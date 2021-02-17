@@ -30,6 +30,8 @@ class Command(BaseCommand):
         )
         parser.add_argument("--version_number", type=int, help="An integer version number for the new version")
         parser.add_argument("--validation_status", type=str, help="Validation status", required=False)
+        parser.add_argument("--field_names", type=str, help="Name of the fields to compare, separated by commas (by default: name,geometry,parent)", required=False)
+        parser.add_argument("--diff_statuses", type=str, help="Type of diffs to consider for export, separated by commas (by default: deleted,new,same,modified)", required=False)
         parser.add_argument(
             "--source_name_ref", type=str, help="The name of the source. It will be created if it doesn't exist"
         )
@@ -69,6 +71,8 @@ class Command(BaseCommand):
         validation_status_ref = options.get("validation_status_ref", None)
         top_org_unit = options.get("top_org_unit", None)
         top_org_unit_ref = options.get("top_org_unit_ref", None)
+        field_names = options.get("field_names", None)
+        diff_statuses = options.get("diff_statuses", None)
         org_unit_types = options.get("org_unit_types", None)
         org_unit_types_ref = options.get("org_unit_types_ref", None)
         iaso_logger = CommandLogger(self.stdout)
@@ -78,6 +82,13 @@ class Command(BaseCommand):
             org_unit_types = [int(i) for i in org_unit_types.split(',')]
         if org_unit_types_ref:
             org_unit_types_ref = [int(i) for i in org_unit_types_ref.split(',')]
+
+        if not field_names:
+            field_names = "name,geometry,parent"
+        field_names = [name for name in field_names.split(',')]
+        if not diff_statuses:
+            diff_statuses = "deleted,new,same,modified"
+        diff_statuses = [name for name in diff_statuses.split(',')]
         _source, version = self.load_version(options, "source_name", "version_number")
         _source_ref, version_ref = self.load_version(options, "source_name_ref", "version_number_ref")
         iaso_logger.ok("================= Diffing =================")
@@ -93,9 +104,10 @@ class Command(BaseCommand):
             top_org_unit=top_org_unit,
             top_org_unit_ref=top_org_unit_ref,
             org_unit_types=org_unit_types,
-            org_unit_types_ref=org_unit_types_ref
+            org_unit_types_ref=org_unit_types_ref,
+            field_names=field_names
         )
-        Dumper(iaso_logger, csv_file_name=file_name).dump(diffs, fields)
+        Dumper(iaso_logger, csv_file_name=file_name).dump(diffs, fields, diff_statuses)
         export = options.get("export")
 
         if export:

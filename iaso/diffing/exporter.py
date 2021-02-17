@@ -61,12 +61,12 @@ class Exporter:
         self.iaso_logger = logger
 
     def export_to_dhis2(self, api, diffs, fields):
-        self.iaso_logger.ok("   ------ New org units----")
-        self.create_missings(api, diffs)
+        #self.iaso_logger.ok("   ------ New org units----")
+        #self.create_missings(api, diffs)
         self.iaso_logger.ok("   ------ Modified org units----")
         self.update_orgunits(api, diffs)
-        self.iaso_logger.ok("   ------ Modified groups----")
-        self.update_groups(api, diffs, fields)
+        #self.iaso_logger.ok("   ------ Modified groups----")
+        #self.update_groups(api, diffs, fields)
 
     def create_missings(self, api, diffs):
         to_create_diffs = list(filter(lambda x: x.status == "new", diffs))

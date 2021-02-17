@@ -31,12 +31,17 @@ class Dumper:
         self.iaso_logger = logger
         self.csv_file_name = csv_file_name
 
-    def dump(self, diffs, fields):
-        stats = self.dump_stats(diffs, fields)
+    def dump(self, diffs, fields, diff_statuses):
+        to_dump_diffs = []
+        for d in diffs:
+            if d.status in diff_statuses:
+                to_dump_diffs.append(d)
+
+        stats = self.dump_stats(to_dump_diffs, fields)
         if self.csv_file_name:
-            self.dump_as_csv(diffs, fields)
+            self.dump_as_csv(to_dump_diffs, fields)
         else:
-            self.dump_as_table(diffs, fields, stats)
+            self.dump_as_table(to_dump_diffs, fields, stats)
 
     def dump_stats(self, diffs, fields):
         stats_ou = {}
