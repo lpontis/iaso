@@ -4,12 +4,12 @@ variable "description" {
   description = "Description of the Environment"
 }
 variable "eb_name" {
-  default     = "iaso"
   description = "Name of the Environment"
 }
 
 variable "tier" {
   type = string
+  description = "Elastic Beanstalk Environment tier. Valid values are Worker or WebServer"
 }
 
 variable "environment_type" {
@@ -101,7 +101,7 @@ variable "MaxSize" {
 }
 variable "MinSize" {
   default     = 1
-  description = "EThe minimum number of instances that you want in your Auto Scaling group"
+  description = "The minimum number of instances that you want in your Auto Scaling group"
 }
 variable "elastic_beanstalk" {
   type = list(object({
@@ -116,71 +116,94 @@ variable "elastic_beanstalk" {
 
 variable "access_key" {
   default = ""
+  description = "AWS Access key for bucket which is the value of AWS_ACCESS_KEY_ID env"
 }
 variable "secret_access_key" {
   default = ""
+  description = "AWS Secret key for bucket which is the value of AWS_SECRET_ACCESS_KEY env"
 
 }
 variable "bucket_name" {
   default = ""
-
+  description = "Bucket name which is the value of AWS_STORAGE_BUCKET_NAME env"
 }
 variable "enketo_api_token" {
   default = ""
+  description = "Enketo Api Token which is the value of ENKETO_API_TOKEN env"
 
 }
 variable "enketo_url" {
   default = "https://enketo-iaso.bluesquare.org"
+  description = "Enketo url which is the value of ENKETO_URL env"
 
 }
 variable "lang" {
   default = "en_GB.UTF-8"
+  description = "Lang which is the value of LANG env"
 
 }
 variable "lc_all" {
   default = "en_GB.UTF-8"
+  description = "LC_all which is the value of LC_ALL env"
 
 }
 variable "rds_db_name" {
   default = "iaso"
-
+  description = "Database name for Iaso which is the value of RDS_DB_NAME env"
 }
 variable "rds_username" {
   default = "iaso"
-
+  description = "Username for the Iaso DB user which is the value of RDS_USERNAME env"
 }
 variable "rds_hostname" {
   default = ""
-
+  description = "The hostname of RDS instance which is the value of RDS_HOSTNAME env"
 }
 variable "rds_password" {
   default = ""
-
+  description = "Password for the DHIS DB user which is the value of RDS_PASSWORD env"
 }
 variable "rds_port" {
   default = "5432"
-
+  description = "The database port which is the value of RDS_PORD env"
 }
 variable "staging" {
   default = "true"
+  description = "The value of STAGING env"
 
 }
 variable "secret_key" {
   default = ""
+  description = "The value of SECRET_KEY env"
 
 }
 variable "use_s3" {
   default = "true"
+  description = "The value of USE_S3 env"
 
 }
 variable "worker" {
   default = "true"
+  description = "Define the type of environment. It is the value of WORKER env"
 
 }
 
 variable "sqs_name" {
   default = "iaso-staging-queue"
+  description = "The name of queue"
 
 }
+
+variable "deadletter_name" {
+  default = "iaso-staging-queue"
+  description = "The name of dead letter queue"
+
+}
+variable "ami" {
+  default = "ami-043e4e49a1b1c990a"
+  description = "AMI to use for the instance"
+
+}
+
 
 

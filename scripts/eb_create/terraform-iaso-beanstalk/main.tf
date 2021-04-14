@@ -12,10 +12,56 @@ data "aws_iam_instance_profile" "example" {
   name = "aws-elasticbeanstalk-ec2-role"
 }
 
+resource "aws_sqs_queue" "deadletter" {
+  name = var.deadletter_name
+}
+resource "aws_sqs_queue_policy" "deadletter" {
+  queue_url = aws_sqs_queue.deadletter.id
+  policy = <<POLICY
+{
+  "Version": "2008-10-17",
+  "Id": "__default_policy_ID",
+  "Statement": [
+    {
+      "Sid": "__owner_statement",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::198293380284:root"
+      },
+      "Action": "SQS:*",
+      "Resource": "${aws_sqs_queue.deadletter.arn}"
+    }
+  ]
+}
+POLICY
+}
+resource "aws_sqs_queue_policy" "sqs" {
+  queue_url = aws_sqs_queue.sqs.id
+  policy = <<POLICY
+{
+  "Version": "2008-10-17",
+  "Id": "__default_policy_ID",
+  "Statement": [
+    {
+      "Sid": "__owner_statement",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::198293380284:root"
+      },
+      "Action": "SQS:*",
+      "Resource": "${aws_sqs_queue.sqs.arn}"
+    }
+  ]
+}
+POLICY
+}
 resource "aws_sqs_queue" "sqs" {
   name = var.sqs_name
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.deadletter.arn
+    maxReceiveCount     = 10
+  })
   tags                   = var.tags_sqs
-
 }
 resource "aws_elastic_beanstalk_environment" "ebenv" {
   description            = var.description
@@ -42,9 +88,27 @@ resource "aws_elastic_beanstalk_environment" "ebenv" {
     value     = aws_sqs_queue.sqs.id
   }
   setting {
+    name      = "BEANSTALK_SQS_URL"
+    namespace = "aws:elasticbeanstalk:application:environment"
+    resource  = ""
+    value     = aws_sqs_queue.sqs.id
+  }
+  setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "EC2KeyName"
-    value     = "iasoeb"
+    value     = "iaso-eb"
+    resource  = ""
+  }
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "ImageId"
+    value     = var.ami
+    resource  = ""
+  }
+  setting {
+    namespace = "aws:ec2:instances"
+    name      = "InstanceTypes"
+    value     = var.eb_size
     resource  = ""
   }
   setting {
@@ -171,7 +235,19 @@ resource "aws_elastic_beanstalk_environment" "ebenv" {
     namespace = "aws:autoscaling:asg"
     name      = "MaxSize"
     value     = var.MaxSize
+    resource  = ""
+
   }
-
-
+  setting {
+    namespace = "aws:elasticbeanstalk:sqsd"
+    name      = "HttpPath"
+    value     = "/tasks/task/"
+    resource  = ""
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:healthreporting:system"
+    name      = "SystemType"
+    value     = "enhanced"
+    resource  = ""
+  }
 }
