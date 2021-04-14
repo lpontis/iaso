@@ -229,12 +229,12 @@ resource "aws_elastic_beanstalk_environment" "ebenv" {
   setting {
     namespace = "aws:autoscaling:asg"
     name      = "MinSize"
-    value     = var.MinSize
+    value     = var.minSize
   }
   setting {
     namespace = "aws:autoscaling:asg"
     name      = "MaxSize"
-    value     = var.MaxSize
+    value     = var.maxSize
     resource  = ""
 
   }

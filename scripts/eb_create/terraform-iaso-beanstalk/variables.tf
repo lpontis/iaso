@@ -95,11 +95,11 @@ variable "eb_size" {
   default     = "t2.micro"
   description = "EC2size to be used"
 }
-variable "MaxSize" {
+variable "maxSize" {
   default     = 4
   description = "The maximum number of instances that you want in your Auto Scaling group"
 }
-variable "MinSize" {
+variable "minSize" {
   default     = 1
   description = "The minimum number of instances that you want in your Auto Scaling group"
 }

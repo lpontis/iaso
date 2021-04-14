@@ -67,8 +67,6 @@ module "iaso-staging-worker" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_MaxSize"></a> [MaxSize](#input\_MaxSize) | The maximum number of instances that you want in your Auto Scaling group | `number` | `4` | no |
-| <a name="input_MinSize"></a> [MinSize](#input\_MinSize) | The minimum number of instances that you want in your Auto Scaling group | `number` | `1` | no |
 | <a name="input_access_key"></a> [access\_key](#input\_access\_key) | AWS Access key for bucket which is the value of AWS\_ACCESS\_KEY\_ID env | `string` | `""` | no |
 | <a name="input_ami"></a> [ami](#input\_ami) | AMI to use for the instance | `string` | `"ami-043e4e49a1b1c990a"` | no |
 | <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | Bucket name which is the value of AWS\_STORAGE\_BUCKET\_NAME env | `string` | `""` | no |
@@ -83,6 +81,8 @@ module "iaso-staging-worker" {
 | <a name="input_iaso_worker_default_beanstalk_settings"></a> [iaso\_worker\_default\_beanstalk\_settings](#input\_iaso\_worker\_default\_beanstalk\_settings) | The default settings we use in all our worker | <pre>list(object({<br>    name      = string<br>    namespace = string<br>    value     = string<br>  }))</pre> | <pre>[<br>  {<br>    "name": "RollingUpdateType",<br>    "namespace": "aws:autoscaling:updatepolicy:rollingupdate",<br>    "value": "Time"<br>  },<br>  {<br>    "name": "Timeout",<br>    "namespace": "aws:autoscaling:updatepolicy:rollingupdate",<br>    "resource": "",<br>    "value": "PT30M"<br>  },<br>  {<br>    "name": "IgnoreHealthCheck",<br>    "namespace": "aws:elasticbeanstalk:command",<br>    "value": "false"<br>  },<br>  {<br>    "name": "Availability Zones",<br>    "namespace": "aws:autoscaling:asg",<br>    "value": "Any"<br>  },<br>  {<br>    "name": "DeploymentPolicy",<br>    "namespace": "aws:elasticbeanstalk:command",<br>    "value": "AllAtOnce"<br>  },<br>  {<br>    "name": "RollingUpdateEnabled",<br>    "namespace": "aws:autoscaling:updatepolicy:rollingupdate",<br>    "value": "false"<br>  },<br>  {<br>    "name": "EnvironmentType",<br>    "namespace": "aws:elasticbeanstalk:environment",<br>    "value": "LoadBalanced"<br>  }<br>]</pre> | no |
 | <a name="input_lang"></a> [lang](#input\_lang) | Lang which is the value of LANG env | `string` | `"en_GB.UTF-8"` | no |
 | <a name="input_lc_all"></a> [lc\_all](#input\_lc\_all) | LC\_all which is the value of LC\_ALL env | `string` | `"en_GB.UTF-8"` | no |
+| <a name="input_maxSize"></a> [maxSize](#input\_maxSize) | The maximum number of instances that you want in your Auto Scaling group | `number` | `4` | no |
+| <a name="input_minSize"></a> [minSize](#input\_minSize) | The minimum number of instances that you want in your Auto Scaling group | `number` | `1` | no |
 | <a name="input_rds_db_name"></a> [rds\_db\_name](#input\_rds\_db\_name) | Database name for Iaso which is the value of RDS\_DB\_NAME env | `string` | `"iaso"` | no |
 | <a name="input_rds_hostname"></a> [rds\_hostname](#input\_rds\_hostname) | The hostname of RDS instance which is the value of RDS\_HOSTNAME env | `string` | `""` | no |
 | <a name="input_rds_password"></a> [rds\_password](#input\_rds\_password) | Password for the DHIS DB user which is the value of RDS\_PASSWORD env | `string` | `""` | no |
