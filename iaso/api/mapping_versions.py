@@ -58,7 +58,10 @@ class MappingVersionSerializer(DynamicFieldsModelSerializer):
 
     def get_mapping(self, mapping_version):
         m = mapping_version.mapping
-        return {"mapping_type": m.mapping_type, "data_source": {"id": m.data_source.id, "name": m.data_source.name}}
+        return {
+            "mapping_type": m.mapping_type,
+            "data_source": {"id": m.data_source.id, "name": m.data_source.name},
+        }
 
     def get_form_version(self, mapping_version):
         v = mapping_version.form_version
@@ -87,9 +90,9 @@ class MappingVersionSerializer(DynamicFieldsModelSerializer):
 
         form_version = None
         try:
-            form_version = m.FormVersion.objects.filter(form__projects__account=profile.account).get(
-                pk=data["form_version"]["id"]
-            )
+            form_version = m.FormVersion.objects.filter(
+                form__projects__account=profile.account
+            ).get(pk=data["form_version"]["id"])
         except ObjectDoesNotExist:
             raise serializers.ValidationError({"form_version": "object doesn't exist"})
 
@@ -105,7 +108,11 @@ class MappingVersionSerializer(DynamicFieldsModelSerializer):
 
         mapping_type = data["mapping"]["type"]
 
-        validated_data = {"form_version": form_version, "datasource": datasource, "mapping_type": mapping_type}
+        validated_data = {
+            "form_version": form_version,
+            "datasource": datasource,
+            "mapping_type": mapping_type,
+        }
         validated_data["json"] = {"question_mappings": {}}
 
         if mapping_type == "AGGREGATE":
@@ -126,7 +133,9 @@ class MappingVersionSerializer(DynamicFieldsModelSerializer):
             form=form_version.form, data_source=datasource, mapping_type=mapping_type
         )
 
-        existing_mapping_version = m.MappingVersion.objects.filter(mapping=mapping, form_version=form_version).first()
+        existing_mapping_version = m.MappingVersion.objects.filter(
+            mapping=mapping, form_version=form_version
+        ).first()
         if existing_mapping_version:
             # be idempotent return existing
             return existing_mapping_version
@@ -152,7 +161,9 @@ class MappingVersionSerializer(DynamicFieldsModelSerializer):
                     MappingVersion.QUESTION_MAPPING_NEVER_MAPPED,
                 ):
                     if data_element.get("id") == None:
-                        raise serializers.ValidationError({path: "should have a least an data element id"})
+                        raise serializers.ValidationError(
+                            {path: "should have a least an data element id"}
+                        )
 
                     if data_element.get("valueType") is None:
                         raise serializers.ValidationError({path: "should have a valueType"})
@@ -165,7 +176,7 @@ class MappingVersionSerializer(DynamicFieldsModelSerializer):
 
 
 class MappingVersionsViewSet(ModelViewSet):
-    """ Mapping versions API
+    """Mapping versions API
 
     This API is restricted to authenticated users having the "menupermissions.iaso_mappings" permission
 
@@ -175,7 +186,10 @@ class MappingVersionsViewSet(ModelViewSet):
     PATCH /api/mappingversions/<id>
     """
 
-    permission_classes = [permissions.IsAuthenticated, HasPermission("menupermissions.iaso_mappings")]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        HasPermission("menupermissions.iaso_mappings"),
+    ]
     serializer_class = MappingVersionSerializer
     results_key = "mapping_versions"
     queryset = MappingVersion.objects.all()

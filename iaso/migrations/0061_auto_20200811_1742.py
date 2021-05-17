@@ -12,7 +12,9 @@ class Migration(migrations.Migration):
             model_name="orgunit",
             name="validation_status",
             field=models.CharField(
-                choices=[("NEW", "new"), ("VALID", "valid"), ("REJECTED", "rejected")], default="NEW", max_length=25
+                choices=[("NEW", "new"), ("VALID", "valid"), ("REJECTED", "rejected")],
+                default="NEW",
+                max_length=25,
             ),
         )
     ]

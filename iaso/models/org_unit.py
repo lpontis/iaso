@@ -17,7 +17,9 @@ from .project import Project
 
 
 class OrgUnitTypeQuerySet(models.QuerySet):
-    def filter_for_user_and_app_id(self, user: typing.Union[User, AnonymousUser, None], app_id: str):
+    def filter_for_user_and_app_id(
+        self, user: typing.Union[User, AnonymousUser, None], app_id: str
+    ):
         if user and user.is_anonymous and app_id is None:
             return self.none()
 
@@ -62,10 +64,13 @@ class OrgUnitType(models.Model):
         }
         if sub_units:
             if not app_id:
-                sub_unit_types = [unit.as_dict(sub_units=False) for unit in self.sub_unit_types.all()]
+                sub_unit_types = [
+                    unit.as_dict(sub_units=False) for unit in self.sub_unit_types.all()
+                ]
             else:
                 sub_unit_types = [
-                    unit.as_dict(sub_units=False) for unit in self.sub_unit_types.filter(projects__app_id=app_id)
+                    unit.as_dict(sub_units=False)
+                    for unit in self.sub_unit_types.filter(projects__app_id=app_id)
                 ]
             res["sub_unit_types"] = sub_unit_types
         return res
@@ -81,7 +86,9 @@ class OrgUnitQuerySet(models.QuerySet):
         # We need to cast PathValue instances to strings - this could be fixed upstream
         # (https://github.com/mariocesar/django-ltree/issues/8)
         if isinstance(org_unit, (list, models.QuerySet)):
-            query = reduce(operator.or_, [models.Q(path__descendants=str(ou.path)) for ou in list(org_unit)])
+            query = reduce(
+                operator.or_, [models.Q(path__descendants=str(ou.path)) for ou in list(org_unit)]
+            )
         else:
             query = models.Q(path__descendants=str(org_unit.path))
 
@@ -92,7 +99,9 @@ class OrgUnitQuerySet(models.QuerySet):
         # (https://github.com/mariocesar/django-ltree/issues/8)
         return self.filter(path__descendants=str(org_unit.path), path__depth__gt=len(org_unit.path))
 
-    def filter_for_user_and_app_id(self, user: typing.Union[User, AnonymousUser, None], app_id: str):
+    def filter_for_user_and_app_id(
+        self, user: typing.Union[User, AnonymousUser, None], app_id: str
+    ):
         if user and user.is_anonymous and app_id is None:
             return self.none()
 
@@ -132,7 +141,14 @@ class OrgUnitQuerySet(models.QuerySet):
 
 class OrgUnitManager(ManagerWithBulkUpdate):
     def update_single_unit_from_bulk(
-        self, user, org_unit, *, validation_status, org_unit_type_id, groups_ids_added, groups_ids_removed
+        self,
+        user,
+        org_unit,
+        *,
+        validation_status,
+        org_unit_type_id,
+        groups_ids_added,
+        groups_ids_removed
     ):
         """Used within the context of a bulk operation"""
 
@@ -153,7 +169,9 @@ class OrgUnitManager(ManagerWithBulkUpdate):
 
         org_unit.save()
 
-        audit_models.log_modification(original_copy, org_unit, source=audit_models.ORG_UNIT_API_BULK, user=user)
+        audit_models.log_modification(
+            original_copy, org_unit, source=audit_models.ORG_UNIT_API_BULK, user=user
+        )
 
 
 class OrgUnit(models.Model):
@@ -170,8 +188,12 @@ class OrgUnit(models.Model):
     name = models.CharField(max_length=255)
     uuid = models.TextField(null=True, blank=True, db_index=True)
     custom = models.BooleanField(default=False)
-    validated = models.BooleanField(default=True, db_index=True)  # TO DO : remove in a later migration
-    validation_status = models.CharField(max_length=25, choices=VALIDATION_STATUS_CHOICES, default=VALIDATION_NEW)
+    validated = models.BooleanField(
+        default=True, db_index=True
+    )  # TO DO : remove in a later migration
+    validation_status = models.CharField(
+        max_length=25, choices=VALIDATION_STATUS_CHOICES, default=VALIDATION_NEW
+    )
     version = models.ForeignKey("SourceVersion", null=True, blank=True, on_delete=models.CASCADE)
     parent = models.ForeignKey("OrgUnit", on_delete=models.CASCADE, null=True, blank=True)
     path = PathField(null=True, blank=True, unique=True)
@@ -179,7 +201,9 @@ class OrgUnit(models.Model):
 
     org_unit_type = models.ForeignKey(OrgUnitType, on_delete=models.CASCADE, null=True, blank=True)
 
-    sub_source = models.TextField(null=True, blank=True)  # sometimes, in a given source, there are sub sources
+    sub_source = models.TextField(
+        null=True, blank=True
+    )  # sometimes, in a given source, there are sub sources
     source_ref = models.TextField(null=True, blank=True, db_index=True)
     geom = MultiPolygonField(null=True, blank=True, srid=4326, geography=True)
     simplified_geom = MultiPolygonField(null=True, blank=True, srid=4326, geography=True)
@@ -197,7 +221,9 @@ class OrgUnit(models.Model):
     class Meta:
         indexes = [GistIndex(fields=["path"], buffering=True)]
 
-    def save(self, *args, skip_calculate_path: bool = False, force_recalculate: bool = False, **kwargs):
+    def save(
+        self, *args, skip_calculate_path: bool = False, force_recalculate: bool = False, **kwargs
+    ):
         """Override default save() to make sure that the path property is calculated and saved,
         for this org unit and its children.
 
@@ -211,7 +237,9 @@ class OrgUnit(models.Model):
         else:
             with transaction.atomic():
                 super().save(*args, **kwargs)
-                OrgUnit.objects.bulk_update(self.calculate_paths(force_recalculate=force_recalculate), ["path"])
+                OrgUnit.objects.bulk_update(
+                    self.calculate_paths(force_recalculate=force_recalculate), ["path"]
+                )
 
     def calculate_paths(self, force_recalculate: bool = False) -> typing.List["OrgUnit"]:
         """Calculate the path for this org unit and all its children.
@@ -321,7 +349,9 @@ class OrgUnit(models.Model):
             "parent_id": self.parent_id,
             "validation_status": self.validation_status,
             "parent_name": self.parent.name if self.parent else None,
-            "parent": self.parent.as_dict_with_parents(light=light_parents, light_parents=light_parents)
+            "parent": self.parent.as_dict_with_parents(
+                light=light_parents, light_parents=light_parents
+            )
             if self.parent
             else None,
             "org_unit_type_id": self.org_unit_type_id,

@@ -35,10 +35,14 @@ class InstanceSerializer(serializers.ModelSerializer):
         """
         if value.org_unit_type in self.instance.form.org_unit_types.all():
             try:
-                return OrgUnit.objects.filter_for_user_and_app_id(self.context["request"].user, None).get(pk=value.pk)
+                return OrgUnit.objects.filter_for_user_and_app_id(
+                    self.context["request"].user, None
+                ).get(pk=value.pk)
             except OrgUnit.DoesNotExist:
                 pass  # that way, if the condition is false, the exception is raised as well
-        raise serializers.ValidationError("Org unit type not assigned to this form or not accessible to this user")
+        raise serializers.ValidationError(
+            "Org unit type not assigned to this form or not accessible to this user"
+        )
 
     def validate_period(self, value):
         """
@@ -63,7 +67,7 @@ class HasInstancePermission(permissions.BasePermission):
 
 
 class InstancesViewSet(viewsets.ViewSet):
-    """ Instances API
+    """Instances API
 
     Posting instances can be done anonymously (if the project allows it), all other methods are restricted
     to authenticated users having the "menupermissions.iaso_forms" permission.
@@ -124,7 +128,9 @@ class InstancesViewSet(viewsets.ViewSet):
                 return Response(
                     [
                         instance.as_small_dict()
-                        for instance in queryset.filter(Q(location__isnull=False) | Q(instancefile_count__gt=0))
+                        for instance in queryset.filter(
+                            Q(location__isnull=False) | Q(instancefile_count__gt=0)
+                        )
                         .prefetch_related("instancefile_set")
                         .prefetch_related("device")
                         .defer("json")
@@ -158,7 +164,9 @@ class InstancesViewSet(viewsets.ViewSet):
 
             sub_columns = ["" for __ in columns]
             latest_form_version = form.form_versions.order_by("id").last()
-            questions_by_name = latest_form_version.questions_by_name() if latest_form_version else {}
+            questions_by_name = (
+                latest_form_version.questions_by_name() if latest_form_version else {}
+            )
             if form and form.latest_version:
                 file_content_template = questions_by_name
                 for title in file_content_template:
@@ -208,19 +216,24 @@ class InstancesViewSet(viewsets.ViewSet):
 
             queryset.prefetch_related("org_unit__parent__parent__parent__parent").prefetch_related(
                 "org_unit__parent__parent__parent"
-            ).prefetch_related("org_unit__parent__parent").prefetch_related("org_unit__parent").prefetch_related(
+            ).prefetch_related("org_unit__parent__parent").prefetch_related(
+                "org_unit__parent"
+            ).prefetch_related(
                 "org_unit"
             )
 
             if xlsx_format:
                 filename = filename + ".xlsx"
                 response = HttpResponse(
-                    generate_xlsx("Forms", columns, queryset_iterator(queryset, 100), get_row, sub_columns),
+                    generate_xlsx(
+                        "Forms", columns, queryset_iterator(queryset, 100), get_row, sub_columns
+                    ),
                     content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 )
             if csv_format:
                 response = StreamingHttpResponse(
-                    streaming_content=(iter_items(queryset, Echo(), columns, get_row)), content_type="text/csv"
+                    streaming_content=(iter_items(queryset, Echo(), columns, get_row)),
+                    content_type="text/csv",
                 )
                 filename = filename + ".csv"
             response["Content-Disposition"] = "attachment; filename=%s" % filename
@@ -257,7 +270,11 @@ class InstancesViewSet(viewsets.ViewSet):
         log_modification(original, instance, INSTANCE_API, user=request.user)
         return Response(instance.as_full_model())
 
-    @action(detail=False, methods=["POST"], permission_classes=[permissions.IsAuthenticated, HasInstancePermission])
+    @action(
+        detail=False,
+        methods=["POST"],
+        permission_classes=[permissions.IsAuthenticated, HasInstancePermission],
+    )
     def bulkdelete(self, request):
         select_all = request.data.get("select_all", None)
         selected_ids = request.data.get("selected_ids", None)
@@ -278,13 +295,18 @@ class InstancesViewSet(viewsets.ViewSet):
         try:
             instances_query.update(deleted=is_deletion)
         except Exception as e:
-            return Response({
-                "result": "A problem happened while deleting instances"
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"result": "A problem happened while deleting instances"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        return Response({
-            "result": "success",
-        }, status=201)
+        return Response(
+            {
+                "result": "success",
+            },
+            status=201,
+        )
+
 
 def import_data(instances, user, app_id):
     project = Project.objects.get_for_user_and_app_id(user, app_id)
@@ -317,11 +339,15 @@ def import_data(instances, user, app_id):
         instance.form_id = instance_data.get("formId")
 
         created_at_ts = instance_data.get("created_at", None)
-        instance.created_at = timestamp_to_utc_datetime(int(created_at_ts)) if created_at_ts is not None else None
+        instance.created_at = (
+            timestamp_to_utc_datetime(int(created_at_ts)) if created_at_ts is not None else None
+        )
 
         updated_at_ts = instance_data.get("updated_at", None)
         instance.updated_at = (
-            timestamp_to_utc_datetime(int(updated_at_ts)) if updated_at_ts is not None else instance.created_at
+            timestamp_to_utc_datetime(int(updated_at_ts))
+            if updated_at_ts is not None
+            else instance.created_at
         )
 
         latitude = instance_data.get("latitude", None)

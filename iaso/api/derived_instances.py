@@ -24,7 +24,10 @@ class DerivedInstanceSerializer(serializers.Serializer):
 
         if forms.count() == 0:
             raise serializers.ValidationError(
-                {"form_ids": "no form or allowed : " + (" ".join(list(map(str, validated_data["form_ids"]))))}
+                {
+                    "form_ids": "no form or allowed : "
+                    + (" ".join(list(map(str, validated_data["form_ids"]))))
+                }
             )
 
         for stat_form in forms:
@@ -35,7 +38,11 @@ class DerivedInstanceSerializer(serializers.Serializer):
                 ).last()
                 cvs_form = Form.objects.get(form_id=cvs_stat_mapping_version.json["formId"])
                 # TODO project ?
-                stats.append(generate_instances(cvs_form.projects.first(), cvs_form, cvs_stat_mapping_version, period))
+                stats.append(
+                    generate_instances(
+                        cvs_form.projects.first(), cvs_form, cvs_stat_mapping_version, period
+                    )
+                )
         validated_data["stats"] = stats
         return validated_data
 
@@ -45,14 +52,17 @@ class DerivedInstanceSerializer(serializers.Serializer):
 
 
 class DerivedInstancesViewSet(ModelViewSet):
-    """ Derived instances API
+    """Derived instances API
 
     This API is restricted to authenticated users having the "menupermissions.iaso_completeness" permission
 
     POST /api/derivedinstances/
     """
 
-    permission_classes = [permissions.IsAuthenticated, HasPermission("menupermissions.iaso_completeness")]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        HasPermission("menupermissions.iaso_completeness"),
+    ]
     serializer_class = DerivedInstanceSerializer
     results_key = "export_instances"
     queryset = ExportRequest.objects.all()

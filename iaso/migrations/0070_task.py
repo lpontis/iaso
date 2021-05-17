@@ -17,18 +17,31 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Task",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("ended_at", models.DateTimeField(blank=True, null=True)),
                 ("progress_value", models.IntegerField(default=0)),
                 ("end_value", models.IntegerField(default=100)),
                 ("result", django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
                 ("finished", models.BooleanField(default=False)),
-                ("account", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="iaso.Account")),
+                (
+                    "account",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="iaso.Account"
+                    ),
+                ),
                 (
                     "launcher",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
             ],

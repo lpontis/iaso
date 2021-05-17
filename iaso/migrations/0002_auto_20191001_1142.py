@@ -7,4 +7,6 @@ class Migration(migrations.Migration):
 
     dependencies = [("iaso", "0001_squashed_0026_adding_indexes_on_org_unit")]
 
-    operations = [migrations.RenameField(model_name="orgunit", old_name="source", new_name="sub_source")]
+    operations = [
+        migrations.RenameField(model_name="orgunit", old_name="source", new_name="sub_source")
+    ]

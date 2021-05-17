@@ -45,7 +45,7 @@ class FormSerializer(serializers.ModelSerializer):
             "updated_at",
             "deleted_at",
             "derived",
-            "label_keys"
+            "label_keys",
         ]
         read_only_fields = [
             "id",
@@ -60,11 +60,19 @@ class FormSerializer(serializers.ModelSerializer):
 
     org_unit_types = serializers.SerializerMethodField()
     org_unit_type_ids = serializers.PrimaryKeyRelatedField(
-        source="org_unit_types", write_only=True, many=True, allow_empty=True, queryset=OrgUnitType.objects.all()
+        source="org_unit_types",
+        write_only=True,
+        many=True,
+        allow_empty=True,
+        queryset=OrgUnitType.objects.all(),
     )
     projects = ProjectSerializer(read_only=True, many=True)
     project_ids = serializers.PrimaryKeyRelatedField(
-        source="projects", write_only=True, many=True, allow_empty=False, queryset=Project.objects.all()
+        source="projects",
+        write_only=True,
+        many=True,
+        allow_empty=False,
+        queryset=Project.objects.all(),
     )
     latest_form_version = serializers.SerializerMethodField()  # TODO: use FormSerializer
     instances_count = serializers.IntegerField(read_only=True)
@@ -91,7 +99,9 @@ class FormSerializer(serializers.ModelSerializer):
             # validate org_unit_types against projects
             allowed_org_unit_types = [ut for p in data["projects"] for ut in p.unit_types.all()]
             if len(set(data["org_unit_types"]) - set(allowed_org_unit_types)) > 0:
-                raise serializers.ValidationError({"org_unit_type_ids": "Invalid org unit type ids"})
+                raise serializers.ValidationError(
+                    {"org_unit_type_ids": "Invalid org unit type ids"}
+                )
 
         # If the period type is None, some period-specific fields must have specific values
         if "period_type" in data and data["period_type"] is None:
@@ -107,8 +117,9 @@ class FormSerializer(serializers.ModelSerializer):
 
         return data
 
+
 class FormsViewSet(ModelViewSet):
-    """ Forms API
+    """Forms API
 
     Read-only methods are accessible to anonymous users. All other actions are restricted to authenticated users
     having the "menupermissions.iaso_forms" permission.
@@ -142,7 +153,9 @@ class FormsViewSet(ModelViewSet):
         if self.request.query_params.get("only_deleted", None):
             form_objects = Form.objects_only_deleted
 
-        queryset = form_objects.filter_for_user_and_app_id(self.request.user, self.request.query_params.get("app_id"))
+        queryset = form_objects.filter_for_user_and_app_id(
+            self.request.user, self.request.query_params.get("app_id")
+        )
         org_unit_id = self.request.query_params.get("orgUnitId", None)
         if org_unit_id:
             queryset = queryset.filter(instances__org_unit__id=org_unit_id)
@@ -151,14 +164,20 @@ class FormsViewSet(ModelViewSet):
         queryset = queryset.annotate(
             instances_count=Count(
                 "instances",
-                filter=(~Q(instances__file="") & ~Q(instances__device__test_device=True) & ~Q(instances__deleted=True)),
+                filter=(
+                    ~Q(instances__file="")
+                    & ~Q(instances__device__test_device=True)
+                    & ~Q(instances__deleted=True)
+                ),
             )
         )
 
         from_date = self.request.query_params.get("date_from", None)
         if from_date:
             queryset = queryset.filter(
-                Q(instance_updated_at__gte=from_date) | Q(created_at__gte=from_date) | Q(updated_at__gte=from_date)
+                Q(instance_updated_at__gte=from_date)
+                | Q(created_at__gte=from_date)
+                | Q(updated_at__gte=from_date)
             )
         to_date = self.request.query_params.get("date_to", None)
         if to_date:
@@ -199,7 +218,11 @@ class FormsViewSet(ModelViewSet):
 
     def list_to_csv(self):
         response = StreamingHttpResponse(
-            streaming_content=(iter_items(self.get_queryset(), Echo(), self.EXPORT_TABLE_COLUMNS, self._get_table_row)),
+            streaming_content=(
+                iter_items(
+                    self.get_queryset(), Echo(), self.EXPORT_TABLE_COLUMNS, self._get_table_row
+                )
+            ),
             content_type="text/csv",
         )
         response["Content-Disposition"] = f"attachment; filename={self.EXPORT_FILE_NAME}.csv"
@@ -208,7 +231,9 @@ class FormsViewSet(ModelViewSet):
 
     def list_to_xlsx(self):
         response = HttpResponse(
-            generate_xlsx("Forms", self.EXPORT_TABLE_COLUMNS, self.get_queryset(), self._get_table_row),
+            generate_xlsx(
+                "Forms", self.EXPORT_TABLE_COLUMNS, self.get_queryset(), self._get_table_row
+            ),
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
         response["Content-Disposition"] = f"attachment; filename={self.EXPORT_FILE_NAME}.xlsx"
@@ -223,7 +248,9 @@ class FormsViewSet(ModelViewSet):
             if form_data.get("instance_updated_at")
             else "2019-01-01 00:00:00"
         )
-        org_unit_types = ", ".join([o["name"] for o in form_data.get("org_unit_types") if o is not None])
+        org_unit_types = ", ".join(
+            [o["name"] for o in form_data.get("org_unit_types") if o is not None]
+        )
         return [
             form_data.get("form_id"),
             form_data.get("name"),

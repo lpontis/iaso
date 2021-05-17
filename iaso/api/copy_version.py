@@ -26,7 +26,9 @@ class CopyVersionSerializer(serializers.Serializer):
         account = user.iaso_profile.account
 
         possible_data_sources = (
-            DataSource.objects.filter(projects__in=account.project_set.all()).distinct().values_list("id", flat=True)
+            DataSource.objects.filter(projects__in=account.project_set.all())
+            .distinct()
+            .values_list("id", flat=True)
         )
         possible_data_sources = list(possible_data_sources)
         force = attrs["force"]
@@ -36,7 +38,9 @@ class CopyVersionSerializer(serializers.Serializer):
             SourceVersion, data_source_id=source_source_id, number=attrs["source_version_number"]
         )
         destination_version = get_object_or_404(
-            SourceVersion, data_source_id=destination_source_id, number=attrs["destination_version_number"]
+            SourceVersion,
+            data_source_id=destination_source_id,
+            number=attrs["destination_version_number"],
         )
 
         if source_version.id == destination_version.id:
@@ -44,7 +48,8 @@ class CopyVersionSerializer(serializers.Serializer):
         version_count = OrgUnit.objects.filter(version=destination_version).count()
         if version_count > 0 and not force:
             raise serializers.ValidationError(
-                "This is going to delete %d org units records. Use the force parameter to proceed" % version_count
+                "This is going to delete %d org units records. Use the force parameter to proceed"
+                % version_count
             )
 
         if validated_data["source_source_id"] not in possible_data_sources:
@@ -56,7 +61,10 @@ class CopyVersionSerializer(serializers.Serializer):
 
 
 class CopyVersionViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated, HasPermission("menupermissions.iaso_sources")]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        HasPermission("menupermissions.iaso_sources"),
+    ]
     serializer_class = CopyVersionSerializer
 
     def create(self, request):

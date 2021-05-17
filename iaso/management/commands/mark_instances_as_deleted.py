@@ -8,7 +8,9 @@ class Command(BaseCommand):
     help = 'Flag all instances for the provided project as "deleted"'
 
     def add_arguments(self, parser):
-        parser.add_argument("project_id", help="The project for which instances ought to be deleted")
+        parser.add_argument(
+            "project_id", help="The project for which instances ought to be deleted"
+        )
         parser.add_argument(
             "--force",
             action="store_true",

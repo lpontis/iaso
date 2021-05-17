@@ -29,11 +29,19 @@ class OrgUnitTypeSerializer(DynamicFieldsModelSerializer):
 
     projects = ProjectSerializer(many=True, read_only=True)
     project_ids = serializers.PrimaryKeyRelatedField(
-        source="projects", write_only=True, many=True, queryset=Project.objects.all(), allow_empty=False
+        source="projects",
+        write_only=True,
+        many=True,
+        queryset=Project.objects.all(),
+        allow_empty=False,
     )
     sub_unit_types = serializers.SerializerMethodField(read_only=True)
     sub_unit_type_ids = serializers.PrimaryKeyRelatedField(
-        source="sub_unit_types", write_only=True, many=True, allow_empty=True, queryset=OrgUnitType.objects.all()
+        source="sub_unit_types",
+        write_only=True,
+        many=True,
+        allow_empty=True,
+        queryset=OrgUnitType.objects.all(),
     )
     created_at = TimestampField(read_only=True)
     updated_at = TimestampField(read_only=True)

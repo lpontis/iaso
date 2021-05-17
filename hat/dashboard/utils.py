@@ -104,8 +104,7 @@ def get_menu(user, active_link):
                 },
                 {
                     "name": "Villages",
-                    "url_key": reverse("dashboard:management_village")
-                    + "/village_official/YES",
+                    "url_key": reverse("dashboard:management_village") + "/village_official/YES",
                     "perms": "x_management_villages",
                 },
                 {

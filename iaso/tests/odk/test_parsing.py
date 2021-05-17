@@ -35,14 +35,18 @@ class ParsingTestCase(SimpleTestCase):
         with open("iaso/tests/fixtures/odk_form_invalid_version.xls", "rb") as xls_file:
             with self.assertRaises(ParsingError) as cm:
                 parse_xls_form(xls_file)
-            self.assertEqual(str(cm.exception), "Invalid XLS file: Invalid version (must be a string of 1-10 numbers).")
+            self.assertEqual(
+                str(cm.exception),
+                "Invalid XLS file: Invalid version (must be a string of 1-10 numbers).",
+            )
 
     def test_parse_xls_form_invalid_version_inferior_to_previous(self):
         with open("iaso/tests/fixtures/odk_form_valid_sample1_2020022401.xls", "rb") as xls_file:
             with self.assertRaises(ParsingError) as cm:
                 parse_xls_form(xls_file, previous_version="2020022501")
             self.assertEqual(
-                str(cm.exception), "Invalid XLS file: Parsed version should be greater than previous version."
+                str(cm.exception),
+                "Invalid XLS file: Parsed version should be greater than previous version.",
             )
 
     def test_parse_xls_form_invalid_version_same_as_previous(self):
@@ -50,7 +54,8 @@ class ParsingTestCase(SimpleTestCase):
             with self.assertRaises(ParsingError) as cm:
                 parse_xls_form(xls_file, previous_version="2020022401")
             self.assertEqual(
-                str(cm.exception), "Invalid XLS file: Parsed version should be greater than previous version."
+                str(cm.exception),
+                "Invalid XLS file: Parsed version should be greater than previous version.",
             )
 
     def test_parse_xls_form_blatantly_invalid(self):
@@ -159,7 +164,11 @@ class ParsingTestCase(SimpleTestCase):
 
         self.assertEqual(
             questions_by_name["PBF_PCA_qlt_3_1"],
-            {"name": "PBF_PCA_qlt_3_1", "type": "calculate", "bind": {"calculate": r"if(${PBF_PCA_qlt_3_1_1}=1,2,0)"}},
+            {
+                "name": "PBF_PCA_qlt_3_1",
+                "type": "calculate",
+                "bind": {"calculate": r"if(${PBF_PCA_qlt_3_1_1}=1,2,0)"},
+            },
         )
 
     def test_to_questions_by_name_with_empty_dict(self):
@@ -170,6 +179,10 @@ class ParsingTestCase(SimpleTestCase):
 
     def test_to_questions_by_name_with_node_without_children(self):
         flattened = to_questions_by_name(
-            {"name": "parent", "type": "survey", "children": [{"name": "group_without_children", "type": "group"}]}
+            {
+                "name": "parent",
+                "type": "survey",
+                "children": [{"name": "group_without_children", "type": "group"}],
+            }
         )
         self.assertEqual({}, flattened)

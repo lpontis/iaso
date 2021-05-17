@@ -25,7 +25,7 @@ class HasProfilePermission(permissions.BasePermission):
 
 
 class ProfilesViewSet(viewsets.ViewSet):
-    """ Profiles API
+    """Profiles API
 
     This API is restricted to authenticated users having the "menupermissions.iaso_users" permission, with one
     exception: GET /api/profiles/me is accessible to any authenticated user.
@@ -89,7 +89,9 @@ class ProfilesViewSet(viewsets.ViewSet):
         username = request.data.get("user_name")
         password = request.data.get("password", "")
         if not username:
-            return JsonResponse({"errorKey": "user_name", "errorMessage": "Nom d'utilisateur requis"}, status=400)
+            return JsonResponse(
+                {"errorKey": "user_name", "errorMessage": "Nom d'utilisateur requis"}, status=400
+            )
         user = profile.user
         user.first_name = request.data.get("first_name", "")
         user.last_name = request.data.get("last_name", "")
@@ -115,12 +117,19 @@ class ProfilesViewSet(viewsets.ViewSet):
         username = request.data.get("user_name")
         password = request.data.get("password", "")
         if not username:
-            return JsonResponse({"errorKey": "user_name", "errorMessage": _("Nom d'utilisateur requis")}, status=400)
+            return JsonResponse(
+                {"errorKey": "user_name", "errorMessage": _("Nom d'utilisateur requis")}, status=400
+            )
         if not password:
-            return JsonResponse({"errorKey": "password", "errorMessage": _("Mot de passe requis")}, status=400)
+            return JsonResponse(
+                {"errorKey": "password", "errorMessage": _("Mot de passe requis")}, status=400
+            )
         existing_profile = User.objects.filter(username=username).first()
         if existing_profile:
-            return JsonResponse({"errorKey": "user_name", "errorMessage": _("Nom d'utilisateur existant")}, status=400)
+            return JsonResponse(
+                {"errorKey": "user_name", "errorMessage": _("Nom d'utilisateur existant")},
+                status=400,
+            )
 
         user = User()
         user.first_name = request.data.get("first_name", "")

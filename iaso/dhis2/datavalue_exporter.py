@@ -4,7 +4,17 @@ from dhis2 import RequestException
 from dhis2 import Api
 from .value_formatter import format_value
 import json
-from iaso.models import Instance, OrgUnit, Form, FormVersion, MappingVersion, ExportLog, RUNNING, ERRORED, EXPORTED
+from iaso.models import (
+    Instance,
+    OrgUnit,
+    Form,
+    FormVersion,
+    MappingVersion,
+    ExportLog,
+    RUNNING,
+    ERRORED,
+    EXPORTED,
+)
 import iaso.models as models
 from timeit import default_timer as timer
 import itertools
@@ -74,7 +84,9 @@ class AggregateHandler(BaseHandler):
         if len(descriptions) > 0:
             self.logger.warn(
                 "----------------------- aggregate EXPORT ERROR --------------------\n"
-                + "Failed to create dataValueSets got {} {} {}".format(message, counts, descriptions)
+                + "Failed to create dataValueSets got {} {} {}".format(
+                    message, counts, descriptions
+                )
             )
             return InstanceExportError(message, counts, descriptions)
 
@@ -231,7 +243,10 @@ class EventHandler(BaseHandler):
             "dataValues": [],
         }
         if instance.location:
-            event["coordinate"] = {"latitude": instance.location.y, "longitude": instance.location.x}
+            event["coordinate"] = {
+                "latitude": instance.location.y,
+                "longitude": instance.location.x,
+            }
         errored = False
         event_errors = []
         question_mappings = form_mapping["question_mappings"]
@@ -328,13 +343,17 @@ class EventHandler(BaseHandler):
 
             for count_type in ("imported", "updated", "deleted", "ignored"):
                 counts[count_type] = response.get(count_type, 0)
-            import_summaries = response.get("importSummaries") or response["response"]["importSummaries"]
+            import_summaries = (
+                response.get("importSummaries") or response["response"]["importSummaries"]
+            )
             descriptions = [m["description"] for m in import_summaries if "description" in m]
             conflicts = [m["conflicts"] for m in import_summaries if "conflicts" in m]
             descriptions = uniquify(descriptions)
             self.logger.error("---------------------------------------------------------")
             self.logger.error("----------------------- EXPORT ERROR --------------------")
-            self.logger.error("Failed to create events got" + str(descriptions) + str(conflicts) + str(resp))
+            self.logger.error(
+                "Failed to create events got" + str(descriptions) + str(conflicts) + str(resp)
+            )
             return InstanceExportError(message, counts, descriptions)
 
 
@@ -388,28 +407,40 @@ class EventTrackerHandler(BaseHandler):
                 "dataValues": [],
             }
             if instance.location:
-                event["coordinate"] = {"latitude": instance.location.y, "longitude": instance.location.x}
+                event["coordinate"] = {
+                    "latitude": instance.location.y,
+                    "longitude": instance.location.x,
+                }
 
             event_errors = []
 
             for question_key in form_mapping["question_mappings"]:
                 if question_key in answers.keys():
                     for mapping in question_mappings[question_key]:
-                        if "programStage" in mapping and mapping["programStage"] == program_stage_id:
+                        if (
+                            "programStage" in mapping
+                            and mapping["programStage"] == program_stage_id
+                        ):
                             if "dataElement" in mapping:
                                 data_element = mapping["dataElement"]
-                                raw_value = self.get_instance_value(instance, question_key, mapping, answers)
+                                raw_value = self.get_instance_value(
+                                    instance, question_key, mapping, answers
+                                )
 
                                 data_value = {
                                     "dataElement": data_element["id"],
-                                    "value": format_value(data_element, raw_value, self.orgunit_resolver),
+                                    "value": format_value(
+                                        data_element, raw_value, self.orgunit_resolver
+                                    ),
                                 }
 
                                 event["dataValues"].append(data_value)
             if len(event["dataValues"]) > 0:
                 events.append(event)
             else:
-                self.logger.debug(f"skipping event for stage {program_stage_id} in #{instance.id} no data")
+                self.logger.debug(
+                    f"skipping event for stage {program_stage_id} in #{instance.id} no data"
+                )
 
         tracked_entity_with_events = {
             "orgUnit": orgunit_id,
@@ -433,7 +464,9 @@ class EventTrackerHandler(BaseHandler):
                 for mapping in question_mappings[question_key]:
                     if "trackedEntityAttribute" in mapping:
                         tea = mapping["trackedEntityAttribute"]
-                        raw_value = self.get_instance_value(instance, question_key, mapping, answers)
+                        raw_value = self.get_instance_value(
+                            instance, question_key, mapping, answers
+                        )
                         attribute = {
                             "attribute": tea["id"],
                             "value": format_value(tea, raw_value, self.orgunit_resolver),
@@ -467,7 +500,9 @@ class EventTrackerHandler(BaseHandler):
 
     def update_tracked_entity(self, api, tracked_entity):
         # print("update_tracked_entity", json.dumps(tracked_entity))
-        resp = api.put("trackedEntityInstances/" + tracked_entity["trackedEntityInstance"], tracked_entity).json()
+        resp = api.put(
+            "trackedEntityInstances/" + tracked_entity["trackedEntityInstance"], tracked_entity
+        ).json()
         self.logger.debug(str(resp))
 
         return resp
@@ -487,7 +522,9 @@ class EventTrackerHandler(BaseHandler):
         return default
 
     def generate_unique_number(self, api, unique_number_attribute_id, org_unit):
-        org_unit_dhis2 = api.get(f"organisationUnits/{org_unit.source_ref}", params={"fields": "id,name,code"}).json()
+        org_unit_dhis2 = api.get(
+            f"organisationUnits/{org_unit.source_ref}", params={"fields": "id,name,code"}
+        ).json()
         generated = api.get(
             f"trackedEntityAttributes/{unique_number_attribute_id}/generate",
             params={"ORG_UNIT_CODE": org_unit_dhis2["code"]},
@@ -532,14 +569,21 @@ class EventTrackerHandler(BaseHandler):
                                 question_mapping != {"type": "neverMapped"}
                                 and question_mapping[0].get("parent") == repeat_group_name
                             ):
-                                subform_mapping["question_mappings"][question_name] = question_mapping
+                                subform_mapping["question_mappings"][
+                                    question_name
+                                ] = question_mapping
 
                         if repeat_group_name in instance.json:
                             for related_data in instance.json[repeat_group_name]:
                                 mapped = self.map_to_values(
-                                    instance, subform_mapping, export_status=export_status, related_data=related_data
+                                    instance,
+                                    subform_mapping,
+                                    export_status=export_status,
+                                    related_data=related_data,
                                 )
-                                unique_number_attribute_id = subform_mapping["tracked_entity_identifier"]
+                                unique_number_attribute_id = subform_mapping[
+                                    "tracked_entity_identifier"
+                                ]
                                 tracked_entity_iaso = mapped[0][2]
                                 self.logger.debug("SUB form mapped to " + str(tracked_entity_iaso))
                                 # export_record
@@ -556,8 +600,16 @@ class EventTrackerHandler(BaseHandler):
                                 if "relationship_type" in subform_mapping:
                                     relation_ship = {
                                         "relationshipType": subform_mapping["relationship_type"],
-                                        "from": {"trackedEntityInstance": {"trackedEntityInstance": parent_tei_uid}},
-                                        "to": {"trackedEntityInstance": {"trackedEntityInstance": related_tei_uid}},
+                                        "from": {
+                                            "trackedEntityInstance": {
+                                                "trackedEntityInstance": parent_tei_uid
+                                            }
+                                        },
+                                        "to": {
+                                            "trackedEntityInstance": {
+                                                "trackedEntityInstance": related_tei_uid
+                                            }
+                                        },
                                     }
                                     api.post("relationships", relation_ship)
 
@@ -600,11 +652,18 @@ class EventTrackerHandler(BaseHandler):
                 if attribute["attribute"] == unique_number_attribute_id
             ]
         )
-        self.logger.debug("looking for" + unique_number_attribute_id, "in " + str(tracked_entity_iaso["attributes"]))
+        self.logger.debug(
+            "looking for" + unique_number_attribute_id,
+            "in " + str(tracked_entity_iaso["attributes"]),
+        )
         self.logger.debug(str(instance.id) + "unique number ?" + str(unique_number))
         if unique_number:
             tracked_entity_dhis2 = self.find_tracked_entity(
-                api, country_dhis2_id, form_mapping["tracked_entity_type"], unique_number_attribute_id, unique_number
+                api,
+                country_dhis2_id,
+                form_mapping["tracked_entity_type"],
+                unique_number_attribute_id,
+                unique_number,
             )
             if tracked_entity_dhis2:
 
@@ -617,7 +676,9 @@ class EventTrackerHandler(BaseHandler):
                 raise Exception(f"error : no tracked entity with unique number : {unique_number}")
         else:
 
-            unique_number = self.generate_unique_number(api, unique_number_attribute_id, instance.org_unit)
+            unique_number = self.generate_unique_number(
+                api, unique_number_attribute_id, instance.org_unit
+            )
 
             self.logger.debug(str(instance.id) + "unique number ?" + str(unique_number))
 
@@ -668,7 +729,9 @@ class EventTrackerHandler(BaseHandler):
 
             for count_type in ("imported", "updated", "deleted", "ignored"):
                 counts[count_type] = response.get(count_type, 0)
-            import_summaries = response.get("importSummaries") or response["response"]["importSummaries"]
+            import_summaries = (
+                response.get("importSummaries") or response["response"]["importSummaries"]
+            )
             descriptions = [m["description"] for m in import_summaries if "description" in m]
             conflicts = [m["conflicts"] for m in import_summaries if "conflicts" in m]
             descriptions = uniquify(descriptions)
@@ -677,7 +740,12 @@ class EventTrackerHandler(BaseHandler):
             self.logger.error("---------------------------------------------------------")
             self.logger.error("----------------------- EXPORT ERROR --------------------")
             self.logger.error(
-                "Failed to create events got" + str(descriptions) + "conflicts " + str(conflicts) + "resp " + str(resp)
+                "Failed to create events got"
+                + str(descriptions)
+                + "conflicts "
+                + str(conflicts)
+                + "resp "
+                + str(resp)
             )
             return InstanceExportError(message, counts, descriptions)
 
@@ -703,7 +771,9 @@ class DataValueExporter:
 
         if not mapping_version.id in self.api_cache:
             credentials = mapping_version.mapping.data_source.credentials
-            self.api_cache[mapping_version.id] = Api(credentials.url, credentials.login, credentials.password)
+            self.api_cache[mapping_version.id] = Api(
+                credentials.url, credentials.login, credentials.password
+            )
         return self.api_cache[mapping_version.id]
 
     def export_log_on(self, status, export_status, export_logs):
@@ -734,7 +804,9 @@ class DataValueExporter:
 
             if map_errors:
                 message = "ERROR while processing " + prefix + ", instance_id %d" % (instance.id,)
-                exception = InstanceExportError(message, {}, list(map(lambda x: x[0] + " " + str(x[1]), map_errors)))
+                exception = InstanceExportError(
+                    message, {}, list(map(lambda x: x[0] + " " + str(x[1]), map_errors))
+                )
 
                 raise exception
             else:
@@ -830,7 +902,10 @@ class DataValueExporter:
             # it's ok to catch BaseException, we want to be able to mark it as errored if cancelled or worst
             except BaseException as exception:
                 self.flag_as_errored(
-                    export_request, export_statuses, repr(exception) + " : " + type(exception).__name__, stats
+                    export_request,
+                    export_statuses,
+                    repr(exception) + " : " + type(exception).__name__,
+                    stats,
                 )
                 raise exception
 

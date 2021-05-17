@@ -11,8 +11,12 @@ class ProjectsAPITestCase(APITestCase):
         ghi = m.Account.objects.create(name="Global Health Initiative")
         wha = m.Account.objects.create(name="Worldwide Health Aid")
 
-        cls.jane = cls.create_user_with_profile(username="janedoe", account=ghi, permissions=["iaso_forms"])
-        cls.john = cls.create_user_with_profile(username="johndoe", account=wha, permissions=["iaso_forms"])
+        cls.jane = cls.create_user_with_profile(
+            username="janedoe", account=ghi, permissions=["iaso_forms"]
+        )
+        cls.john = cls.create_user_with_profile(
+            username="johndoe", account=wha, permissions=["iaso_forms"]
+        )
         cls.jim = cls.create_user_with_profile(username="jimdoe", account=wha)
 
         cls.project_1 = m.Project.objects.create(name="Project 1", app_id="org.ghi.p1", account=ghi)
@@ -58,16 +62,20 @@ class ProjectsAPITestCase(APITestCase):
         """GET /featureflags/ happy path: we expect one result"""
 
         self.client.force_authenticate(self.jane)
-        response = self.client.get("/api/featureflags/", headers={"Content-Type": "application/json"})
+        response = self.client.get(
+            "/api/featureflags/", headers={"Content-Type": "application/json"}
+        )
         self.assertJSONResponse(response, 200)
-        self.assertValidFeatureFlagListData(response.json(),1)
+        self.assertValidFeatureFlagListData(response.json(), 1)
 
     @tag("iaso_only")
     def test_projects_list_paginated(self):
         """GET /projects/ paginated happy path"""
 
         self.client.force_authenticate(self.jane)
-        response = self.client.get("/api/projects/?limit=1&page=1", headers={"Content-Type": "application/json"})
+        response = self.client.get(
+            "/api/projects/?limit=1&page=1", headers={"Content-Type": "application/json"}
+        )
         self.assertJSONResponse(response, 200)
 
         response_data = response.json()
@@ -82,7 +90,9 @@ class ProjectsAPITestCase(APITestCase):
         """GET /featureflags/ paginated happy path"""
 
         self.client.force_authenticate(self.jane)
-        response = self.client.get("/api/featureflags/?limit=1&page=1", headers={"Content-Type": "application/json"})
+        response = self.client.get(
+            "/api/featureflags/?limit=1&page=1", headers={"Content-Type": "application/json"}
+        )
         self.assertJSONResponse(response, 200)
 
         response_data = response.json()
@@ -152,17 +162,27 @@ class ProjectsAPITestCase(APITestCase):
         response = self.client.delete(f"/api/projects/{self.project_1.id}/", format="json")
         self.assertJSONResponse(response, 405)
 
-    def assertValidProjectListData(self, list_data: typing.Mapping, expected_length: int, paginated: bool = False):
+    def assertValidProjectListData(
+        self, list_data: typing.Mapping, expected_length: int, paginated: bool = False
+    ):
         self.assertValidListData(
-            list_data=list_data, expected_length=expected_length, results_key="projects", paginated=paginated
+            list_data=list_data,
+            expected_length=expected_length,
+            results_key="projects",
+            paginated=paginated,
         )
 
         for project_data in list_data["projects"]:
             self.assertValidProjectData(project_data)
 
-    def assertValidFeatureFlagListData(self, list_data: typing.Mapping, expected_length: int, paginated: bool = False):
+    def assertValidFeatureFlagListData(
+        self, list_data: typing.Mapping, expected_length: int, paginated: bool = False
+    ):
         self.assertValidListData(
-            list_data=list_data, expected_length=expected_length, results_key="featureflags", paginated=paginated
+            list_data=list_data,
+            expected_length=expected_length,
+            results_key="featureflags",
+            paginated=paginated,
         )
 
         for feature_flags_data in list_data["featureflags"]:

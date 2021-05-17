@@ -39,7 +39,15 @@ def org_units_to_gpkg(queryset: QuerySet) -> bytes:
     # cleanup / transforms
     ou_df["parent"] = ou_df["parent__name"] + " (" + ou_df["parent__org_unit_type__name"] + ")"
     ou_df["geography"] = ou_df["geom"].fillna(ou_df["simplified_geom"].fillna(ou_df["location"]))
-    ou_df = ou_df.drop(columns=["geom", "simplified_geom", "location", "parent__name", "parent__org_unit_type__name"])
+    ou_df = ou_df.drop(
+        columns=[
+            "geom",
+            "simplified_geom",
+            "location",
+            "parent__name",
+            "parent__org_unit_type__name",
+        ]
+    )
     ou_df = ou_df.rename(columns={"org_unit_type__name": "type", "org_unit_type__depth": "depth"})
     ou_df["depth"] = ou_df["depth"].fillna(999)
     ou_df = ou_df.set_index("uuid")

@@ -9,6 +9,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="orgunittype", name="depth", field=models.PositiveSmallIntegerField(blank=True, null=True)
+            model_name="orgunittype",
+            name="depth",
+            field=models.PositiveSmallIntegerField(blank=True, null=True),
         )
     ]

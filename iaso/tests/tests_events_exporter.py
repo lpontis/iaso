@@ -123,20 +123,32 @@ class DataValueExporterTests(TestCase):
 
         account, account_created = Account.objects.get_or_create(name="Organisation Name")
 
-        user, user_created = User.objects.get_or_create(username="Test User Name", email="testemail@bluesquarehub.com")
+        user, user_created = User.objects.get_or_create(
+            username="Test User Name", email="testemail@bluesquarehub.com"
+        )
         self.user = user
         p = Profile(user=user, account=account)
         p.save()
         credentials, creds_created = ExternalCredentials.objects.get_or_create(
-            name="Test export api", url="https://dhis2.com", login="admin", password="whocares", account=account
+            name="Test export api",
+            url="https://dhis2.com",
+            login="admin",
+            password="whocares",
+            account=account,
         )
 
-        datasource, _ds_created = DataSource.objects.get_or_create(name="reference", credentials=credentials)
+        datasource, _ds_created = DataSource.objects.get_or_create(
+            name="reference", credentials=credentials
+        )
         self.datasource = datasource
-        source_version, _created = SourceVersion.objects.get_or_create(number=1, data_source=datasource)
+        source_version, _created = SourceVersion.objects.get_or_create(
+            number=1, data_source=datasource
+        )
         self.source_version = source_version
 
-        self.project = Project(name="Hyrule", app_id="magic.countries.hyrule.collect", account=account)
+        self.project = Project(
+            name="Hyrule", app_id="magic.countries.hyrule.collect", account=account
+        )
         self.project.save()
 
         datasource.projects.add(self.project)
@@ -164,7 +176,9 @@ class DataValueExporterTests(TestCase):
 
     def test_event_mapping_works(self):
 
-        event, errors = EventHandler().map_to_values(self.build_instance(self.form), build_form_mapping())
+        event, errors = EventHandler().map_to_values(
+            self.build_instance(self.form), build_form_mapping()
+        )
 
         self.assertEquals(
             {
@@ -226,7 +240,10 @@ class DataValueExporterTests(TestCase):
     def test_event_export_works(self):
 
         mapping_version = MappingVersion(
-            name="event", json=build_form_mapping(), form_version=self.form_version, mapping=self.mapping
+            name="event",
+            json=build_form_mapping(),
+            form_version=self.form_version,
+            mapping=self.mapping,
         )
         mapping_version.save()
         # setup
@@ -234,13 +251,20 @@ class DataValueExporterTests(TestCase):
         instance = self.build_instance(self.form)
 
         export_request = ExportRequestBuilder().build_export_request(
-            filters={"period_ids": "201801", "form_id": self.form.id, "org_unit_id": instance.org_unit.id},
+            filters={
+                "period_ids": "201801",
+                "form_id": self.form.id,
+                "org_unit_id": instance.org_unit.id,
+            },
             launcher=self.user,
         )
         # mock expected calls
 
         responses.add(
-            responses.POST, "https://dhis2.com/api/events", json=load_dhis2_fixture("datavalues-ok.json"), status=200
+            responses.POST,
+            "https://dhis2.com/api/events",
+            json=load_dhis2_fixture("datavalues-ok.json"),
+            status=200,
         )
 
         # excercice
@@ -256,7 +280,10 @@ class DataValueExporterTests(TestCase):
     def test_event_export_handle_errors(self):
 
         mapping_version = MappingVersion(
-            name="event", json=build_form_mapping(), form_version=self.form_version, mapping=self.mapping
+            name="event",
+            json=build_form_mapping(),
+            form_version=self.form_version,
+            mapping=self.mapping,
         )
         mapping_version.save()
         # setup
@@ -264,7 +291,11 @@ class DataValueExporterTests(TestCase):
         instance = self.build_instance(self.form)
 
         export_request = ExportRequestBuilder().build_export_request(
-            filters={"period_ids": "201801", "form_id": self.form.id, "org_unit_id": instance.org_unit.id},
+            filters={
+                "period_ids": "201801",
+                "form_id": self.form.id,
+                "org_unit_id": instance.org_unit.id,
+            },
             launcher=self.user,
         )
         # mock expected calls

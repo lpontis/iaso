@@ -10,7 +10,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="formversion", name="file", field=models.FileField(upload_to=_form_version_upload_to)
+            model_name="formversion",
+            name="file",
+            field=models.FileField(upload_to=_form_version_upload_to),
         ),
         migrations.AlterField(
             model_name="formversion",

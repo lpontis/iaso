@@ -13,13 +13,22 @@ class Migration(migrations.Migration):
             name="period_type",
             field=models.TextField(
                 blank=True,
-                choices=[("YEAR", "Year"), ("QUARTER", "Quarter"), ("MONTH", "Month"), ("SIX_MONTH", "Six-month")],
+                choices=[
+                    ("YEAR", "Year"),
+                    ("QUARTER", "Quarter"),
+                    ("MONTH", "Month"),
+                    ("SIX_MONTH", "Six-month"),
+                ],
                 null=True,
             ),
         ),
-        migrations.AddField(model_name="form", name="single_per_period", field=models.NullBooleanField()),
         migrations.AddField(
-            model_name="instance", name="period", field=models.TextField(blank=True, db_index=True, null=True)
+            model_name="form", name="single_per_period", field=models.NullBooleanField()
+        ),
+        migrations.AddField(
+            model_name="instance",
+            name="period",
+            field=models.TextField(blank=True, db_index=True, null=True),
         ),
         migrations.AlterField(
             model_name="groupset",

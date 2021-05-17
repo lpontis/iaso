@@ -17,7 +17,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="ExportLog",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("sent", django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
                 ("received", django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -28,7 +33,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="ExportRequest",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("params", django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
                 ("result", django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
                 ("finished", models.BooleanField(default=False)),
@@ -55,7 +65,10 @@ class Migration(migrations.Migration):
                 (
                     "launcher",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
             ],
@@ -63,7 +76,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="ExportStatus",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 (
                     "status",
                     models.TextField(
@@ -81,51 +99,74 @@ class Migration(migrations.Migration):
                 ("export_logs", models.ManyToManyField(blank=True, to="iaso.ExportLog")),
                 (
                     "export_request",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="iaso.ExportRequest"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="iaso.ExportRequest"
+                    ),
                 ),
             ],
         ),
         migrations.CreateModel(
             name="Mapping",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("name", models.TextField()),
-                ("mapping_type", models.TextField(choices=[("AGGREGATE", "Aggregate"), ("EVENT", "Event")])),
+                (
+                    "mapping_type",
+                    models.TextField(choices=[("AGGREGATE", "Aggregate"), ("EVENT", "Event")]),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
                     "data_source",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="mappings", to="iaso.DataSource"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="mappings",
+                        to="iaso.DataSource",
                     ),
                 ),
                 (
                     "form",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to="iaso.Form"
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="iaso.Form",
                     ),
                 ),
             ],
         ),
         migrations.AddField(
-            model_name="instance", name="last_export_success_at", field=models.DateTimeField(blank=True, null=True)
+            model_name="instance",
+            name="last_export_success_at",
+            field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AlterField(
             model_name="mappingversion",
             name="form_version",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="mapping_versions", to="iaso.FormVersion"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="mapping_versions",
+                to="iaso.FormVersion",
             ),
         ),
         migrations.AddField(
             model_name="exportstatus",
             name="instance",
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="iaso.Instance"),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="iaso.Instance"
+            ),
         ),
         migrations.AddField(
             model_name="exportstatus",
             name="mapping_version",
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="iaso.MappingVersion"),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="iaso.MappingVersion"
+            ),
         ),
         migrations.AddField(
             model_name="mappingversion",

@@ -1,4 +1,15 @@
-from iaso.models import OrgUnit, OrgUnitType, DataSource, SourceVersion, Group, GroupSet, Task, SUCCESS, ERRORED, RUNNING
+from iaso.models import (
+    OrgUnit,
+    OrgUnitType,
+    DataSource,
+    SourceVersion,
+    Group,
+    GroupSet,
+    Task,
+    SUCCESS,
+    ERRORED,
+    RUNNING,
+)
 from beanstalk_worker import task
 from django.contrib.gis.geos import Point, MultiPolygon, Polygon
 
@@ -11,12 +22,14 @@ import time
 
 logger = logging.getLogger(__name__)
 
+
 def get_api(options):
     from dhis2 import Api
 
     api = Api(options.get("dhis2_url"), options.get("dhis2_user"), options.get("dhis2_password"))
 
     return api
+
 
 def fetch_orgunits(options):
     api = get_api(options)
@@ -25,7 +38,9 @@ def fetch_orgunits(options):
     for page in api.get_paged(
         "organisationUnits",
         page_size=options.get("page_size", 500),
-        params={"fields": "id,name,path,coordinates,geometry,parent,organisationUnitGroups[id,name]"},
+        params={
+            "fields": "id,name,path,coordinates,geometry,parent,organisationUnitGroups[id,name]"
+        },
     ):
 
         orgunits.extend(page["organisationUnits"])
@@ -64,8 +79,10 @@ def map_parent(row, org_unit, unit_dict):
                 + str(row)
             )
 
+
 def row_without_coordinates(row):
     return {i: row[i] for i in row if i != "coordinates" and i != "geometry"}
+
 
 def map_org_unit_type(row, org_unit, type_dict, unknown_unit_type):
     for group in row["organisationUnitGroups"]:
@@ -77,6 +94,7 @@ def map_org_unit_type(row, org_unit, type_dict, unknown_unit_type):
         org_unit.org_unit_type = unknown_unit_type
         logger.debug("unknown type for ", row_without_coordinates(row))
 
+
 def guess_feature_type(coordinates):
     if coordinates == None:
         return None
@@ -87,6 +105,7 @@ def guess_feature_type(coordinates):
     if coordinates.startswith("["):
         return "POINT"
     return None
+
 
 def map_coordinates(row, org_unit):
     if "coordinates" in row:
@@ -146,7 +165,8 @@ def map_geometry(row, org_unit):
         except Exception as bad_coord:
             logger.debug("failed at importing ", feature_type, coordinates, bad_coord, row)
 
-def get_group( dhis2_group, group_dict, source_version):
+
+def get_group(dhis2_group, group_dict, source_version):
     name = dhis2_group["name"]
     group = group_dict.get(name, None)
     if group is None:
@@ -156,6 +176,7 @@ def get_group( dhis2_group, group_dict, source_version):
         logger.debug("group, created ", group, created)
         group_dict[name] = group
     return group
+
 
 def get_group_set(dhis2_group_set, group_set_dict, source_version):
     name = dhis2_group_set["name"]
@@ -169,16 +190,19 @@ def get_group_set(dhis2_group_set, group_set_dict, source_version):
 
     return group_set
 
+
 def map_groups(row, org_unit, group_dict, version):
     for ougroup in row["organisationUnitGroups"]:
         group = get_group(ougroup, group_dict, version)
         group.org_units.add(org_unit)
 
+
 def load_groupsets(options, version, group_dict):
     group_set_dict = {}
     api = get_api(options)
     dhis2_group_sets = api.get(
-        "organisationUnitGroupSets", params={"paging": "false", "fields": "id,name,organisationUnitGroups[id,name]"}
+        "organisationUnitGroupSets",
+        params={"paging": "false", "fields": "id,name,organisationUnitGroups[id,name]"},
     )
     dhis2_group_sets = dhis2_group_sets.json()["organisationUnitGroupSets"]
 
@@ -188,6 +212,7 @@ def load_groupsets(options, version, group_dict):
         for ougroup in dhis2_group_set["organisationUnitGroups"]:
             group = get_group(ougroup, group_dict, version)
             group_set.groups.add(group)
+
 
 @task(task_name="dhis2_ou_importer")
 def dhis2_ou_importer(
@@ -199,12 +224,14 @@ def dhis2_ou_importer(
     url,
     login,
     password,
-    task=None
+    task=None,
 ):
     the_task = task
     logger.debug("********* Starting import")
     source = DataSource.objects.get(id=source_id)
-    source_version, _created = SourceVersion.objects.get_or_create(number=int(source_version_number), data_source=source)
+    source_version, _created = SourceVersion.objects.get_or_create(
+        number=int(source_version_number), data_source=source
+    )
     start = time.time()
 
     logger.debug("source", source)
@@ -226,7 +253,7 @@ def dhis2_ou_importer(
             }
 
         else:
-            res_string = ("No credentials exist for this source, please provide them ")
+            res_string = "No credentials exist for this source, please provide them "
             logger.debug(res_string)
             the_task.status = ERRORED
             the_task.result = {"message": res_string}
@@ -234,14 +261,18 @@ def dhis2_ou_importer(
     the_task.report_progress_and_stop_if_killed(progress_message="fetching org units")
     orgunits = fetch_orgunits(connection_config)
 
-    version, _created = SourceVersion.objects.get_or_create(number=source_version_number, data_source=source)
+    version, _created = SourceVersion.objects.get_or_create(
+        number=source_version_number, data_source=source
+    )
 
     version_count = OrgUnit.objects.filter(version=version).count()
 
-
     logger.debug("Orgunits in db for source and version ", source, version, version_count)
     if version_count > 0 and not force:
-        res_string = ("This is going to delete %d org units records. If you want to proceed, add the -f option"  % version_count)
+        res_string = (
+            "This is going to delete %d org units records. If you want to proceed, add the -f option"
+            % version_count
+        )
         logger.debug(res_string)
         the_task.status = ERRORED
         the_task.result = {"message": res_string}
@@ -251,7 +282,9 @@ def dhis2_ou_importer(
         logger.debug(("%d org units records deleted" % version_count).upper())
 
     type_dict = {}
-    unknown_unit_type, _created = OrgUnitType.objects.get_or_create(name="%s-%s-%d" % (source.name, "Unknown", source.id))
+    unknown_unit_type, _created = OrgUnitType.objects.get_or_create(
+        name="%s-%s-%d" % (source.name, "Unknown", source.id)
+    )
     for project in source.projects.all():
         unknown_unit_type.projects.add(project)
     group_dict = {}
@@ -259,7 +292,9 @@ def dhis2_ou_importer(
     index = 0
     unit_dict = dict()
     logger.debug("about to create orgunits", len(orgunits))
-    the_task.report_progress_and_stop_if_killed(progress_value=0, end_value=len(orgunits), progress_message="Importing org units")
+    the_task.report_progress_and_stop_if_killed(
+        progress_value=0, end_value=len(orgunits), progress_message="Importing org units"
+    )
     for row in orgunits:
         try:
             org_unit = OrgUnit()
@@ -267,7 +302,9 @@ def dhis2_ou_importer(
             org_unit.sub_source = source.name
             org_unit.version = version
             org_unit.source_ref = row["id"].strip()
-            org_unit.validation_status = OrgUnit.VALIDATION_VALID if validate else OrgUnit.VALIDATION_NEW
+            org_unit.validation_status = (
+                OrgUnit.VALIDATION_VALID if validate else OrgUnit.VALIDATION_NEW
+            )
 
             map_org_unit_type(row, org_unit, type_dict, unknown_unit_type)
             map_parent(row, org_unit, unit_dict)
@@ -278,7 +315,9 @@ def dhis2_ou_importer(
             org_unit.save()
 
             res_string = "%s sec, processed %i org units" % (time.time() - start, index)
-            the_task.report_progress_and_stop_if_killed(progress_message=res_string, progress_value=index)
+            the_task.report_progress_and_stop_if_killed(
+                progress_message=res_string, progress_value=index
+            )
 
             # log progress
             if index % 100 == 0:
@@ -304,9 +343,12 @@ def dhis2_ou_importer(
     logger.debug("processed in %.2f seconds" % (end - start))
     res_string = (
         "processed in %.2f seconds" % (end - start),
-        "orgunits:", len(unit_dict),
-        "orgunits with point: ", len([p for p in unit_dict.values() if p.location]),
-        "areas with polygon: ", len([p for p in unit_dict.values() if p.geom])
+        "orgunits:",
+        len(unit_dict),
+        "orgunits with point: ",
+        len([p for p in unit_dict.values() if p.location]),
+        "areas with polygon: ",
+        len([p for p in unit_dict.values() if p.geom]),
     )
 
     the_task.report_success(message=res_string)

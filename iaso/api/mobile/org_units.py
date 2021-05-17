@@ -1,4 +1,3 @@
-
 from rest_framework.response import Response
 from rest_framework import viewsets, permissions
 from iaso.api.common import safe_api_import
@@ -41,9 +40,9 @@ class MobileOrgUnitViewSet(viewsets.ViewSet):
     permission_classes = [HasOrgUnitPermission]
 
     def get_queryset(self):
-        return OrgUnit.objects.filter_for_user_and_app_id(None, self.request.query_params.get("app_id")).filter(
-            validation_status=OrgUnit.VALIDATION_VALID
-        )
+        return OrgUnit.objects.filter_for_user_and_app_id(
+            None, self.request.query_params.get("app_id")
+        ).filter(validation_status=OrgUnit.VALIDATION_VALID)
 
     def list(self, request):
         queryset = self.get_queryset()

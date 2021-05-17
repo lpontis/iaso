@@ -13,9 +13,13 @@ class Migration(migrations.Migration):
             model_name="orgunit",
             name="validation_status",
             field=models.CharField(
-                choices=[("new", "new"), ("valid", "valid"), ("rejected", "rejected")], default="NEW", max_length=25
+                choices=[("new", "new"), ("valid", "valid"), ("rejected", "rejected")],
+                default="NEW",
+                max_length=25,
             ),
             preserve_default=False,
         ),
-        migrations.AlterField(model_name="orgunit", name="sub_source", field=models.TextField(blank=True, null=True)),
+        migrations.AlterField(
+            model_name="orgunit", name="sub_source", field=models.TextField(blank=True, null=True)
+        ),
     ]

@@ -7,18 +7,26 @@ import iaso.periods as periods
 
 
 class CompletenessViewSet(viewsets.ViewSet):
-    """ Completeness API
+    """Completeness API
 
     This API is restricted to authenticated users having the "menupermissions.iaso_completeness" permission
 
     GET /api/completeness/
     """
 
-    permission_classes = [permissions.IsAuthenticated, HasPermission("menupermissions.iaso_completeness")]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        HasPermission("menupermissions.iaso_completeness"),
+    ]
 
     def list(self, request):
         profile = request.user.iaso_profile
-        queryset = Instance.objects.filter(project__account=profile.account).exclude(deleted=True).exclude(file="").with_status()
+        queryset = (
+            Instance.objects.filter(project__account=profile.account)
+            .exclude(deleted=True)
+            .exclude(file="")
+            .with_status()
+        )
         counts = [to_completeness(count) for count in queryset.counts_by_status()]
         form_ids = [count["form"]["form_id"] for count in counts]
 
@@ -34,7 +42,9 @@ class CompletenessViewSet(viewsets.ViewSet):
 
         # enrich the paylod to allow scheduling from client if applicable
         for count in counts:
-            count["form"]["generate_derived"] = derived_forms_by_form_id.get(count["form"]["form_id"])
+            count["form"]["generate_derived"] = derived_forms_by_form_id.get(
+                count["form"]["form_id"]
+            )
 
         return Response({"completeness": counts})
 

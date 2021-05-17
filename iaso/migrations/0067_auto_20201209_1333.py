@@ -8,5 +8,7 @@ class Migration(migrations.Migration):
     dependencies = [("iaso", "0066_merge_20201208_1115")]
 
     operations = [
-        migrations.AlterField(model_name="deviceownership", name="end", field=models.DateTimeField(null=True))
+        migrations.AlterField(
+            model_name="deviceownership", name="end", field=models.DateTimeField(null=True)
+        )
     ]

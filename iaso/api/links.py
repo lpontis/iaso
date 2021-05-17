@@ -31,13 +31,15 @@ class LinkSerializer(serializers.ModelSerializer):
         # print(link_source.version, run.version_1)
         # print(link_destination.version, run.version_2)
         if not (link_source.version == run.version_2 and link_destination.version == run.version_1):
-            raise serializers.ValidationError("Your source and destination are not matching with the run")
+            raise serializers.ValidationError(
+                "Your source and destination are not matching with the run"
+            )
 
         return validated_data
 
 
 class LinkViewSet(viewsets.ViewSet):
-    """ Links API
+    """Links API
 
     This API is restricted to authenticated users having the "menupermissions.iaso_links" permission
 
@@ -73,13 +75,17 @@ class LinkViewSet(viewsets.ViewSet):
 
         if not request.user.is_anonymous:
             profile = request.user.iaso_profile
-            queryset = queryset.filter(source__version__data_source__projects__account=profile.account)
+            queryset = queryset.filter(
+                source__version__data_source__projects__account=profile.account
+            )
 
         if search:
             queryset = queryset.filter(
                 Q(destination__name__icontains=search) | Q(destination__aliases__contains=[search])
             )
-            queryset = queryset.filter(Q(source__name__icontains=search) | Q(source__aliases__contains=[search]))
+            queryset = queryset.filter(
+                Q(source__name__icontains=search) | Q(source__aliases__contains=[search])
+            )
 
         if validated == "true":
             queryset = queryset.filter(validated=True)
@@ -187,7 +193,8 @@ class LinkViewSet(viewsets.ViewSet):
                 )
             if csv_format:
                 response = StreamingHttpResponse(
-                    streaming_content=(iter_items(queryset, Echo(), columns, get_row)), content_type="text/csv"
+                    streaming_content=(iter_items(queryset, Echo(), columns, get_row)),
+                    content_type="text/csv",
                 )
                 filename = filename + ".csv"
             response["Content-Disposition"] = "attachment; filename=%s" % filename
@@ -221,7 +228,9 @@ class LinkViewSet(viewsets.ViewSet):
             res["source"]["geo_json"] = geojson_queryset(queryset, geometry_field="simplified_geom")
         if link.destination.simplified_geom:
             queryset = OrgUnit.objects.all().filter(id=link.destination.id)
-            res["destination"]["geo_json"] = geojson_queryset(queryset, geometry_field="simplified_geom")
+            res["destination"]["geo_json"] = geojson_queryset(
+                queryset, geometry_field="simplified_geom"
+            )
         return Response(res)
 
     def create(self, request):

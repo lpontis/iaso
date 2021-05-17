@@ -76,7 +76,9 @@ class CommandTests(TestCase):
 
         # assert groups are created and assigned to orgunits
         group = Group.objects.get(name="CHP")
-        self.assertEquals([entry for entry in group.org_units.values("name")], [{"name": "Bambara Kaima CHP"}])
+        self.assertEquals(
+            [entry for entry in group.org_units.values("name")], [{"name": "Bambara Kaima CHP"}]
+        )
 
         groupsets_qs = GroupSet.objects.order_by("id")
         created_groupsets = [entry for entry in groupsets_qs.values("source_ref", "name")]
@@ -90,7 +92,10 @@ class CommandTests(TestCase):
             ],
         )
         facility_type = groupsets_qs.get(name="Facility Type")
-        self.assertEquals([x.name for x in facility_type.groups.all()], ["CHP", "MCHP", "Clinic", "Hospital", "CHC"])
+        self.assertEquals(
+            [x.name for x in facility_type.groups.all()],
+            ["CHP", "MCHP", "Clinic", "Hospital", "CHC"],
+        )
 
         # assert that path has been generated for all org units
         self.assertEquals(0, OrgUnit.objects.filter(path=None).count())

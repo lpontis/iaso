@@ -7,7 +7,17 @@ from django.utils.translation import gettext as _
 import re
 from iaso.api.common import safe_api_import
 from iaso.gpkg import org_units_to_gpkg
-from iaso.models import OrgUnit, OrgUnitType, Instance, Group, Project, BulkOperation, SourceVersion, DataSource, Form
+from iaso.models import (
+    OrgUnit,
+    OrgUnitType,
+    Instance,
+    Group,
+    Project,
+    BulkOperation,
+    SourceVersion,
+    DataSource,
+    Form,
+)
 from django.contrib.gis.geos import Point
 from django.db import connection
 
@@ -62,12 +72,16 @@ class OrgUnitViewSet(viewsets.ViewSet):
     permission_classes = [HasOrgUnitPermission]
 
     def get_queryset(self):
-        return OrgUnit.objects.filter_for_user_and_app_id(self.request.user, self.request.query_params.get("app_id"))
+        return OrgUnit.objects.filter_for_user_and_app_id(
+            self.request.user, self.request.query_params.get("app_id")
+        )
 
     def list(self, request):
         queryset = self.get_queryset()
 
-        forms = Form.objects.filter_for_user_and_app_id(self.request.user, self.request.query_params.get("app_id"))
+        forms = Form.objects.filter_for_user_and_app_id(
+            self.request.user, self.request.query_params.get("app_id")
+        )
         limit = request.GET.get("limit", None)
         page_offset = request.GET.get("page", 1)
         order = request.GET.get("order", "name").split(",")
@@ -97,9 +111,9 @@ class OrgUnitViewSet(viewsets.ViewSet):
             search_index = 0
             base_queryset = queryset
             for search in json.loads(searches):
-                additional_queryset = build_org_units_queryset(base_queryset, search, profile, is_export, forms).annotate(
-                    search_index=Value(search_index, IntegerField())
-                )
+                additional_queryset = build_org_units_queryset(
+                    base_queryset, search, profile, is_export, forms
+                ).annotate(search_index=Value(search_index, IntegerField()))
                 if search_index == 0:
                     queryset = additional_queryset
                 else:
@@ -124,7 +138,9 @@ class OrgUnitViewSet(viewsets.ViewSet):
                 if small_search:
                     res["orgunits"] = map(lambda x: x.as_small_dict(), page.object_list)
                 else:
-                    res["orgunits"] = map(lambda x: x.as_dict_with_parents(light=False), page.object_list)
+                    res["orgunits"] = map(
+                        lambda x: x.as_dict_with_parents(light=False), page.object_list
+                    )
 
                 res["has_next"] = page.has_next()
                 res["has_previous"] = page.has_previous()
@@ -143,7 +159,9 @@ class OrgUnitViewSet(viewsets.ViewSet):
                     temp_org_unit["geo_json"] = None
                     if temp_org_unit["has_geo_json"] == True:
                         shape_queryset = self.get_queryset().filter(id=temp_org_unit["id"])
-                        temp_org_unit["geo_json"] = geojson_queryset(shape_queryset, geometry_field="simplified_geom")
+                        temp_org_unit["geo_json"] = geojson_queryset(
+                            shape_queryset, geometry_field="simplified_geom"
+                        )
                     org_units.append(temp_org_unit)
                 return Response({"orgUnits": org_units})
             elif as_location:
@@ -156,7 +174,9 @@ class OrgUnitViewSet(viewsets.ViewSet):
                     temp_org_unit["geo_json"] = None
                     if temp_org_unit["has_geo_json"] == True:
                         shape_queryset = self.get_queryset().filter(id=temp_org_unit["id"])
-                        temp_org_unit["geo_json"] = geojson_queryset(shape_queryset, geometry_field="simplified_geom")
+                        temp_org_unit["geo_json"] = geojson_queryset(
+                            shape_queryset, geometry_field="simplified_geom"
+                        )
                     org_units.append(temp_org_unit)
                 return Response(org_units)
             else:
@@ -166,13 +186,17 @@ class OrgUnitViewSet(viewsets.ViewSet):
             return self.list_to_gpkg(queryset)
         else:
 
-            '''
+            """
             When filtering the org units by group, the values_list will return the groups also filtered.
-            In order to get the all groups independently of filters, we should get the groups 
+            In order to get the all groups independently of filters, we should get the groups
             based on the org_unit FK.
-            '''
-            org_ids = queryset.order_by('pk').values_list('pk', flat=True).distinct()
-            groups = Group.objects.filter(org_units__id__in=list(org_ids)).only('id', 'name').distinct('id')
+            """
+            org_ids = queryset.order_by("pk").values_list("pk", flat=True).distinct()
+            groups = (
+                Group.objects.filter(org_units__id__in=list(org_ids))
+                .only("id", "name")
+                .distinct("id")
+            )
 
             columns = [
                 {"title": "ID", "width": 10},
@@ -202,8 +226,8 @@ class OrgUnitViewSet(viewsets.ViewSet):
                 columns.append({"title": "Total d'instances", "width": 15})
 
             for group in groups:
-                group.org_units__ids = list(group.org_units.values_list('id', flat=True))
-                columns.append({'title': group.name, 'width': 20})
+                group.org_units__ids = list(group.org_units.values_list("id", flat=True))
+                columns.append({"title": group.name, "width": 20})
 
             parent_field_names = ["parent__" * i + "name" for i in range(1, 5)]
             parent_field_names.extend(["parent__" * i + "source_ref" for i in range(1, 5)])
@@ -220,7 +244,7 @@ class OrgUnitViewSet(viewsets.ViewSet):
                 "location",
                 *parent_field_names,
                 *counts_by_forms,
-                "instances_count"
+                "instances_count",
             )
 
             filename = "org_units"
@@ -242,7 +266,7 @@ class OrgUnitViewSet(viewsets.ViewSet):
                     *[org_unit.get(field_name) for field_name in parent_field_names],
                     *[org_unit.get(count_field_name) for count_field_name in counts_by_forms],
                     org_unit.get("instances_count"),
-                    *[int(org_unit.get("id") in group.org_units__ids) for group in groups]
+                    *[int(org_unit.get("id") in group.org_units__ids) for group in groups],
                 ]
                 return org_unit_values
 
@@ -258,7 +282,8 @@ class OrgUnitViewSet(viewsets.ViewSet):
                 )
             if csv_format:
                 response = StreamingHttpResponse(
-                    streaming_content=(iter_items(queryset, Echo(), columns, get_row)), content_type="text/csv"
+                    streaming_content=(iter_items(queryset, Echo(), columns, get_row)),
+                    content_type="text/csv",
                 )
                 filename = filename + ".csv"
             response["Content-Disposition"] = "attachment; filename=%s" % filename
@@ -267,7 +292,9 @@ class OrgUnitViewSet(viewsets.ViewSet):
     def list_to_gpkg(self, queryset):
         queryset = queryset.prefetch_related("parent", "org_unit_type")
 
-        response = HttpResponse(org_units_to_gpkg(queryset), content_type="application/octet-stream")
+        response = HttpResponse(
+            org_units_to_gpkg(queryset), content_type="application/octet-stream"
+        )
         filename = f"org_units-{timezone.now().strftime('%Y-%m-%d-%H-%M')}.gpkg"
         response["Content-Disposition"] = f"attachment; filename={filename}"
 
@@ -305,13 +332,20 @@ class OrgUnitViewSet(viewsets.ViewSet):
         groups = request.data.get("groups")
 
         if False:  # simplified geom shape editing is currently disabled
-            if geo_json and geo_json["features"][0]["geometry"] and geo_json["features"][0]["geometry"]["coordinates"]:
+            if (
+                geo_json
+                and geo_json["features"][0]["geometry"]
+                and geo_json["features"][0]["geometry"]["coordinates"]
+            ):
                 if len(geo_json["features"][0]["geometry"]["coordinates"]) == 1:
-                    org_unit.simplified_geom = Polygon(geo_json["features"][0]["geometry"]["coordinates"][0])
+                    org_unit.simplified_geom = Polygon(
+                        geo_json["features"][0]["geometry"]["coordinates"][0]
+                    )
                 else:
                     # DB has a single Polygon, refuse if we have more, or less.
                     return Response(
-                        "Only one polygon should be saved in the geo_json shape", status=status.HTTP_400_BAD_REQUEST
+                        "Only one polygon should be saved in the geo_json shape",
+                        status=status.HTTP_400_BAD_REQUEST,
                     )
             elif simplified_geom:
                 org_unit.simplified_geom = simplified_geom
@@ -325,11 +359,14 @@ class OrgUnitViewSet(viewsets.ViewSet):
                 and catchment["features"][0]["geometry"]["coordinates"]
             ):
                 if len(catchment["features"][0]["geometry"]["coordinates"]) == 1:
-                    org_unit.catchment = Polygon(catchment["features"][0]["geometry"]["coordinates"][0])
+                    org_unit.catchment = Polygon(
+                        catchment["features"][0]["geometry"]["coordinates"][0]
+                    )
                 else:
                     # DB has a single Polygon, refuse if we have more, or less.
                     return Response(
-                        "Only one polygon should be saved in the catchment shape", status=status.HTTP_400_BAD_REQUEST
+                        "Only one polygon should be saved in the catchment shape",
+                        status=status.HTTP_400_BAD_REQUEST,
                     )
             else:
                 org_unit.catchment = None
@@ -341,7 +378,9 @@ class OrgUnitViewSet(viewsets.ViewSet):
             # TODO: remove this mess once the frontend handles altitude edition
             if "altitude" in request.data:  # provided explicitly
                 altitude = request.data["altitude"]
-            elif org_unit.location is not None:  # not provided but we have a current location: keep altitude
+            elif (
+                org_unit.location is not None
+            ):  # not provided but we have a current location: keep altitude
                 altitude = org_unit.location.z
             else:  # no location yet, no altitude provided, set to 0
                 altitude = 0
@@ -356,7 +395,9 @@ class OrgUnitViewSet(viewsets.ViewSet):
             org_unit_type = get_object_or_404(OrgUnitType, id=org_unit_type_id)
             org_unit.org_unit_type = org_unit_type
         else:
-            errors.append({"errorKey": "org_unit_type_id", "errorMessage": _("Org unit type is required")})
+            errors.append(
+                {"errorKey": "org_unit_type_id", "errorMessage": _("Org unit type is required")}
+            )
 
         if parent_id:
             parent_org_unit = get_object_or_404(self.get_queryset(), id=parent_id)
@@ -368,7 +409,9 @@ class OrgUnitViewSet(viewsets.ViewSet):
             temp_group = get_object_or_404(Group, id=group)
             new_groups.append(temp_group)
         org_unit.groups.set(new_groups)
-        audit_models.log_modification(original_copy, org_unit, source=audit_models.ORG_UNIT_API, user=request.user)
+        audit_models.log_modification(
+            original_copy, org_unit, source=audit_models.ORG_UNIT_API, user=request.user
+        )
         if not errors:
             org_unit.save()
 
@@ -386,7 +429,11 @@ class OrgUnitViewSet(viewsets.ViewSet):
         else:
             return Response(errors, status=400)
 
-    @action(detail=False, methods=["POST"], permission_classes=[permissions.IsAuthenticated, HasOrgUnitPermission])
+    @action(
+        detail=False,
+        methods=["POST"],
+        permission_classes=[permissions.IsAuthenticated, HasOrgUnitPermission],
+    )
     def create_org_unit(self, request):
         errors = []
         org_unit = OrgUnit()
@@ -398,9 +445,9 @@ class OrgUnitViewSet(viewsets.ViewSet):
         version_id = request.data.get("version_id", None)
         if version_id:
             authorized_ids = list(
-                SourceVersion.objects.filter(data_source__projects__account=profile.account).values_list(
-                    "id", flat=True
-                )
+                SourceVersion.objects.filter(
+                    data_source__projects__account=profile.account
+                ).values_list("id", flat=True)
             )
             if version_id in authorized_ids:
                 org_unit.version_id = version_id
@@ -423,7 +470,10 @@ class OrgUnitViewSet(viewsets.ViewSet):
 
         if org_unit.version.data_source.read_only:
             errors.append(
-                {"errorKey": "name", "errorMessage": "Creation of org unit not authorized on read only data source"}
+                {
+                    "errorKey": "name",
+                    "errorMessage": "Creation of org unit not authorized on read only data source",
+                }
             )
 
         org_unit.name = name
@@ -462,12 +512,19 @@ class OrgUnitViewSet(viewsets.ViewSet):
             org_unit.location = Point(x=longitude, y=latitude, z=altitude, srid=4326)
 
         if not org_unit_type_id:
-            errors.append({"errorKey": "org_unit_type_id", "errorMessage": _("Org unit type is required")})
+            errors.append(
+                {"errorKey": "org_unit_type_id", "errorMessage": _("Org unit type is required")}
+            )
 
         if parent_id:
             parent_org_unit = get_object_or_404(self.get_queryset(), id=parent_id)
             if org_unit.version_id != parent_org_unit.version_id:
-                errors.append({"errorKey": "parent_id", "errorMessage": _("Parent is not in the same version")})
+                errors.append(
+                    {
+                        "errorKey": "parent_id",
+                        "errorMessage": _("Parent is not in the same version"),
+                    }
+                )
             org_unit.parent = parent_org_unit
 
         if not errors:
@@ -483,7 +540,9 @@ class OrgUnitViewSet(viewsets.ViewSet):
             new_groups.append(temp_group)
         org_unit.groups.set(new_groups)
 
-        audit_models.log_modification(None, org_unit, source=audit_models.ORG_UNIT_API, user=request.user)
+        audit_models.log_modification(
+            None, org_unit, source=audit_models.ORG_UNIT_API, user=request.user
+        )
         org_unit.save()
 
         res = org_unit.as_dict_with_parents()
@@ -508,7 +567,11 @@ class OrgUnitViewSet(viewsets.ViewSet):
                 res["catchment"] = geojson_queryset(geo_queryset, geometry_field="catchment")
         return Response(res)
 
-    @action(detail=False, methods=["POST"], permission_classes=[permissions.IsAuthenticated, HasOrgUnitPermission])
+    @action(
+        detail=False,
+        methods=["POST"],
+        permission_classes=[permissions.IsAuthenticated, HasOrgUnitPermission],
+    )
     def bulkupdate(self, request):
         select_all = request.data.get("select_all", None)
         validation_status = request.data.get("validation_status", None)
@@ -535,14 +598,18 @@ class OrgUnitViewSet(viewsets.ViewSet):
             base_queryset = queryset
             profile = request.user.iaso_profile
             for search in searches:
-                additional_queryset = build_org_units_queryset(base_queryset, search, profile, is_export, forms)
+                additional_queryset = build_org_units_queryset(
+                    base_queryset, search, profile, is_export, forms
+                )
                 if search_index == 0:
                     queryset = additional_queryset
                 else:
                     queryset = queryset.union(additional_queryset)
                 search_index += 1
         if queryset.count() > 0:
-            data_sources = DataSource.objects.filter(id__in=queryset.values_list("version__data_source", flat=True))
+            data_sources = DataSource.objects.filter(
+                id__in=queryset.values_list("version__data_source", flat=True)
+            )
             for source in data_sources:
                 if source.read_only:
                     return Response(
@@ -635,7 +702,9 @@ def import_data(org_units, user, app_id):
     return new_org_units
 
 
-def build_org_units_queryset(queryset, params, profile, is_export, forms):  # TODO: move in viewset.get_queryset()
+def build_org_units_queryset(
+    queryset, params, profile, is_export, forms
+):  # TODO: move in viewset.get_queryset()
     validation_status = params.get("validation_status", OrgUnit.VALIDATION_VALID)
     has_instances = params.get("hasInstances", None)
     date_from = params.get("dateFrom", None)
@@ -722,7 +791,8 @@ def build_org_units_queryset(queryset, params, profile, is_export, forms):  # TO
             queryset = queryset.exclude(id__in=ids_with_instances)
         if has_instances == "duplicates":
             ids_with_duplicate_instances = (
-                Instance.objects.with_status().filter(org_unit__isnull=False, status=Instance.STATUS_DUPLICATED)
+                Instance.objects.with_status()
+                .filter(org_unit__isnull=False, status=Instance.STATUS_DUPLICATED)
                 .exclude(file="")
                 .exclude(deleted=True)
                 .values_list("org_unit_id", flat=True)
@@ -770,12 +840,33 @@ def build_org_units_queryset(queryset, params, profile, is_export, forms):  # TO
     queryset = queryset.annotate(
         instances_count=Count(
             "instance",
-            filter=(~Q(instance__file="") & ~Q(instance__device__test_device=True) & ~Q(instance__deleted=True)),
+            filter=(
+                ~Q(instance__file="")
+                & ~Q(instance__device__test_device=True)
+                & ~Q(instance__deleted=True)
+            ),
         )
     )
 
     if is_export:
-        annotations = {"form_" + str(frm.id) + "_instances":Sum(Case(When(Q(instance__form_id=frm.id) & ~Q(instance__file="") & ~Q(instance__device__test_device=True) & ~Q(instance__deleted=True), then=1), default=0, output_field=IntegerField())) for frm in forms}
+        annotations = {
+            "form_"
+            + str(frm.id)
+            + "_instances": Sum(
+                Case(
+                    When(
+                        Q(instance__form_id=frm.id)
+                        & ~Q(instance__file="")
+                        & ~Q(instance__device__test_device=True)
+                        & ~Q(instance__deleted=True),
+                        then=1,
+                    ),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            )
+            for frm in forms
+        }
         queryset = queryset.annotate(**annotations)
 
     queryset = queryset.select_related("version__data_source")

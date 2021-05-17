@@ -24,14 +24,20 @@ class FormsVersionAPITestCase(APITestCase):
         star_wars.default_version = sw_version
         star_wars.save()
 
-        cls.yoda = cls.create_user_with_profile(username="yoda", account=star_wars, permissions=["iaso_forms"])
-        cls.batman = cls.create_user_with_profile(username="batman", account=dc, permissions=["iaso_forms"])
+        cls.yoda = cls.create_user_with_profile(
+            username="yoda", account=star_wars, permissions=["iaso_forms"]
+        )
+        cls.batman = cls.create_user_with_profile(
+            username="batman", account=dc, permissions=["iaso_forms"]
+        )
         cls.superman = cls.create_user_with_profile(username="superman", account=dc)
 
         cls.sith_council = m.OrgUnitType.objects.create(name="Sith Council", short_name="Cnc")
 
         cls.project = m.Project.objects.create(
-            name="Hydroponic gardens", app_id="stars.empire.agriculture.hydroponics", account=star_wars
+            name="Hydroponic gardens",
+            app_id="stars.empire.agriculture.hydroponics",
+            account=star_wars,
         )
         cls.project.unit_types.add(cls.sith_council)
 
@@ -46,7 +52,10 @@ class FormsVersionAPITestCase(APITestCase):
         cls.project.save()
 
         cls.form_2 = m.Form.objects.create(
-            name="Death Start survey", form_id="sample2", period_type="MONTH", single_per_period=False
+            name="Death Start survey",
+            form_id="sample2",
+            period_type="MONTH",
+            single_per_period=False,
         )
         cls.form_2.org_unit_types.add(cls.sith_council)
         cls.form_1.save()
@@ -93,7 +102,9 @@ class FormsVersionAPITestCase(APITestCase):
         """GET /formversions/<form_id>: allowed"""
 
         self.client.force_authenticate(self.yoda)
-        response = self.client.get(f"/api/formversions/{self.form_2.form_versions.first().id}/?fields=:all")
+        response = self.client.get(
+            f"/api/formversions/{self.form_2.form_versions.first().id}/?fields=:all"
+        )
         self.assertJSONResponse(response, 200)
         form_version_data = response.json()
         self.assertValidFormVersionData(form_version_data)
@@ -111,7 +122,7 @@ class FormsVersionAPITestCase(APITestCase):
             data={
                 "end_period": end_period,
                 "form_id": self.form_2.id,
-                'start_period': start_period,
+                "start_period": start_period,
             },
             format="json",
         )
@@ -151,7 +162,9 @@ class FormsVersionAPITestCase(APITestCase):
         self.assertEqual(created_version.file.name, "forms/new_land_speeder_concept_2020022401.xml")
         self.assertIsInstance(created_version.xls_file, File)
         self.assertGreater(created_version.xls_file.size, 100)
-        self.assertEqual(created_version.xls_file.name, "forms/new_land_speeder_concept_2020022401.xls")
+        self.assertEqual(
+            created_version.xls_file.name, "forms/new_land_speeder_concept_2020022401.xls"
+        )
 
         version_form = created_version.form
         self.assertEqual("sample1", version_form.form_id)
@@ -180,7 +193,9 @@ class FormsVersionAPITestCase(APITestCase):
         """POST /form-versions/ happy path (second version)"""
 
         self.client.force_authenticate(self.yoda)
-        form_mapping = m.Mapping.objects.create(form=self.form_2, mapping_type=m.AGGREGATE, data_source=self.sw_source)
+        form_mapping = m.Mapping.objects.create(
+            form=self.form_2, mapping_type=m.AGGREGATE, data_source=self.sw_source
+        )
         m.MappingVersion.objects.create(
             mapping=form_mapping,
             form_version=self.form_2.form_versions.first(),
@@ -201,8 +216,16 @@ class FormsVersionAPITestCase(APITestCase):
             name="derived",
             json={
                 "aggregations": [
-                    {"id": "old_question", "questionName": "question_name_old", "aggregationType": "sum"},
-                    {"id": "member", "questionName": "question_name_member", "aggregationType": "sum"},
+                    {
+                        "id": "old_question",
+                        "questionName": "question_name_old",
+                        "aggregationType": "sum",
+                    },
+                    {
+                        "id": "member",
+                        "questionName": "question_name_member",
+                        "aggregationType": "sum",
+                    },
                 ]
             },
         )
@@ -220,16 +243,29 @@ class FormsVersionAPITestCase(APITestCase):
 
         created_version = m.FormVersion.objects.get(pk=response_data["id"])
         self.assertEqual(created_version.version_id, "2020022402")
-        new_mapping = m.MappingVersion.objects.all().filter(mapping__mapping_type=m.AGGREGATE).last()
+        new_mapping = (
+            m.MappingVersion.objects.all().filter(mapping__mapping_type=m.AGGREGATE).last()
+        )
         self.assertEqual(new_mapping.form_version_id, response_data["id"])
-        self.assertEqual(new_mapping.json, {"question_mappings": {"member": {"id": "dhis2_id", "valueType": "NUMBER"}}})
+        self.assertEqual(
+            new_mapping.json,
+            {"question_mappings": {"member": {"id": "dhis2_id", "valueType": "NUMBER"}}},
+        )
 
         new_mapping = m.MappingVersion.objects.all().filter(mapping__mapping_type=m.DERIVED).last()
 
         self.assertEqual(new_mapping.form_version_id, response_data["id"])
         self.assertEqual(
             new_mapping.json,
-            {"aggregations": [{"aggregationType": "sum", "id": "member", "questionName": "question_name_member"}]},
+            {
+                "aggregations": [
+                    {
+                        "aggregationType": "sum",
+                        "id": "member",
+                        "questionName": "question_name_member",
+                    }
+                ]
+            },
         )
 
     @tag("iaso_only")
@@ -245,7 +281,9 @@ class FormsVersionAPITestCase(APITestCase):
                 HTTP_ACCEPT="application/json",
             )
         self.assertJSONResponse(response, 400)
-        self.assertHasError(response.json(), "xls_file", "The form_id is already used in another form.")
+        self.assertHasError(
+            response.json(), "xls_file", "The form_id is already used in another form."
+        )
 
     @tag("iaso_only")
     def test_form_versions_create_invalid_xls_form_id_2(self):
@@ -260,7 +298,9 @@ class FormsVersionAPITestCase(APITestCase):
                 HTTP_ACCEPT="application/json",
             )
         self.assertJSONResponse(response, 400)
-        self.assertHasError(response.json(), "xls_file", "Form id should stay constant across form versions.")
+        self.assertHasError(
+            response.json(), "xls_file", "Form id should stay constant across form versions."
+        )
 
     @tag("iaso_only")
     def test_form_versions_create_invalid_xls_version(self):
@@ -276,7 +316,9 @@ class FormsVersionAPITestCase(APITestCase):
             )
         self.assertJSONResponse(response, 400)
         self.assertHasError(
-            response.json(), "xls_file", "Invalid XLS file: Parsed version should be greater than previous version."
+            response.json(),
+            "xls_file",
+            "Invalid XLS file: Parsed version should be greater than previous version.",
         )
 
     @tag("iaso_only")
@@ -303,7 +345,9 @@ class FormsVersionAPITestCase(APITestCase):
         """POST /form-versions/, missing params"""
 
         self.client.force_authenticate(self.yoda)
-        response = self.client.post(f"/api/formversions/", data={}, format="multipart", HTTP_ACCEPT="application/json")
+        response = self.client.post(
+            f"/api/formversions/", data={}, format="multipart", HTTP_ACCEPT="application/json"
+        )
         self.assertJSONResponse(response, 400)
         response_data = response.json()
         self.assertHasError(response_data, "form_id")
@@ -330,7 +374,11 @@ class FormsVersionAPITestCase(APITestCase):
         form_file_mock.name = "test_batman.xml"
         response = self.client.post(
             f"/api/formversions/",
-            data={"form_id": self.form_1.id, "version_id": "february_2020", "xls_file": form_file_mock},
+            data={
+                "form_id": self.form_1.id,
+                "version_id": "february_2020",
+                "xls_file": form_file_mock,
+            },
             format="multipart",
         )
         self.assertJSONResponse(response, 400)
@@ -348,7 +396,3 @@ class FormsVersionAPITestCase(APITestCase):
         if check_annotated_fields:
             self.assertHasField(form_version_data, "mapped", bool)
             self.assertHasField(form_version_data, "full_name", str)
-
-
-
-

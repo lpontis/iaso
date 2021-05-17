@@ -13,14 +13,19 @@ class CorrelationAPITestCase(APITestCase):
         cls.now = now()
         star_wars = m.Account.objects.create(name="Star Wars")
         cls.project = m.Project.objects.create(
-            name="Hydroponic gardens", app_id="stars.empire.agriculture.hydroponics", account=star_wars
+            name="Hydroponic gardens",
+            app_id="stars.empire.agriculture.hydroponics",
+            account=star_wars,
         )
         cls.jedi_council = m.OrgUnitType.objects.create(name="Jedi Council", short_name="Cnc")
         cls.coruscant = m.OrgUnit.objects.create(name="coruscant", org_unit_type=cls.jedi_council)
 
         cls.form_1 = m.Form.objects.create(name="Land Speeder", form_id="sample1")
         cls.form_2 = m.Form.objects.create(
-            name="Hydroponic public survey", form_id="sample2", correlatable=True, correlation_field="service"
+            name="Hydroponic public survey",
+            form_id="sample2",
+            correlatable=True,
+            correlation_field="service",
         )
 
     @tag("iaso_only")
@@ -45,7 +50,9 @@ class CorrelationAPITestCase(APITestCase):
         ]
 
         response = self.client.post(
-            "/api/instances/?app_id=stars.empire.agriculture.hydroponics", data=instance_body, format="json"
+            "/api/instances/?app_id=stars.empire.agriculture.hydroponics",
+            data=instance_body,
+            format="json",
         )
         self.assertEqual(response.status_code, 200)
 
@@ -85,7 +92,9 @@ class CorrelationAPITestCase(APITestCase):
         ]
 
         response = self.client.post(
-            "/api/instances/?app_id=stars.empire.agriculture.hydroponics", data=instance_body, format="json"
+            "/api/instances/?app_id=stars.empire.agriculture.hydroponics",
+            data=instance_body,
+            format="json",
         )
         self.assertEqual(response.status_code, 200)
 

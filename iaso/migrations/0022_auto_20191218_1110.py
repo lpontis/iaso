@@ -9,12 +9,16 @@ class Migration(migrations.Migration):
     dependencies = [("iaso", "0021_auto_20191203_1302")]
 
     operations = [
-        migrations.AddField(model_name="datasource", name="read_only", field=models.BooleanField(default=True)),
+        migrations.AddField(
+            model_name="datasource", name="read_only", field=models.BooleanField(default=True)
+        ),
         migrations.AlterField(
             model_name="formversion",
             name="form",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="form_versions", to="iaso.Form"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="form_versions",
+                to="iaso.Form",
             ),
         ),
         migrations.AlterField(

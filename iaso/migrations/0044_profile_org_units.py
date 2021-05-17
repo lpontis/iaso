@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="profile",
             name="org_units",
-            field=models.ManyToManyField(blank=True, related_name="iaso_profile", to="iaso.OrgUnit"),
+            field=models.ManyToManyField(
+                blank=True, related_name="iaso_profile", to="iaso.OrgUnit"
+            ),
         )
     ]

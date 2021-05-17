@@ -22,7 +22,11 @@ class Command(BaseCommand):
         source = DataSource.objects.get(name=source_name)
         version = SourceVersion.objects.get(number=version, data_source=source)
 
-        type_ids = OrgUnit.objects.filter(version=version).values_list("org_unit_type_id", flat=True).distinct()
+        type_ids = (
+            OrgUnit.objects.filter(version=version)
+            .values_list("org_unit_type_id", flat=True)
+            .distinct()
+        )
         types = OrgUnitType.objects.filter(id__in=type_ids)
         print(types)
 
@@ -33,14 +37,20 @@ class Command(BaseCommand):
 
         with open(file_name, "w") as units_file:
             writer = csv.writer(units_file)
-            for t in OrgUnit.objects.filter(version=version).prefetch_related("org_unit_type").order_by("id"):
+            for t in (
+                OrgUnit.objects.filter(version=version)
+                .prefetch_related("org_unit_type")
+                .order_by("id")
+            ):
                 writer.writerow(
                     (
                         t.source_ref if t.source_ref else "iaso_%d" % t.id,
                         t.name,
                         None
                         if t.parent is None
-                        else (t.parent.source_ref if t.parent.source_ref else "iaso_%d" % t.parent.id),
+                        else (
+                            t.parent.source_ref if t.parent.source_ref else "iaso_%d" % t.parent.id
+                        ),
                         "",
                         t.org_unit_type.name,
                         t.geom if t.geom else t.simplified_geom,

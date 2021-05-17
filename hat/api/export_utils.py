@@ -17,9 +17,7 @@ def write_sheet(wb, sheet_name, col_descs, queryset, get_row, sub_columns=None):
     formats = {"bold": bold, "percent": wb.add_format({"num_format": "0.00%"})}
 
     advanced = any([1 for cd in col_descs if "format" in cd])
-    max_height = (
-        max([c["title"].count("\n") for c in col_descs]) + 1
-    )  # Nb of lines in titles
+    max_height = max([c["title"].count("\n") for c in col_descs]) + 1  # Nb of lines in titles
     ws.set_row(0, 15 * max_height, bold)  # default height is 15
     ws.freeze_panes(1, 0)
 

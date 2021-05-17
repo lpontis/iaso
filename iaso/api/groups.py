@@ -21,7 +21,15 @@ class HasGroupPermission(permissions.BasePermission):
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ["id", "name", "source_ref", "source_version", "org_unit_count", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "name",
+            "source_ref",
+            "source_version",
+            "org_unit_count",
+            "created_at",
+            "updated_at",
+        ]
         read_only_fields = ["id", "source_version", "org_unit_count", "created_at", "updated_at"]
 
     source_version = serializers.SerializerMethodField(read_only=True)  # TODO: use serializer
@@ -45,7 +53,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class GroupsViewSet(ModelViewSet):
-    """ Groups API
+    """Groups API
 
     This API is restricted to users having the "menupermissions.iaso_org_units" permission
 
@@ -68,7 +76,9 @@ class GroupsViewSet(ModelViewSet):
     def get_queryset(self):
         light = self.request.GET.get("light", False)
         profile = self.request.user.iaso_profile
-        queryset = Group.objects.filter(source_version__data_source__projects__in=profile.account.project_set.all())
+        queryset = Group.objects.filter(
+            source_version__data_source__projects__in=profile.account.project_set.all()
+        )
         if not light:
             queryset = queryset.annotate(org_unit_count=Count("org_units"))
 
@@ -78,7 +88,9 @@ class GroupsViewSet(ModelViewSet):
         else:
             default_version = self.request.GET.get("defaultVersion", None)
             if default_version == "true":
-                queryset = queryset.filter(source_version=self.request.user.iaso_profile.account.default_version)
+                queryset = queryset.filter(
+                    source_version=self.request.user.iaso_profile.account.default_version
+                )
 
         search = self.request.query_params.get("search", None)
         if search:

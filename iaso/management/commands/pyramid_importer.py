@@ -79,5 +79,7 @@ class Command(BaseCommand):
                     break
 
             for unit in root_org_units:
-                self.stdout.write(f"Setting path for the hierarchy starting with org unit {unit.name}")
+                self.stdout.write(
+                    f"Setting path for the hierarchy starting with org unit {unit.name}"
+                )
                 unit.save(update_fields=["path"])

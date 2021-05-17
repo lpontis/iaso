@@ -21,7 +21,9 @@ class Dhis2APITestCase(APITestCase):
         account.save()
         cls.account = account
 
-        cls.project = m.Project(name="Hyrule", app_id="magic.countries.hyrule.collect", account=account)
+        cls.project = m.Project(
+            name="Hyrule", app_id="magic.countries.hyrule.collect", account=account
+        )
         cls.project.save()
 
         source.projects.add(cls.project)
@@ -35,7 +37,11 @@ class Dhis2APITestCase(APITestCase):
 
     def with_credentials(self):
         credentials = m.ExternalCredentials.objects.create(
-            name="Test export api", url="https://dhis2.com", login="admin", password="district", account=self.account
+            name="Test export api",
+            url="https://dhis2.com",
+            login="admin",
+            password="district",
+            account=self.account,
         )
         self.source.credentials = credentials
         self.source.save()
@@ -98,11 +104,15 @@ class Dhis2APITestCase(APITestCase):
         response_json = response.json()
         # nextPage should have disappeared
         self.assertEqual({"page": 1, "pageCount": 4}, response_json["pager"])
-        self.assertEqual([{"id": "aze4a65z", "displayName": "Hello data element"}], response_json["dataElements"])
+        self.assertEqual(
+            [{"id": "aze4a65z", "displayName": "Hello data element"}], response_json["dataElements"]
+        )
 
     @tag("iaso_only")
     @responses.activate
-    def test_data_element_list_with_auth_and_configured_with_filter_fields_pageSize(self,):
+    def test_data_element_list_with_auth_and_configured_with_filter_fields_pageSize(
+        self,
+    ):
         """GET /dataElements/ with params return filtered"""
 
         self.with_credentials()
@@ -132,4 +142,6 @@ class Dhis2APITestCase(APITestCase):
         respose_json = response.json()
         # nextPage should have disappeared
         self.assertEqual({"page": 1, "pageCount": 4}, respose_json["pager"])
-        self.assertEqual([{"id": "aze4a65z", "displayName": "Hello data element"}], respose_json["dataElements"])
+        self.assertEqual(
+            [{"id": "aze4a65z", "displayName": "Hello data element"}], respose_json["dataElements"]
+        )

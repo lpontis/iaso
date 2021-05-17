@@ -80,14 +80,18 @@ def enketo_public_create_url(request):
     external_user_id = request.GET.get("external_user_id")
     project = get_object_or_404(Project, external_token=token)
     form = get_object_or_404(Form, form_id=form_id, projects=project)
-    org_unit = get_object_or_404(OrgUnit, source_ref=source_ref, version=project.account.default_version)
+    org_unit = get_object_or_404(
+        OrgUnit, source_ref=source_ref, version=project.account.default_version
+    )
 
     if not form in project.forms.all():
         return JsonResponse({"error": _("Unauthorized")}, status=401)
 
     if external_user_id:
         if external_user_id.strip() == "":
-            return JsonResponse({"error": "Unauthorized", "message": "Empty external user id"}, status=401)
+            return JsonResponse(
+                {"error": "Unauthorized", "message": "Empty external user id"}, status=401
+            )
         profiles = Profile.objects.filter(external_user_id=external_user_id)
         if profiles.count() == 1:
             profile = profiles.first()
@@ -97,11 +101,15 @@ def enketo_public_create_url(request):
             account = project.account
             user = User.objects.create(username="external-%s" % external_user_id)
             user.save()
-            profile = Profile.objects.create(external_user_id=external_user_id, user=user, account=account)
+            profile = Profile.objects.create(
+                external_user_id=external_user_id, user=user, account=account
+            )
     else:
         profile = None
 
-    instances = Instance.objects.filter(form_id=form.id, period=period, org_unit_id=org_unit.id).exclude(file="")
+    instances = Instance.objects.filter(
+        form_id=form.id, period=period, org_unit_id=org_unit.id
+    ).exclude(file="")
     if instances.count() > 1:
         return JsonResponse(
             {
@@ -137,9 +145,13 @@ def enketo_public_create_url(request):
 
         try:
             if not return_url:
-                return_url = request.build_absolute_uri("/dashboard/instance/instanceId/%s" % instance.id)
+                return_url = request.build_absolute_uri(
+                    "/dashboard/instance/instanceId/%s" % instance.id
+                )
             edit_url = enketo_url_for_creation(
-                server_url=public_url_for_enketo(request, "/api/enketo"), uuid=uuid, return_url=return_url
+                server_url=public_url_for_enketo(request, "/api/enketo"),
+                uuid=uuid,
+                return_url=return_url,
             )
 
             return JsonResponse({"url": edit_url}, status=201)
@@ -164,7 +176,9 @@ def enketo_public_launch(request, form_uuid, org_unit_id, period=None):
     i.save()
 
     try:
-        edit_url = enketo_url_for_creation(server_url=public_url_for_enketo(request, "/api/enketo"), uuid=uuid)
+        edit_url = enketo_url_for_creation(
+            server_url=public_url_for_enketo(request, "/api/enketo"), uuid=uuid
+        )
 
         return HttpResponseRedirect(edit_url)
     except EnketoError as error:
@@ -198,12 +212,16 @@ def _build_url_for_edition(request, instance, user_id=None):
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def enketo_edit_url(request, instance_uuid):
-    instance = Instance.objects.filter(uuid=instance_uuid, project__account=request.user.iaso_profile.account).first()
+    instance = Instance.objects.filter(
+        uuid=instance_uuid, project__account=request.user.iaso_profile.account
+    ).first()
 
     if instance is None:
         return JsonResponse({"error": "No such instance or not allowed"}, status=404)
     try:
-        instance.to_export = False  # could be controlled but, by default, for a normal edit, no auto export
+        instance.to_export = (
+            False  # could be controlled but, by default, for a normal edit, no auto export
+        )
         edit_url = _build_url_for_edition(request, instance)
     except EnketoError as error:
         print(error)

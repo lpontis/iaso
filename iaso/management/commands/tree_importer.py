@@ -98,9 +98,7 @@ class Command(BaseCommand):
             org_unit_dicts = {}
             previous_outs = []
             project = Project.objects.get(id=project_id)
-            main_out = get_or_create_org_unit_type(
-                name=main_org_unit_name, project=project
-            )
+            main_out = get_or_create_org_unit_type(name=main_org_unit_name, project=project)
             print("Creating Org Unit Types")
             data_dict = json.loads(open(data_dict_name, "r").read())
             for parent in data_dict["parents"]:
@@ -133,9 +131,7 @@ class Command(BaseCommand):
 
                     if index == 1:
                         headers = row
-                        col_indices = {
-                            headers[i].strip(): i for i in range(len(headers))
-                        }
+                        col_indices = {headers[i].strip(): i for i in range(len(headers))}
                         print("col_indices", col_indices)
                     else:
                         try:
@@ -190,9 +186,9 @@ class Command(BaseCommand):
             OrgUnit.objects.bulk_create(leaf_units)
 
             print("computing paths for parents")
-            top_parents = OrgUnit.objects.filter(
-                id__in=[u.id for u in parent_units]
-            ).filter(parent=None)
+            top_parents = OrgUnit.objects.filter(id__in=[u.id for u in parent_units]).filter(
+                parent=None
+            )
             for ou in top_parents:
                 print("computing for", ou)
                 ou.save(force_recalculate=True)

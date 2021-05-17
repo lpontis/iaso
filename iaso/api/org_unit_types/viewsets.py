@@ -7,7 +7,7 @@ from ..common import ModelViewSet
 
 
 class OrgUnitTypeViewSet(ModelViewSet):
-    """ Org unit types API
+    """Org unit types API
 
     This API is open to anonymous users.
 
@@ -22,7 +22,10 @@ class OrgUnitTypeViewSet(ModelViewSet):
     def destroy(self, request, pk):
         t = OrgUnitType.objects.get(pk=pk)
         if t.orgunit_set.count() > 0:
-            return Response("You can't delete a type that still has org units", status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                "You can't delete a type that still has org units",
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
         return super(OrgUnitTypeViewSet, self).destroy(request, pk)
 
     def get_queryset(self):

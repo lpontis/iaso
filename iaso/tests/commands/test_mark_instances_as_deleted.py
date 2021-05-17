@@ -17,12 +17,18 @@ class InstancesAPITestCase(APITestCase):
         cls.jedi_council_endor = m.OrgUnit.objects.create(name="Endor Jedi Council")
 
         cls.project_1 = m.Project.objects.create(
-            name="Hydroponic gardens", app_id="stars.empire.agriculture.hydroponics", account=star_wars
+            name="Hydroponic gardens",
+            app_id="stars.empire.agriculture.hydroponics",
+            account=star_wars,
         )
 
-        cls.form_1 = m.Form.objects.create(name="Hydroponics study", period_type=m.MONTH, single_per_period=True)
+        cls.form_1 = m.Form.objects.create(
+            name="Hydroponics study", period_type=m.MONTH, single_per_period=True
+        )
 
-        cls.form_2 = m.Form.objects.create(name="Hydroponics interview", period_type=m.QUARTER, single_per_period=True)
+        cls.form_2 = m.Form.objects.create(
+            name="Hydroponics interview", period_type=m.QUARTER, single_per_period=True
+        )
 
         cls.instance_1 = cls.create_form_instance(
             form=cls.form_1, period="202001", org_unit=cls.jedi_council_endor, project=cls.project_1
@@ -41,7 +47,9 @@ class InstancesAPITestCase(APITestCase):
             name="Lightsaber mark3", app_id="stars.empire.lightsaber", account=star_wars
         )
         cls.project_2.unit_types.add(cls.jedi_council)
-        cls.form_3 = m.Form.objects.create(name="Land speeder study", period_type=m.QUARTER, single_per_period=False)
+        cls.form_3 = m.Form.objects.create(
+            name="Land speeder study", period_type=m.QUARTER, single_per_period=False
+        )
         cls.instance_4 = cls.create_form_instance(
             form=cls.form_3, period="2020Q3", org_unit=cls.jedi_council_endor, project=cls.project_2
         )
@@ -56,7 +64,9 @@ class InstancesAPITestCase(APITestCase):
 
         self.assertEqual(0, m.Instance.objects.filter(deleted=True).count())
 
-        management.call_command("mark_instances_as_deleted", self.project_1.id, stdout=StringIO(), force=True)
+        management.call_command(
+            "mark_instances_as_deleted", self.project_1.id, stdout=StringIO(), force=True
+        )
 
         self.assertEqual(3, m.Instance.objects.filter(deleted=True).count())
 

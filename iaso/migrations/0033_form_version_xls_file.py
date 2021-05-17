@@ -9,7 +9,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="formversion", name="xls_file", field=models.FileField(blank=True, null=True, upload_to="forms/")
+            model_name="formversion",
+            name="xls_file",
+            field=models.FileField(blank=True, null=True, upload_to="forms/"),
         ),
         migrations.AlterField(
             model_name="formversion",

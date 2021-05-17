@@ -52,21 +52,33 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="OrgUnitType",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("name", models.CharField(max_length=255)),
                 ("short_name", models.CharField(max_length=255)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
                     "sub_unit_types",
-                    models.ManyToManyField(blank=True, related_name="super_types", to="iaso.OrgUnitType"),
+                    models.ManyToManyField(
+                        blank=True, related_name="super_types", to="iaso.OrgUnitType"
+                    ),
                 ),
             ],
         ),
         migrations.CreateModel(
             name="FormVersion",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("file", models.FileField(blank=True, null=True, upload_to="forms/")),
                 ("version_id", models.TextField(blank=True, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -76,7 +88,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Form",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("form_id", models.TextField(blank=True, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
@@ -87,12 +104,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="OrgUnit",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("name", models.CharField(max_length=255)),
                 (
                     "aliases",
                     django.contrib.postgres.fields.ArrayField(
-                        base_field=django.contrib.postgres.fields.citext.CITextField(blank=True, max_length=255),
+                        base_field=django.contrib.postgres.fields.citext.CITextField(
+                            blank=True, max_length=255
+                        ),
                         blank=True,
                         null=True,
                         size=100,
@@ -113,8 +137,18 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("source_ref", models.TextField(blank=True, null=True)),
-                ("geom", django.contrib.gis.db.models.fields.PolygonField(blank=True, null=True, srid=4326)),
-                ("simplified_geom", django.contrib.gis.db.models.fields.PolygonField(blank=True, null=True, srid=4326)),
+                (
+                    "geom",
+                    django.contrib.gis.db.models.fields.PolygonField(
+                        blank=True, null=True, srid=4326
+                    ),
+                ),
+                (
+                    "simplified_geom",
+                    django.contrib.gis.db.models.fields.PolygonField(
+                        blank=True, null=True, srid=4326
+                    ),
+                ),
                 (
                     "geom_source",
                     models.TextField(
@@ -135,19 +169,31 @@ class Migration(migrations.Migration):
                 (
                     "org_unit_type",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="iaso.OrgUnitType"
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="iaso.OrgUnitType",
                     ),
                 ),
                 (
                     "parent",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="iaso.OrgUnit"
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="iaso.OrgUnit",
                     ),
                 ),
                 ("gps_source", models.TextField(blank=True, null=True)),
-                ("latitude", models.DecimalField(blank=True, decimal_places=8, max_digits=10, null=True)),
+                (
+                    "latitude",
+                    models.DecimalField(blank=True, decimal_places=8, max_digits=10, null=True),
+                ),
                 ("location", django.contrib.gis.db.models.fields.PointField(null=True, srid=4326)),
-                ("longitude", models.DecimalField(blank=True, decimal_places=8, max_digits=11, null=True)),
+                (
+                    "longitude",
+                    models.DecimalField(blank=True, decimal_places=8, max_digits=11, null=True),
+                ),
                 ("uuid", models.TextField(blank=True, null=True)),
                 ("custom", models.BooleanField(default=False)),
                 ("validated", models.BooleanField(default=True)),
@@ -156,7 +202,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Account",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("name", models.TextField(blank=True, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
@@ -166,7 +217,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Device",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("imei", models.CharField(blank=True, max_length=20, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
@@ -176,19 +232,39 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="DeviceOwnerShip",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("start", models.DateTimeField(auto_now_add=True)),
                 ("end", models.DateTimeField(auto_now_add=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("device", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="iaso.Device")),
-                ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "device",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="iaso.Device"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
             name="Project",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("name", models.TextField(blank=True, null=True)),
                 ("app_id", models.TextField(blank=True, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -196,14 +272,19 @@ class Migration(migrations.Migration):
                 (
                     "account",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to="iaso.Account"
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="iaso.Account",
                     ),
                 ),
                 ("forms", models.ManyToManyField(blank=True, to="iaso.Form")),
             ],
         ),
         migrations.AddField(
-            model_name="form", name="projects", field=models.ManyToManyField(blank=True, to="iaso.Project")
+            model_name="form",
+            name="projects",
+            field=models.ManyToManyField(blank=True, to="iaso.Project"),
         ),
         migrations.AddField(
             model_name="orgunittype",
@@ -213,11 +294,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Instance",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 (
                     "form",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to="iaso.Form"
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="iaso.Form",
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -228,7 +317,10 @@ class Migration(migrations.Migration):
                 (
                     "org_unit",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to="iaso.OrgUnit"
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="iaso.OrgUnit",
                     ),
                 ),
                 ("uuid", models.TextField(blank=True, null=True)),
@@ -238,17 +330,29 @@ class Migration(migrations.Migration):
                 (
                     "device",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to="iaso.Device"
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="iaso.Device",
                     ),
                 ),
             ],
         ),
-        migrations.AddField(model_name="form", name="device_field", field=models.TextField(blank=True, null=True)),
-        migrations.AddField(model_name="form", name="location_field", field=models.TextField(blank=True, null=True)),
+        migrations.AddField(
+            model_name="form", name="device_field", field=models.TextField(blank=True, null=True)
+        ),
+        migrations.AddField(
+            model_name="form", name="location_field", field=models.TextField(blank=True, null=True)
+        ),
         migrations.CreateModel(
             name="InstanceFile",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("name", models.TextField(blank=True, null=True)),
@@ -256,7 +360,10 @@ class Migration(migrations.Migration):
                 (
                     "instance",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to="iaso.Instance"
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="iaso.Instance",
                     ),
                 ),
             ],
@@ -264,7 +371,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="MatchingAlgorithm",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("name", models.TextField()),
                 ("description", models.TextField()),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -273,7 +385,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Link",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("validated", models.BooleanField(default=False)),
                 ("validation_date", models.DateTimeField(auto_now=True, null=True)),
                 ("similarity_score", models.SmallIntegerField(null=True)),
@@ -281,7 +398,9 @@ class Migration(migrations.Migration):
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
                     "algorithm",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="iaso.MatchingAlgorithm"),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="iaso.MatchingAlgorithm"
+                    ),
                 ),
                 (
                     "destination",
@@ -305,14 +424,21 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "validator",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+                    ),
                 ),
             ],
         ),
         migrations.CreateModel(
             name="DataSource",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("name", models.CharField(max_length=255)),
                 ("description", models.TextField(blank=True, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -322,19 +448,32 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="SourceVersion",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("number", models.IntegerField()),
                 ("description", models.TextField(blank=True, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("data_source", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="iaso.DataSource")),
+                (
+                    "data_source",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="iaso.DataSource"
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
             model_name="orgunit",
             name="version",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="iaso.SourceVersion"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="iaso.SourceVersion",
             ),
         ),
         migrations.AlterField(
@@ -366,12 +505,18 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AlterField(
-            model_name="orgunit", name="source_ref", field=models.TextField(blank=True, db_index=True, null=True)
+            model_name="orgunit",
+            name="source_ref",
+            field=models.TextField(blank=True, db_index=True, null=True),
         ),
         migrations.AlterField(
-            model_name="orgunit", name="uuid", field=models.TextField(blank=True, db_index=True, null=True)
+            model_name="orgunit",
+            name="uuid",
+            field=models.TextField(blank=True, db_index=True, null=True),
         ),
         migrations.AlterField(
-            model_name="orgunit", name="validated", field=models.BooleanField(db_index=True, default=True)
+            model_name="orgunit",
+            name="validated",
+            field=models.BooleanField(db_index=True, default=True),
         ),
     ]

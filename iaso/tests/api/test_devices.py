@@ -10,7 +10,9 @@ class DevicesAPITestCase(APITestCase):
     def setUpTestData(cls):
 
         wha = m.Account.objects.create(name="Worldwide Health Aid")
-        cls.john = cls.create_user_with_profile(username="johndoe", account=wha, permissions=["iaso_forms"])
+        cls.john = cls.create_user_with_profile(
+            username="johndoe", account=wha, permissions=["iaso_forms"]
+        )
         cls.jim = cls.create_user_with_profile(username="jimdoe", account=wha)
         project = m.Project.objects.create(name="Project 1", app_id="org.ghi.p1", account=wha)
         cls.device_1 = m.Device.objects.create(imei="AAABBBCCCDDD")
@@ -45,7 +47,9 @@ class DevicesAPITestCase(APITestCase):
         """GET /devices/ paginated happy path"""
 
         self.client.force_authenticate(self.john)
-        response = self.client.get("/api/devices/?limit=1&page=1", headers={"Content-Type": "application/json"})
+        response = self.client.get(
+            "/api/devices/?limit=1&page=1", headers={"Content-Type": "application/json"}
+        )
         self.assertJSONResponse(response, 200)
 
         response_data = response.json()
@@ -65,7 +69,7 @@ class DevicesAPITestCase(APITestCase):
 
         response_data = response.json()
         self.assertValidDeviceData(response_data)
-        self.assertEquals(self.device_1.imei, response_data['imei'])
+        self.assertEquals(self.device_1.imei, response_data["imei"])
 
     def assertValidDeviceData(self, device_data: typing.Mapping):
         self.assertHasField(device_data, "id", int)
@@ -75,10 +79,14 @@ class DevicesAPITestCase(APITestCase):
         self.assertHasField(device_data, "created_at", float)
         self.assertHasField(device_data, "updated_at", float)
 
-
-    def assertValidDeviceListData(self, list_data: typing.Mapping, expected_length: int, paginated: bool = False):
+    def assertValidDeviceListData(
+        self, list_data: typing.Mapping, expected_length: int, paginated: bool = False
+    ):
         self.assertValidListData(
-            list_data=list_data, expected_length=expected_length, results_key="devices", paginated=paginated
+            list_data=list_data,
+            expected_length=expected_length,
+            results_key="devices",
+            paginated=paginated,
         )
 
         for project_data in list_data["devices"]:

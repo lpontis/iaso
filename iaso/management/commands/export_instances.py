@@ -18,8 +18,10 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--user", type=str, help="username", required=True)
         parser.add_argument("--page_size", type=int, help="page_size")
-        parser.add_argument("--continue_on_error",  action="store_true", help="continue on error")
-        parser.add_argument("--formids", type=str, help="db id comma seperated of the forms", required=True)
+        parser.add_argument("--continue_on_error", action="store_true", help="continue on error")
+        parser.add_argument(
+            "--formids", type=str, help="db id comma seperated of the forms", required=True
+        )
 
     def handle(self, *args, **options):
         continue_on_error = options.get("continue_on_error")
@@ -33,16 +35,33 @@ class Command(BaseCommand):
         ]
         page_size = options.get("page_size", 25)
         try:
-            self.log("Prepare export of instances to dhis2", options["formids"], f"({form_ids})", "on behalf of", user)
+            self.log(
+                "Prepare export of instances to dhis2",
+                options["formids"],
+                f"({form_ids})",
+                "on behalf of",
+                user,
+            )
             export_request = ExportRequestBuilder().build_export_request(
                 filters={"form_ids": ",".join(form_ids)}, launcher=user
             )
 
-            print("export_request => ", export_request.id, export_request.status, export_request.params)
+            print(
+                "export_request => ",
+                export_request.id,
+                export_request.status,
+                export_request.params,
+            )
 
-            self.log("Exporting", export_request.exportstatus_set.count(), "instances", timezone.now())
-            DataValueExporter().export_instances(export_request, page_size=page_size, continue_on_error=continue_on_error)
-            self.log("Exported", export_request.exportstatus_set.count(), "instances", timezone.now())
+            self.log(
+                "Exporting", export_request.exportstatus_set.count(), "instances", timezone.now()
+            )
+            DataValueExporter().export_instances(
+                export_request, page_size=page_size, continue_on_error=continue_on_error
+            )
+            self.log(
+                "Exported", export_request.exportstatus_set.count(), "instances", timezone.now()
+            )
         except NothingToExportError as error:
             self.log("nothing to export : ", error)
 

@@ -9,7 +9,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="form", name="projects", field=models.ManyToManyField(blank=True, to="iaso.Project")
+            model_name="form",
+            name="projects",
+            field=models.ManyToManyField(blank=True, to="iaso.Project"),
         ),
         migrations.AddField(
             model_name="orgunittype",

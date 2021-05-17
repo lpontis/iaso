@@ -40,7 +40,7 @@ from .api.enketo import (
     EnketoSubmissionAPIView,
     enketo_form_download,
     enketo_public_launch,
-    enketo_public_create_url
+    enketo_public_create_url,
 )
 from .api.mappings import MappingsViewSet
 from .api.mapping_versions import MappingVersionsViewSet
@@ -97,8 +97,16 @@ urlpatterns = [
         name="enketo_public_launch",
     ),
     url(r"^enketo/create/$", view=enketo_create_url, name="enketo-create-url"),
-    url(r"^enketo/public_create_url/$", view=enketo_public_create_url, name="enketo_public_create_url"),
-    url(r"^enketo/edit/(?P<instance_uuid>[a-z0-9-]+)/$", view=enketo_edit_url, name="enketo-edit-url"),
+    url(
+        r"^enketo/public_create_url/$",
+        view=enketo_public_create_url,
+        name="enketo_public_create_url",
+    ),
+    url(
+        r"^enketo/edit/(?P<instance_uuid>[a-z0-9-]+)/$",
+        view=enketo_edit_url,
+        name="enketo-edit-url",
+    ),
     url(r"^enketo/formList$", view=enketo_form_list, name="enketo-form-list"),
     url(r"^enketo/formDownload/$", view=enketo_form_download, name="enketo_form_download"),
     url(r"^enketo/submission$", view=EnketoSubmissionAPIView.as_view(), name="enketo-submission"),
@@ -116,7 +124,9 @@ def append_datasources_subresource(viewset, resource_name, urlpatterns):
     )
     urlpatterns.append(
         url(
-            r"^datasources/(?P<datasource_id>[a-z0-9-]+)/" + resource_name + r"\.(?P<format>[a-z0-9]+)/?$",
+            r"^datasources/(?P<datasource_id>[a-z0-9-]+)/"
+            + resource_name
+            + r"\.(?P<format>[a-z0-9]+)/?$",
             view=viewset.as_view({"get": "list"}),
             name=resource_name,
         )
@@ -131,7 +141,9 @@ urlpatterns = urlpatterns + [
 for dhis2_resource in DHIS2_VIEWSETS:
     append_datasources_subresource(dhis2_resource, dhis2_resource.resource, urlpatterns)
 
-append_datasources_subresource(HesabuDescriptorsViewSet, HesabuDescriptorsViewSet.resource, urlpatterns)
+append_datasources_subresource(
+    HesabuDescriptorsViewSet, HesabuDescriptorsViewSet.resource, urlpatterns
+)
 
 
 ##########   creating algorithms in the database so that they will appear in the API  ##########
@@ -142,7 +154,9 @@ try:
         full_name = "iaso.matching." + pkg.name
         algo_module = importlib.import_module(full_name)
         algo = algo_module.Algorithm()
-        MatchingAlgorithm.objects.get_or_create(name=full_name, defaults={"description": algo.description})
+        MatchingAlgorithm.objects.get_or_create(
+            name=full_name, defaults={"description": algo.description}
+        )
 
 except Exception as e:
     print("!! failed to create MatchingAlgorithm based on code, probably in manage.py migrate", e)

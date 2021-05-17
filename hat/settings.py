@@ -97,7 +97,9 @@ if os.path.isdir(AWS_LOG_FOLDER):
             logger["handlers"].append("file")
         LOGGING["loggers"]["hat"]["level"] = "DEBUG"
     else:
-        print(f"WARNING: we seem to be running on AWS but {AWS_LOG_FOLDER} is not writable, check ebextensions")
+        print(
+            f"WARNING: we seem to be running on AWS but {AWS_LOG_FOLDER} is not writable, check ebextensions"
+        )
 
 # Application definition
 
@@ -125,7 +127,7 @@ INSTALLED_APPS = [
 ]
 
 if PLUGIN_POLIO_ENABLED:
-    INSTALLED_APPS.append('plugins.polio')
+    INSTALLED_APPS.append("plugins.polio")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -145,7 +147,7 @@ ROOT_URLCONF = "hat.urls"
 # Allow cors for all origins but only for the sync endpoint
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True
-#CORS_URLS_REGEX = r"^/sync/.*$"
+# CORS_URLS_REGEX = r"^/sync/.*$"
 
 
 TEMPLATES = [
@@ -240,7 +242,10 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {"anon": "200/day"},
 }
 
-SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME": timedelta(days=3650), "REFRESH_TOKEN_LIFETIME": timedelta(days=3651)}
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=3650),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=3651),
+}
 
 AWS_S3_REGION_NAME = "eu-central-1"
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
@@ -259,7 +264,9 @@ if USE_S3:
     STATIC_LOCATION = "iasostatics"
     STATICFILES_STORAGE = "iaso.storage.StaticStorage"
     STATIC_URL = "https://%s.s3.amazonaws.com/%s/" % (AWS_STORAGE_BUCKET_NAME, STATIC_LOCATION)
-    MEDIA_URL = "https://%s.s3.amazonaws.com/" % AWS_STORAGE_BUCKET_NAME  # subdirectories will depend on field
+    MEDIA_URL = (
+        "https://%s.s3.amazonaws.com/" % AWS_STORAGE_BUCKET_NAME
+    )  # subdirectories will depend on field
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 else:
     MEDIA_URL = "/media/"
@@ -267,7 +274,10 @@ else:
     STATIC_ROOT = os.path.join(BASE_DIR, "static")
     MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "iaso/static"), os.path.join(BASE_DIR, "hat/assets/webpack"), )
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "iaso/static"),
+    os.path.join(BASE_DIR, "hat/assets/webpack"),
+)
 
 # Javascript/CSS Files:
 WEBPACK_LOADER = {

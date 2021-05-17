@@ -9,12 +9,21 @@ class Migration(migrations.Migration):
     dependencies = [("iaso", "0034_form_version_upload_to")]
 
     operations = [
-        migrations.AddField(model_name="form", name="periods_after_allowed", field=models.IntegerField(default=3)),
-        migrations.AddField(model_name="form", name="periods_before_allowed", field=models.IntegerField(default=3)),
-        migrations.AlterField(
-            model_name="form", name="name", field=models.TextField(default="Untitled"), preserve_default=False
+        migrations.AddField(
+            model_name="form", name="periods_after_allowed", field=models.IntegerField(default=3)
         ),
-        migrations.AlterField(model_name="form", name="single_per_period", field=models.BooleanField(default=False)),
+        migrations.AddField(
+            model_name="form", name="periods_before_allowed", field=models.IntegerField(default=3)
+        ),
+        migrations.AlterField(
+            model_name="form",
+            name="name",
+            field=models.TextField(default="Untitled"),
+            preserve_default=False,
+        ),
+        migrations.AlterField(
+            model_name="form", name="single_per_period", field=models.BooleanField(default=False)
+        ),
         migrations.AlterField(
             model_name="instance",
             name="form",

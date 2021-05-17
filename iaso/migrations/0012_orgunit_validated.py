@@ -7,4 +7,8 @@ class Migration(migrations.Migration):
 
     dependencies = [("iaso", "0011_orgunit_custom")]
 
-    operations = [migrations.AddField(model_name="orgunit", name="validated", field=models.BooleanField(default=True))]
+    operations = [
+        migrations.AddField(
+            model_name="orgunit", name="validated", field=models.BooleanField(default=True)
+        )
+    ]

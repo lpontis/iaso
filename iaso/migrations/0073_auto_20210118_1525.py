@@ -14,12 +14,16 @@ class Migration(migrations.Migration):
             name="params",
             field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True),
         ),
-        migrations.AddField(model_name="task", name="started_at", field=models.DateTimeField(blank=True, null=True)),
+        migrations.AddField(
+            model_name="task", name="started_at", field=models.DateTimeField(blank=True, null=True)
+        ),
         migrations.AddField(
             model_name="task",
             name="task_name",
             field=models.CharField(default="", max_length=40),
             preserve_default=False,
         ),
-        migrations.AlterField(model_name="task", name="end_value", field=models.IntegerField(default=0)),
+        migrations.AlterField(
+            model_name="task", name="end_value", field=models.IntegerField(default=0)
+        ),
     ]

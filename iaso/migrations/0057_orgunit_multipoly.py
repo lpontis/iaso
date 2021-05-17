@@ -24,12 +24,15 @@ class Migration(migrations.Migration):
             name="catchment",
             field=django.contrib.gis.db.models.fields.GeometryField(null=True, srid=4326),
         ),
-        migrations.RunSQL(sql="update iaso_orgunit set geom=st_multi(geom) where geom is not null", reverse_sql=""),
+        migrations.RunSQL(
+            sql="update iaso_orgunit set geom=st_multi(geom) where geom is not null", reverse_sql=""
+        ),
         migrations.RunSQL(
             sql="update iaso_orgunit set simplified_geom=st_multi(simplified_geom) where simplified_geom is not null",
             reverse_sql="",
         ),
         migrations.RunSQL(
-            sql="update iaso_orgunit set catchment=st_multi(catchment) where catchment is not null", reverse_sql=""
+            sql="update iaso_orgunit set catchment=st_multi(catchment) where catchment is not null",
+            reverse_sql="",
         ),
     ]

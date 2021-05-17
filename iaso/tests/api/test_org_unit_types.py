@@ -13,7 +13,9 @@ class OrgUnitTypesAPITestCase(APITestCase):
         cls.ead = m.Project.objects.create(name="End All Diseases", account=ghi)
         cls.esd = m.Project.objects.create(name="End Some Diseases", account=wha)
 
-        cls.jane = cls.create_user_with_profile(username="janedoe", account=ghi, permissions=["iaso_forms"])
+        cls.jane = cls.create_user_with_profile(
+            username="janedoe", account=ghi, permissions=["iaso_forms"]
+        )
         cls.org_unit_type_1 = m.OrgUnitType.objects.create(name="Plop", short_name="Pl")
         cls.org_unit_type_2 = m.OrgUnitType.objects.create(name="Boom", short_name="Bo")
         cls.ead.unit_types.set([cls.org_unit_type_1, cls.org_unit_type_2])
@@ -176,12 +178,19 @@ class OrgUnitTypesAPITestCase(APITestCase):
         """DELETE /orgunittypes/<org_unit_type_id>: 200 OK"""
 
         self.client.force_authenticate(self.jane)
-        response = self.client.delete(f"/api/orgunittypes/{self.org_unit_type_1.id}/", format="json")
+        response = self.client.delete(
+            f"/api/orgunittypes/{self.org_unit_type_1.id}/", format="json"
+        )
         self.assertJSONResponse(response, 204)
 
-    def assertValidOrgUnitTypeListData(self, list_data: typing.Mapping, expected_length: int, paginated: bool = False):
+    def assertValidOrgUnitTypeListData(
+        self, list_data: typing.Mapping, expected_length: int, paginated: bool = False
+    ):
         self.assertValidListData(
-            list_data=list_data, expected_length=expected_length, results_key="orgUnitTypes", paginated=paginated
+            list_data=list_data,
+            expected_length=expected_length,
+            results_key="orgUnitTypes",
+            paginated=paginated,
         )
 
         for org_unit_type_data in list_data["orgUnitTypes"]:

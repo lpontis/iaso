@@ -80,9 +80,7 @@ class SetupAccountApiTestCase(APITestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(m.Account.objects.filter(name="unittest_account").count(), 1)
-        self.assertEqual(
-            m.Profile.objects.filter(user__username="unittest_username").count(), 1
-        )
+        self.assertEqual(m.Profile.objects.filter(user__username="unittest_username").count(), 1)
         self.assertEqual(m.User.objects.filter(username="unittest_username").count(), 1)
 
     def test_setupaccount_create_with_first_last_name(self):
@@ -98,7 +96,5 @@ class SetupAccountApiTestCase(APITestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(m.Account.objects.filter(name="unittest_account").count(), 1)
-        self.assertEqual(
-            m.Profile.objects.filter(user__username="unittest_username").count(), 1
-        )
+        self.assertEqual(m.Profile.objects.filter(user__username="unittest_username").count(), 1)
         self.assertEqual(m.User.objects.filter(username="unittest_username").count(), 1)

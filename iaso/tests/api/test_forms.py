@@ -16,8 +16,12 @@ class FormsAPITestCase(APITestCase):
         star_wars = m.Account.objects.create(name="Star Wars")
         marvel = m.Account.objects.create(name="Marvel")
 
-        cls.yoda = cls.create_user_with_profile(username="yoda", account=star_wars, permissions=["iaso_forms"])
-        cls.raccoon = cls.create_user_with_profile(username="raccoon", account=marvel, permissions=["iaso_forms"])
+        cls.yoda = cls.create_user_with_profile(
+            username="yoda", account=star_wars, permissions=["iaso_forms"]
+        )
+        cls.raccoon = cls.create_user_with_profile(
+            username="raccoon", account=marvel, permissions=["iaso_forms"]
+        )
         cls.iron_man = cls.create_user_with_profile(username="iron_man", account=marvel)
 
         cls.jedi_council = m.OrgUnitType.objects.create(name="Jedi Council", short_name="Cnc")
@@ -25,11 +29,15 @@ class FormsAPITestCase(APITestCase):
         cls.sith_guild = m.OrgUnitType.objects.create(name="Sith guild", short_name="Sith")
 
         cls.project_1 = m.Project.objects.create(
-            name="Hydroponic gardens", app_id="stars.empire.agriculture.hydroponics", account=star_wars
+            name="Hydroponic gardens",
+            app_id="stars.empire.agriculture.hydroponics",
+            account=star_wars,
         )
 
         cls.project_2 = m.Project.objects.create(
-            name="New Land Speeder concept", app_id="stars.empire.agriculture.land_speeder", account=star_wars
+            name="New Land Speeder concept",
+            app_id="stars.empire.agriculture.land_speeder",
+            account=star_wars,
         )
 
         cls.form_1 = m.Form.objects.create(name="Hydroponics study", created_at=cls.now)
@@ -43,13 +51,16 @@ class FormsAPITestCase(APITestCase):
             single_per_period=True,
             created_at=cls.now,
         )
-        cls.form_2.form_versions.create(file=cls.create_file_mock(name="testf1.xml"), version_id="2020022401")
+        cls.form_2.form_versions.create(
+            file=cls.create_file_mock(name="testf1.xml"), version_id="2020022401"
+        )
         cls.form_2.org_unit_types.add(cls.jedi_council)
         cls.form_2.org_unit_types.add(cls.jedi_academy)
 
         cls.form_2.instances.create(file=cls.create_file_mock(name="testi1.xml"))
         cls.form_2.instances.create(
-            file=cls.create_file_mock(name="testi2.xml"), device=m.Device.objects.create(test_device=True)
+            file=cls.create_file_mock(name="testi2.xml"),
+            device=m.Device.objects.create(test_device=True),
         )
         cls.form_2.save()
 
@@ -108,7 +119,9 @@ class FormsAPITestCase(APITestCase):
 
         date_to = self.now.strftime("%Y-%m-%d")
         self.client.force_authenticate(self.yoda)
-        response = self.client.get(f"/api/forms/?date_to={date_to}", headers={"Content-Type": "application/json"})
+        response = self.client.get(
+            f"/api/forms/?date_to={date_to}", headers={"Content-Type": "application/json"}
+        )
         self.assertJSONResponse(response, 200)
         self.assertValidFormListData(response.json(), 2)
 
@@ -117,7 +130,9 @@ class FormsAPITestCase(APITestCase):
         """GET /forms/ paginated happy path"""
 
         self.client.force_authenticate(self.yoda)
-        response = self.client.get("/api/forms/?limit=1&page=1", headers={"Content-Type": "application/json"})
+        response = self.client.get(
+            "/api/forms/?limit=1&page=1", headers={"Content-Type": "application/json"}
+        )
         self.assertJSONResponse(response, 200)
 
         response_data = response.json()
@@ -132,15 +147,21 @@ class FormsAPITestCase(APITestCase):
         """GET /forms/ csv happy path"""
 
         self.client.force_authenticate(self.yoda)
-        response = self.client.get("/api/forms/?csv=1", headers={"Content-Type": "application/json"})
-        self.assertFileResponse(response, 200, "text/csv", expected_attachment_filename="forms.csv", streaming=True)
+        response = self.client.get(
+            "/api/forms/?csv=1", headers={"Content-Type": "application/json"}
+        )
+        self.assertFileResponse(
+            response, 200, "text/csv", expected_attachment_filename="forms.csv", streaming=True
+        )
 
     @tag("iaso_only")
     def test_forms_list_xslx(self):
         """GET /forms/ xslx happy path"""
 
         self.client.force_authenticate(self.yoda)
-        response = self.client.get("/api/forms/?xlsx=1", headers={"Content-Type": "application/json"})
+        response = self.client.get(
+            "/api/forms/?xlsx=1", headers={"Content-Type": "application/json"}
+        )
         self.assertFileResponse(
             response,
             200,
@@ -442,9 +463,14 @@ class FormsAPITestCase(APITestCase):
         self.assertJSONResponse(response, 403)
 
     # noinspection DuplicatedCode
-    def assertValidFormListData(self, list_data: typing.Mapping, expected_length: int, paginated: bool = False):
+    def assertValidFormListData(
+        self, list_data: typing.Mapping, expected_length: int, paginated: bool = False
+    ):
         self.assertValidListData(
-            list_data=list_data, expected_length=expected_length, results_key="forms", paginated=paginated
+            list_data=list_data,
+            expected_length=expected_length,
+            results_key="forms",
+            paginated=paginated,
         )
 
         for form_data in list_data["forms"]:

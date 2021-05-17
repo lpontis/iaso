@@ -46,21 +46,35 @@ class ValueFormatterTests(TestCase):
             ("LETTER", "", ""),
             ("LETTER", "A", "A"),
             ("COORDINATE", "", None),
-            ("COORDINATE", "50.67630919162184 4.38517696224153 151.0 18.0", "[4.38517696224153,50.67630919162184]"),
+            (
+                "COORDINATE",
+                "50.67630919162184 4.38517696224153 151.0 18.0",
+                "[4.38517696224153,50.67630919162184]",
+            ),
             ("ORGANISATION_UNIT", "SDFJKLZ456", "resolved-SDFJKLZ456"),
         )
 
         for testcase in testcases:
             self.assertEquals(
-                value_formatter.format_value(buid_de(testcase[0]), testcase[1], orgunit_resolver), testcase[2], testcase
+                value_formatter.format_value(buid_de(testcase[0]), testcase[1], orgunit_resolver),
+                testcase[2],
+                testcase,
             )
 
     def test_formats_options_with_odk_mapping(self):
         de = buid_de(
-            "TEXT", {"options": [{"code": "HIV prevention", "odk": "1"}, {"code": "Malaria preventation", "odk": "20"}]}
+            "TEXT",
+            {
+                "options": [
+                    {"code": "HIV prevention", "odk": "1"},
+                    {"code": "Malaria preventation", "odk": "20"},
+                ]
+            },
         )
         self.assertEquals(value_formatter.format_value(de, "1", orgunit_resolver), "HIV prevention")
-        self.assertEquals(value_formatter.format_value(de, "20", orgunit_resolver), "Malaria preventation")
+        self.assertEquals(
+            value_formatter.format_value(de, "20", orgunit_resolver), "Malaria preventation"
+        )
         self.assertEquals(value_formatter.format_value(de, "", orgunit_resolver), None)
 
         with self.assertRaises(Exception) as context:
@@ -72,10 +86,15 @@ class ValueFormatterTests(TestCase):
         )
 
     def test_formats_options_with_only_codes(self):
-        de = buid_de("TEXT", {"options": [{"code": "HIV prevention"}, {"code": "Malaria preventation"}]})
-        self.assertEquals(value_formatter.format_value(de, "HIV prevention", orgunit_resolver), "HIV prevention")
+        de = buid_de(
+            "TEXT", {"options": [{"code": "HIV prevention"}, {"code": "Malaria preventation"}]}
+        )
         self.assertEquals(
-            value_formatter.format_value(de, "Malaria preventation", orgunit_resolver), "Malaria preventation"
+            value_formatter.format_value(de, "HIV prevention", orgunit_resolver), "HIV prevention"
+        )
+        self.assertEquals(
+            value_formatter.format_value(de, "Malaria preventation", orgunit_resolver),
+            "Malaria preventation",
         )
         self.assertEquals(value_formatter.format_value(de, "", orgunit_resolver), None)
 
@@ -101,9 +120,18 @@ class ValueFormatterTests(TestCase):
     def test_fail_fast_on_bad_string_value(self):
 
         testcases = (
-            ("INTEGER", "(\"Bad value for int 'a bad string'\", {'id': 'dataElementId', 'valueType': 'INTEGER'})"),
-            ("NUMBER", "(\"Bad value for float 'a bad string'\", {'id': 'dataElementId', 'valueType': 'NUMBER'})"),
-            ("BOOLEAN", "(\"Bad value for boolean 'a bad string'\", {'id': 'dataElementId', 'valueType': 'BOOLEAN'})"),
+            (
+                "INTEGER",
+                "(\"Bad value for int 'a bad string'\", {'id': 'dataElementId', 'valueType': 'INTEGER'})",
+            ),
+            (
+                "NUMBER",
+                "(\"Bad value for float 'a bad string'\", {'id': 'dataElementId', 'valueType': 'NUMBER'})",
+            ),
+            (
+                "BOOLEAN",
+                "(\"Bad value for boolean 'a bad string'\", {'id': 'dataElementId', 'valueType': 'BOOLEAN'})",
+            ),
         )
 
         for testcase in testcases:

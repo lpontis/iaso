@@ -7,7 +7,9 @@ def fix_period_before_after(apps, schema_editor):
     # noinspection PyPep8Naming
     Form = apps.get_model("iaso", "Form")
 
-    for form in Form.objects.filter(period_type=None).exclude(periods_before_allowed=0, periods_after_allowed=0):
+    for form in Form.objects.filter(period_type=None).exclude(
+        periods_before_allowed=0, periods_after_allowed=0
+    ):
         form.periods_before_allowed = 0
         form.periods_after_allowed = 0
         form.save()
@@ -23,11 +25,20 @@ class Migration(migrations.Migration):
             name="period_type",
             field=models.TextField(
                 blank=True,
-                choices=[("MONTH", "Month"), ("QUARTER", "Quarter"), ("SIX_MONTH", "Six-month"), ("YEAR", "Year")],
+                choices=[
+                    ("MONTH", "Month"),
+                    ("QUARTER", "Quarter"),
+                    ("SIX_MONTH", "Six-month"),
+                    ("YEAR", "Year"),
+                ],
                 null=True,
             ),
         ),
-        migrations.AlterField(model_name="form", name="periods_after_allowed", field=models.IntegerField(default=0)),
-        migrations.AlterField(model_name="form", name="periods_before_allowed", field=models.IntegerField(default=0)),
+        migrations.AlterField(
+            model_name="form", name="periods_after_allowed", field=models.IntegerField(default=0)
+        ),
+        migrations.AlterField(
+            model_name="form", name="periods_before_allowed", field=models.IntegerField(default=0)
+        ),
         migrations.RunPython(fix_period_before_after, reverse_code=migrations.RunPython.noop),
     ]

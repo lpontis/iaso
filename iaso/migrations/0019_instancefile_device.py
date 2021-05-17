@@ -13,7 +13,10 @@ class Migration(migrations.Migration):
             model_name="instancefile",
             name="device",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to="iaso.Device"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                to="iaso.Device",
             ),
         )
     ]

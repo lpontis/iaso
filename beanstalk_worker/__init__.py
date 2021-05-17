@@ -15,7 +15,9 @@ def task(task_name=""):
         def wrapper(*args, **kwargs):
             from iaso.models.base import Task, RUNNING, QUEUED, ERRORED, KilledException
 
-            immediate = kwargs.pop("_immediate", False)  # if true, we need to run the task now, we are a worker
+            immediate = kwargs.pop(
+                "_immediate", False
+            )  # if true, we need to run the task now, we are a worker
             if immediate:
                 the_task = kwargs.pop("task")
                 if (
@@ -30,7 +32,11 @@ def task(task_name=""):
                 except Exception as e:
                     the_task.status = ERRORED
                     the_task.ended_at = timezone.now()
-                    the_task.result = {"result": ERRORED, "message": str(e), "stack_trace": traceback.format_exc()}
+                    the_task.result = {
+                        "result": ERRORED,
+                        "message": str(e),
+                        "stack_trace": traceback.format_exc(),
+                    }
                     the_task.save()
                 return the_task
             else:  # enqueue the task
@@ -45,7 +51,9 @@ def task(task_name=""):
                 task.params = {"args": args, "kwargs": kwargs, "task_id": task.id}
                 task.save()  # need to save twice because the task.id is in the args
 
-                task.queue_answer = task_service.enqueue(func.__module__, func.__name__, args, kwargs, task_id=task.id)
+                task.queue_answer = task_service.enqueue(
+                    func.__module__, func.__name__, args, kwargs, task_id=task.id
+                )
                 task.save()
 
                 return task

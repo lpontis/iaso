@@ -8,7 +8,7 @@ from iaso.models import DataSource
 
 
 class HesabuDescriptorsViewSet(viewsets.ViewSet):
-    """ Hesabu descriptors API
+    """Hesabu descriptors API
 
     This API is restricted to authenticated users (no specific permission check)
 
@@ -27,9 +27,17 @@ class HesabuDescriptorsViewSet(viewsets.ViewSet):
         credentials = data_source.credentials
 
         if not credentials:
-            return Response({"error": "no credentials configured"}, status=status.HTTP_501_NOT_IMPLEMENTED)
+            return Response(
+                {"error": "no credentials configured"}, status=status.HTTP_501_NOT_IMPLEMENTED
+            )
 
-        return Response({"hesabudescriptors": [load_fixture_response("fixtures/hesabu.dhis2.fbrcameroun.org.json")]})
+        return Response(
+            {
+                "hesabudescriptors": [
+                    load_fixture_response("fixtures/hesabu.dhis2.fbrcameroun.org.json")
+                ]
+            }
+        )
 
 
 def load_fixture_response(filename):

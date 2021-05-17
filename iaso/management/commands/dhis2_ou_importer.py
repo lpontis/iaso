@@ -40,13 +40,21 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--dhis2_url", type=str, help="Dhis2 url to import from (without user/password)", required=False
+            "--dhis2_url",
+            type=str,
+            help="Dhis2 url to import from (without user/password)",
+            required=False,
         )
         parser.add_argument("--dhis2_user", type=str, help="dhis2 user name", required=False)
-        parser.add_argument("--dhis2_password", type=str, help="dhis2 password of the dhis2_user", required=False)
+        parser.add_argument(
+            "--dhis2_password", type=str, help="dhis2 password of the dhis2_user", required=False
+        )
 
         parser.add_argument(
-            "--org_unit_type_csv_file", type=str, help="Path to the org unit types csv file", required=False
+            "--org_unit_type_csv_file",
+            type=str,
+            help="Path to the org unit types csv file",
+            required=False,
         )
         parser.add_argument(
             "--source_name",
@@ -55,19 +63,30 @@ class Command(BaseCommand):
             required=True,
         )
         parser.add_argument(
-            "--version_number", type=int, help="An integer version number for the new version", required=True
+            "--version_number",
+            type=int,
+            help="An integer version number for the new version",
+            required=True,
         )
         parser.add_argument(
-            "-f", "--force", action="store_true", help="Force the deletion of the pyramid snapshot prior importing"
+            "-f",
+            "--force",
+            action="store_true",
+            help="Force the deletion of the pyramid snapshot prior importing",
         )
-        parser.add_argument("--validate", action="store_true", help="Mark all the newly imported units as validated")
+        parser.add_argument(
+            "--validate", action="store_true", help="Mark all the newly imported units as validated"
+        )
         parser.add_argument(
             "--continue_on_error",
             action="store_true",
             help="Continue import even if an error occurred for one org unit",
         )
         parser.add_argument(
-            "--page-size", type=int, default=500, help="Continue import even if an error occurred for one org unit"
+            "--page-size",
+            type=int,
+            default=500,
+            help="Continue import even if an error occurred for one org unit",
         )
 
     def get_group(self, dhis2_group, group_dict, source_version):
@@ -111,7 +130,9 @@ class Command(BaseCommand):
     def get_api(self, options):
         from dhis2 import Api
 
-        api = Api(options.get("dhis2_url"), options.get("dhis2_user"), options.get("dhis2_password"))
+        api = Api(
+            options.get("dhis2_url"), options.get("dhis2_user"), options.get("dhis2_password")
+        )
 
         return api
 
@@ -122,7 +143,9 @@ class Command(BaseCommand):
         for page in api.get_paged(
             "organisationUnits",
             page_size=options.get("page_size", 500),
-            params={"fields": "id,name,path,coordinates,geometry,parent,organisationUnitGroups[id,name]"},
+            params={
+                "fields": "id,name,path,coordinates,geometry,parent,organisationUnitGroups[id,name]"
+            },
         ):
 
             orgunits.extend(page["organisationUnits"])
@@ -164,13 +187,17 @@ class Command(BaseCommand):
                     j = json.loads(coordinates)
                     org_unit.geom = MultiPolygon(Polygon(j[0]))
                 except Exception as bad_polygon:
-                    self.iaso_logger.error("failed at importing POLYGON", coordinates, bad_polygon, row)
+                    self.iaso_logger.error(
+                        "failed at importing POLYGON", coordinates, bad_polygon, row
+                    )
             if feature_type == "MULTI_POLYGON" and coordinates:
                 try:
                     j = json.loads(coordinates)
                     org_unit.geom = MultiPolygon(*[Polygon(i) for i in j[0]])
                 except Exception as bad_polygon:
-                    self.iaso_logger.error("failed at importing POLYGON", coordinates, bad_polygon, row)
+                    self.iaso_logger.error(
+                        "failed at importing POLYGON", coordinates, bad_polygon, row
+                    )
 
             org_unit.simplified_geom = org_unit.geom
 
@@ -197,7 +224,9 @@ class Command(BaseCommand):
                 org_unit.simplified_geom = org_unit.geom
 
             except Exception as bad_coord:
-                self.iaso_logger.error("failed at importing ", feature_type, coordinates, bad_coord, row)
+                self.iaso_logger.error(
+                    "failed at importing ", feature_type, coordinates, bad_coord, row
+                )
 
     def map_parent(self, row, org_unit, unit_dict):
         parent_id = None
@@ -235,17 +264,23 @@ class Command(BaseCommand):
     def print_stats(self, unit_dict, unknown_unit_type):
         self.iaso_logger.info("** Stats ")
         self.iaso_logger.info("orgunits\t", len(unit_dict))
-        self.iaso_logger.info("orgunits with point\t", len([p for p in unit_dict.values() if p.location]))
-        self.iaso_logger.info("areas with polygon\t", len([p for p in unit_dict.values() if p.geom]))
         self.iaso_logger.info(
-            "orgunits with unknown type\t", len([p for p in unit_dict.values() if p.org_unit_type == unknown_unit_type])
+            "orgunits with point\t", len([p for p in unit_dict.values() if p.location])
+        )
+        self.iaso_logger.info(
+            "areas with polygon\t", len([p for p in unit_dict.values() if p.geom])
+        )
+        self.iaso_logger.info(
+            "orgunits with unknown type\t",
+            len([p for p in unit_dict.values() if p.org_unit_type == unknown_unit_type]),
         )
 
     def load_groupsets(self, options, version, group_dict):
         group_set_dict = {}
         api = self.get_api(options)
         dhis2_group_sets = api.get(
-            "organisationUnitGroupSets", params={"paging": "false", "fields": "id,name,organisationUnitGroups[id,name]"}
+            "organisationUnitGroupSets",
+            params={"paging": "false", "fields": "id,name,organisationUnitGroups[id,name]"},
         )
         dhis2_group_sets = dhis2_group_sets.json()["organisationUnitGroupSets"]
 
@@ -301,11 +336,15 @@ class Command(BaseCommand):
                 }
 
             else:
-                iaso_logger.info("No credentials exist for this source, please provide them on the command line")
+                iaso_logger.info(
+                    "No credentials exist for this source, please provide them on the command line"
+                )
                 return
         orgunits = self.fetch_orgunits(connection_config)
 
-        version, _created = SourceVersion.objects.get_or_create(number=version_number, data_source=source)
+        version, _created = SourceVersion.objects.get_or_create(
+            number=version_number, data_source=source
+        )
 
         version_count = OrgUnit.objects.filter(version=version).count()
         iaso_logger.info("Orgunits in db for source and version ", source, version, version_count)
@@ -323,7 +362,9 @@ class Command(BaseCommand):
         if org_unit_type_file_name:
             type_dict = self.parse_type_dict(org_unit_type_file_name)
 
-        unknown_unit_type, _created = OrgUnitType.objects.get_or_create(name="%s-%s" % (source_name, "Unknown"))
+        unknown_unit_type, _created = OrgUnitType.objects.get_or_create(
+            name="%s-%s" % (source_name, "Unknown")
+        )
         group_dict = {}
 
         index = 0
@@ -336,7 +377,9 @@ class Command(BaseCommand):
                 org_unit.sub_source = source_name
                 org_unit.version = version
                 org_unit.source_ref = row["id"].strip()
-                org_unit.validation_status = OrgUnit.VALIDATION_VALID if validate else OrgUnit.VALIDATION_NEW
+                org_unit.validation_status = (
+                    OrgUnit.VALIDATION_VALID if validate else OrgUnit.VALIDATION_NEW
+                )
 
                 self.map_org_unit_type(row, org_unit, type_dict, unknown_unit_type)
                 self.map_parent(row, org_unit, unit_dict)

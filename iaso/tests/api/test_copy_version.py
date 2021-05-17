@@ -19,10 +19,16 @@ class CopyVersionTestCase(APITestCase):
         unit_type.save()
         cls.project.unit_types.add(unit_type)
         source.projects.add(cls.project)
-        OrgUnit.objects.create(version=old_version, name="Myagi", org_unit_type=unit_type, source_ref="nomercy")
+        OrgUnit.objects.create(
+            version=old_version, name="Myagi", org_unit_type=unit_type, source_ref="nomercy"
+        )
         cls.source = source
-        cls.johnny = cls.create_user_with_profile(username="johnny", account=account, permissions=["iaso_sources"])
-        cls.miguel = cls.create_user_with_profile(username="miguel", account=account, permissions=[])
+        cls.johnny = cls.create_user_with_profile(
+            username="johnny", account=account, permissions=["iaso_sources"]
+        )
+        cls.miguel = cls.create_user_with_profile(
+            username="miguel", account=account, permissions=[]
+        )
 
         from beanstalk_worker import task_service
 
@@ -54,7 +60,9 @@ class CopyVersionTestCase(APITestCase):
         self.assertEqual(org_unit_copy.source_ref, "nomercy")
         response = self.client.post("/api/copyversion/", data=data, format="json")
 
-        self.assertEqual(response.status_code, 400)  # you can't overwrite a version without setting force=true
+        self.assertEqual(
+            response.status_code, 400
+        )  # you can't overwrite a version without setting force=true
 
         data = {
             "source_source_id": self.source.id,
@@ -65,7 +73,9 @@ class CopyVersionTestCase(APITestCase):
         }
         response = self.client.post("/api/copyversion/", data=data, format="json")
 
-        self.assertEqual(response.status_code, 200)  # you can overwrite a version when setting force=true
+        self.assertEqual(
+            response.status_code, 200
+        )  # you can overwrite a version when setting force=true
 
         response = self.client.get("/api/tasks/%d/" % task["id"])
 

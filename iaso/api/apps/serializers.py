@@ -16,7 +16,16 @@ class AppSerializer(ProjectSerializer):
 
     class Meta(ProjectSerializer.Meta):
         model = Project
-        fields = ["id", "name", "app_id", "forms", "feature_flags", "needs_authentication", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "name",
+            "app_id",
+            "forms",
+            "feature_flags",
+            "needs_authentication",
+            "created_at",
+            "updated_at",
+        ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
     id = serializers.CharField(read_only=True, source="app_id")
@@ -25,7 +34,9 @@ class AppSerializer(ProjectSerializer):
         validated_forms = []
         current_account_id = self.context["request"].user.iaso_profile.account.id
         for f in data:
-            account_ids = Form.objects.filter(id=f.id).values_list("projects__account", flat=True).distinct()
+            account_ids = (
+                Form.objects.filter(id=f.id).values_list("projects__account", flat=True).distinct()
+            )
             if current_account_id in account_ids:
                 validated_forms.append(f)
             else:

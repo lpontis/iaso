@@ -16,13 +16,17 @@ class MultiSearchTestCase(TestCase):
         default_version = SourceVersion.objects.create(data_source=source, number=1)
         account.default_version = default_version
         account.save()
-        self.project = Project(name="Hyrule", app_id="magic.countries.hyrule.collect", account=account)
+        self.project = Project(
+            name="Hyrule", app_id="magic.countries.hyrule.collect", account=account
+        )
         self.project.save()
         source.projects.add(self.project)
 
         source_2 = DataSource.objects.create(name="Goron")
         other_version = SourceVersion.objects.create(data_source=source_2, number=1)
-        self.project_2 = Project(name="Lorule", app_id="magic.countries.lorule.collect", account=account)
+        self.project_2 = Project(
+            name="Lorule", app_id="magic.countries.lorule.collect", account=account
+        )
         self.project_2.save()
 
         source_2.projects.add(self.project_2)
@@ -78,7 +82,8 @@ class MultiSearchTestCase(TestCase):
         link_client = self.link_client
 
         response = link_client.get(
-            '/api/orgunits/?limit=20&searches=[{"search":"akka"},{"search":"riko"}]&asLocation=True', format="json"
+            '/api/orgunits/?limit=20&searches=[{"search":"akka"},{"search":"riko"}]&asLocation=True',
+            format="json",
         )
         self.assertEqual(response.status_code, 200)
 
@@ -117,7 +122,9 @@ class MultiSearchTestCase(TestCase):
         """Testing the multi search only default version"""
         link_client = self.link_client
 
-        response = link_client.get('/api/orgunits/?limit=20&searches=[{"defaultVersion":"true"}]', format="json")
+        response = link_client.get(
+            '/api/orgunits/?limit=20&searches=[{"defaultVersion":"true"}]', format="json"
+        )
         self.assertEqual(response.status_code, 200)
 
         json_response = json.loads(response.content)

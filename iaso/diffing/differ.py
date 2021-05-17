@@ -3,14 +3,16 @@ from iaso.models import OrgUnit, GroupSet
 from .comparisons import as_field_types, Diff, Comparison
 
 
-
 def index_pyramid(orgunits):
     orgunits_by_source_ref = {}
     for orgunit in orgunits:
         if orgunits_by_source_ref.get(orgunit.source_ref, None) is None:
             orgunits_by_source_ref[orgunit.source_ref] = [orgunit]
         else:
-            print("TWO ORG UNITS WITH THE SAME source_ref: %s (THIS SHOULD NOT HAPPEN!)" % orgunit.source_ref)
+            print(
+                "TWO ORG UNITS WITH THE SAME source_ref: %s (THIS SHOULD NOT HAPPEN!)"
+                % orgunit.source_ref
+            )
 
             orgunits_by_source_ref[orgunit.source_ref].append(orgunit)
     return orgunits_by_source_ref
@@ -21,7 +23,9 @@ class Differ:
         self.iaso_logger = logger
 
     def load_pyramid(self, version, validation_status=None, top_org_unit=None, org_unit_types=None):
-        self.iaso_logger.info("loading pyramid ", version.data_source, version, top_org_unit, org_unit_types)
+        self.iaso_logger.info(
+            "loading pyramid ", version.data_source, version, top_org_unit, org_unit_types
+        )
         queryset = (
             OrgUnit.objects.prefetch_related("groups")
             .prefetch_related("groups__group_sets")
@@ -48,7 +52,7 @@ class Differ:
         top_org_unit=None,
         top_org_unit_ref=None,
         org_unit_types=None,
-        org_unit_types_ref=None
+        org_unit_types_ref=None,
     ):
         field_names = ["name", "geometry", "parent"]
         if not ignore_groups:
@@ -57,10 +61,29 @@ class Differ:
         self.iaso_logger.info("will compare the following fields ", field_names)
         field_types = as_field_types(field_names)
 
-        orgunits_dhis2 = self.load_pyramid(version, validation_status=validation_status, top_org_unit=top_org_unit, org_unit_types=org_unit_types)
-        orgunit_refs = self.load_pyramid(version_ref, validation_status=validation_status_ref, top_org_unit=top_org_unit_ref, org_unit_types=org_unit_types_ref)
+        orgunits_dhis2 = self.load_pyramid(
+            version,
+            validation_status=validation_status,
+            top_org_unit=top_org_unit,
+            org_unit_types=org_unit_types,
+        )
+        orgunit_refs = self.load_pyramid(
+            version_ref,
+            validation_status=validation_status_ref,
+            top_org_unit=top_org_unit_ref,
+            org_unit_types=org_unit_types_ref,
+        )
         self.iaso_logger.info(
-            "comparing ", version_ref, "(", len(orgunits_dhis2), ")", " and ", version, "(", len(orgunit_refs), ")"
+            "comparing ",
+            version_ref,
+            "(",
+            len(orgunits_dhis2),
+            ")",
+            " and ",
+            version,
+            "(",
+            len(orgunit_refs),
+            ")",
         )
         # speed how to index_by(&:source_ref)
         diffs = []
@@ -89,7 +112,9 @@ class Differ:
                 status = "same"
 
             diff = Diff(
-                org_unit=orgunit_dhis2 if orgunit_dhis2 else orgunit_ref, status=status, comparisons=comparisons
+                org_unit=orgunit_dhis2 if orgunit_dhis2 else orgunit_ref,
+                status=status,
+                comparisons=comparisons,
             )
             diffs.append(diff)
 
@@ -109,7 +134,9 @@ class Differ:
                         distance=100,
                     )
                     comparisons.append(comparison)
-                used_to_exist = OrgUnit.objects.filter(source_ref=deleted_id, version=version).count() > 0
+                used_to_exist = (
+                    OrgUnit.objects.filter(source_ref=deleted_id, version=version).count() > 0
+                )
                 status = "deleted" if used_to_exist else "never_seen"
                 diff = Diff(orgunit_dhis2, status=status, comparisons=comparisons)
                 diffs.append(diff)

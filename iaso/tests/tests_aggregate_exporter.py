@@ -75,7 +75,10 @@ class DataValueExporterTests(TestCase):
             instance.json = {"question1": "1", "version": self.form_version.version_id}
         else:
             instance.period = "2018Q1"
-            instance.json = {"question1_quality": "1", "version": self.form_quality_version.version_id}
+            instance.json = {
+                "question1_quality": "1",
+                "version": self.form_quality_version.version_id,
+            }
 
         instance.file = UploadedFile(open("iaso/tests/fixtures/hydroponics_test_upload.xml"))
         instance.form = form
@@ -108,7 +111,10 @@ class DataValueExporterTests(TestCase):
 
     def setUp(self):
         form, created = Form.objects.get_or_create(
-            form_id="quantity_pca", name="Quantity PCA form", period_type="month", single_per_period=True
+            form_id="quantity_pca",
+            name="Quantity PCA form",
+            period_type="month",
+            single_per_period=True,
         )
         self.form = form
 
@@ -119,20 +125,32 @@ class DataValueExporterTests(TestCase):
 
         account, account_created = Account.objects.get_or_create(name="Organisation Name")
 
-        user, user_created = User.objects.get_or_create(username="Test User Name", email="testemail@bluesquarehub.com")
+        user, user_created = User.objects.get_or_create(
+            username="Test User Name", email="testemail@bluesquarehub.com"
+        )
         self.user = user
         p = Profile(user=user, account=account)
         p.save()
         credentials, creds_created = ExternalCredentials.objects.get_or_create(
-            name="Test export api", url="https://dhis2.com", login="admin", password="whocares", account=account
+            name="Test export api",
+            url="https://dhis2.com",
+            login="admin",
+            password="whocares",
+            account=account,
         )
 
-        datasource, _ds_created = DataSource.objects.get_or_create(name="reference", credentials=credentials)
+        datasource, _ds_created = DataSource.objects.get_or_create(
+            name="reference", credentials=credentials
+        )
         self.datasource = datasource
-        source_version, _created = SourceVersion.objects.get_or_create(number=1, data_source=datasource)
+        source_version, _created = SourceVersion.objects.get_or_create(
+            number=1, data_source=datasource
+        )
         self.source_version = source_version
 
-        self.project = Project(name="Hyrule", app_id="magic.countries.hyrule.collect", account=account)
+        self.project = Project(
+            name="Hyrule", app_id="magic.countries.hyrule.collect", account=account
+        )
         self.project.save()
 
         datasource.projects.add(self.project)
@@ -151,14 +169,21 @@ class DataValueExporterTests(TestCase):
 
     def setUpFormQuality(self):
         form_quality, created = Form.objects.get_or_create(
-            form_id="quality_pca", name="Quality PCA form", period_type="quarter", single_per_period=True
+            form_id="quality_pca",
+            name="Quality PCA form",
+            period_type="quarter",
+            single_per_period=True,
         )
         self.form_quality = form_quality
 
-        form_quality_version, created = FormVersion.objects.get_or_create(form=form_quality, version_id="1")
+        form_quality_version, created = FormVersion.objects.get_or_create(
+            form=form_quality, version_id="1"
+        )
 
         self.form_quality_version = form_quality_version
-        mapping_quality = Mapping(form=form_quality, data_source=self.datasource, mapping_type=AGGREGATE)
+        mapping_quality = Mapping(
+            form=form_quality, data_source=self.datasource, mapping_type=AGGREGATE
+        )
         mapping_quality.save()
         self.mapping_quality = mapping_quality
 
@@ -169,7 +194,9 @@ class DataValueExporterTests(TestCase):
             ErrorTestCase(
                 "datavalues-error-assigned.json",
                 {},
-                ["Data element: FC3nR54yGUx must be assigned through data sets to organisation unit: t3kZ5ksd8IR"],
+                [
+                    "Data element: FC3nR54yGUx must be assigned through data sets to organisation unit: t3kZ5ksd8IR"
+                ],
             ),
             ErrorTestCase(
                 "datavalues-error-bad-coc.json",
@@ -197,10 +224,14 @@ class DataValueExporterTests(TestCase):
             ErrorTestCase(
                 "datavalues-error-open-periods.json",
                 {"imported": 0, "updated": 0, "deleted": 0, "ignored": 1},
-                ["Period: 203001 is after latest open future period: 202001 for data element: M62VHgYT2n0"],
+                [
+                    "Period: 203001 is after latest open future period: 202001 for data element: M62VHgYT2n0"
+                ],
             ),
             ErrorTestCase(
-                "datavalues-error-technical.json", {}, ["The import process failed: Failed to flush BatchHandler"]
+                "datavalues-error-technical.json",
+                {},
+                ["The import process failed: Failed to flush BatchHandler"],
             ),
             ErrorTestCase(
                 "datavalues-error-unknown-dataelement.json",
@@ -210,7 +241,9 @@ class DataValueExporterTests(TestCase):
         ]
 
         for testcase in testcases:
-            error = AggregateHandler().handle_exception(load_dhis2_fixture(testcase.fixture), "error")
+            error = AggregateHandler().handle_exception(
+                load_dhis2_fixture(testcase.fixture), "error"
+            )
             self.assertEquals(testcase.expected_counts, error.counts)
             self.assertEquals(testcase.expected_messages, error.descriptions)
 
@@ -258,19 +291,45 @@ class DataValueExporterTests(TestCase):
                 "description": "Import process completed successfully",
                 "importCount": {"imported": 93, "updated": 0, "ignored": 191, "deleted": 0},
                 "conflicts": [
-                    {"object": "GuJESuyOCMW", "value": "Category option combo not found or not accessible"},
-                    {"object": "uX9yDetTdOp", "value": "Category option combo not found or not accessible"},
-                    {"object": "LbeIlyHEhKr", "value": "Category option combo not found or not accessible"},
-                    {"object": "qNCMOhkoQju", "value": "Category option combo not found or not accessible"},
-                    {"object": "rCMUTmcreqP", "value": "Category option combo not found or not accessible"},
-                    {"object": "TkDhg29x18A", "value": "Category option combo not found or not accessible"},
-                    {"object": "qa0VqgYlgtN", "value": "Category option combo not found or not accessible"},
-                    {"object": "zPpvbvpmkxN", "value": "Category option combo not found or not accessible"},
+                    {
+                        "object": "GuJESuyOCMW",
+                        "value": "Category option combo not found or not accessible",
+                    },
+                    {
+                        "object": "uX9yDetTdOp",
+                        "value": "Category option combo not found or not accessible",
+                    },
+                    {
+                        "object": "LbeIlyHEhKr",
+                        "value": "Category option combo not found or not accessible",
+                    },
+                    {
+                        "object": "qNCMOhkoQju",
+                        "value": "Category option combo not found or not accessible",
+                    },
+                    {
+                        "object": "rCMUTmcreqP",
+                        "value": "Category option combo not found or not accessible",
+                    },
+                    {
+                        "object": "TkDhg29x18A",
+                        "value": "Category option combo not found or not accessible",
+                    },
+                    {
+                        "object": "qa0VqgYlgtN",
+                        "value": "Category option combo not found or not accessible",
+                    },
+                    {
+                        "object": "zPpvbvpmkxN",
+                        "value": "Category option combo not found or not accessible",
+                    },
                 ],
             }
         }
         error = AggregateHandler().handle_exception(resp, "error")
-        self.assertEquals(error.message, "error : Category option combo not found or not accessible")
+        self.assertEquals(
+            error.message, "error : Category option combo not found or not accessible"
+        )
 
     def test_aggregate_mapping_works(self):
         instance = self.build_instance(self.form)
@@ -284,7 +343,11 @@ class DataValueExporterTests(TestCase):
                 "period": "201801",
                 "orgUnit": "OU_DHIS2_ID",
                 "dataValues": [
-                    {"dataElement": "DE_DHIS2_ID", "comment": str(instance.id) + " 1 question1", "value": 1}
+                    {
+                        "dataElement": "DE_DHIS2_ID",
+                        "comment": str(instance.id) + " 1 question1",
+                        "value": 1,
+                    }
                 ],
             },
         )
@@ -318,7 +381,10 @@ class DataValueExporterTests(TestCase):
     def test_aggregate_export_works(self):
 
         mapping_version = MappingVersion(
-            name="aggregate", json=build_form_mapping(), form_version=self.form_version, mapping=self.mapping
+            name="aggregate",
+            json=build_form_mapping(),
+            form_version=self.form_version,
+            mapping=self.mapping,
         )
         mapping_version.save()
         # setup
@@ -326,7 +392,11 @@ class DataValueExporterTests(TestCase):
         instance = self.build_instance(self.form)
 
         export_request = ExportRequestBuilder().build_export_request(
-            filters={"period_ids": "201801", "form_id": self.form.id, "org_unit_id": instance.org_unit.id},
+            filters={
+                "period_ids": "201801",
+                "form_id": self.form.id,
+                "org_unit_id": instance.org_unit.id,
+            },
             launcher=self.user,
         )
         # mock expected calls
@@ -338,7 +408,12 @@ class DataValueExporterTests(TestCase):
             status=200,
         )
 
-        responses.add(responses.POST, "https://dhis2.com/api/completeDataSetRegistrations", json={}, status=200)
+        responses.add(
+            responses.POST,
+            "https://dhis2.com/api/completeDataSetRegistrations",
+            json={},
+            status=200,
+        )
 
         # excercice
         instances_qs = Instance.objects.order_by("id").all()
@@ -355,7 +430,10 @@ class DataValueExporterTests(TestCase):
         # setup
         # persist an instance
         mapping_version = MappingVersion(
-            name="aggregate", json=build_form_mapping(), form_version=self.form_version, mapping=self.mapping
+            name="aggregate",
+            json=build_form_mapping(),
+            form_version=self.form_version,
+            mapping=self.mapping,
         )
         mapping_version.save()
 
@@ -389,7 +467,12 @@ class DataValueExporterTests(TestCase):
             status=200,
         )
 
-        responses.add(responses.POST, "https://dhis2.com/api/completeDataSetRegistrations", json={}, status=200)
+        responses.add(
+            responses.POST,
+            "https://dhis2.com/api/completeDataSetRegistrations",
+            json={},
+            status=200,
+        )
 
         # excercice
 
@@ -409,7 +492,10 @@ class DataValueExporterTests(TestCase):
 
         with self.assertRaises(InstanceExportError) as context:
             mapping_version = MappingVersion(
-                name="aggregate", json=build_form_mapping(), form_version=self.form_version, mapping=self.mapping
+                name="aggregate",
+                json=build_form_mapping(),
+                form_version=self.form_version,
+                mapping=self.mapping,
             )
             mapping_version.save()
 
@@ -445,7 +531,10 @@ class DataValueExporterTests(TestCase):
         # setup
         # persist an instance
         mapping_version = MappingVersion(
-            name="aggregate", json=build_form_mapping(), form_version=self.form_version, mapping=self.mapping
+            name="aggregate",
+            json=build_form_mapping(),
+            form_version=self.form_version,
+            mapping=self.mapping,
         )
         mapping_version.save()
 
@@ -479,7 +568,12 @@ class DataValueExporterTests(TestCase):
             status=200,
         )
 
-        responses.add(responses.POST, "https://dhis2.com/api/completeDataSetRegistrations", json={}, status=200)
+        responses.add(
+            responses.POST,
+            "https://dhis2.com/api/completeDataSetRegistrations",
+            json={},
+            status=200,
+        )
         responses.add(
             responses.POST,
             "https://dhis2.com/api/dataValueSets",
@@ -497,7 +591,6 @@ class DataValueExporterTests(TestCase):
         instance_quality.refresh_from_db()
         self.assertIsNone(instance_quality.last_export_success_at)
 
-
     @responses.activate
     def test_aggregate_export_handle_mapping_errors(self):
         # setup
@@ -507,7 +600,10 @@ class DataValueExporterTests(TestCase):
         instance.save()
 
         mapping_version = MappingVersion(
-            name="aggregate", json=build_form_mapping(), form_version=self.form_version, mapping=self.mapping
+            name="aggregate",
+            json=build_form_mapping(),
+            form_version=self.form_version,
+            mapping=self.mapping,
         )
         mapping_version.save()
 
@@ -540,7 +636,10 @@ class DataValueExporterTests(TestCase):
 
         with self.assertRaises(InstanceExportError) as context:
             mapping_version = MappingVersion(
-                name="aggregate", json=build_form_mapping(), form_version=self.form_version, mapping=self.mapping
+                name="aggregate",
+                json=build_form_mapping(),
+                form_version=self.form_version,
+                mapping=self.mapping,
             )
             mapping_version.save()
 
@@ -564,7 +663,8 @@ class DataValueExporterTests(TestCase):
         self.expect_logs(ERRORED)
 
         self.assertEquals(
-            "ERROR while processing page 1/1 : non json response return by server", context.exception.message
+            "ERROR while processing page 1/1 : non json response return by server",
+            context.exception.message,
         )
         instance.refresh_from_db()
         self.assertIsNone(instance.last_export_success_at)

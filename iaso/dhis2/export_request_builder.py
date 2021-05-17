@@ -77,7 +77,9 @@ class ExportRequestBuilder:
                         )
 
                     export_status = ExportStatus(
-                        export_request=export_request, instance=instance, mapping_version=mapping_version
+                        export_request=export_request,
+                        instance=instance,
+                        mapping_version=mapping_version,
                     )
                     export_statuses.append(export_status)
 

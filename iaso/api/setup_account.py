@@ -24,20 +24,14 @@ class SetupAccountSerializer(serializers.Serializer):
 
     def validate_account_name(self, value):
         if Account.objects.filter(name=value).exists():
-            raise serializers.ValidationError(
-                "An account with this name already exists"
-            )
+            raise serializers.ValidationError("An account with this name already exists")
         if DataSource.objects.filter(name=value).exists():
-            raise serializers.ValidationError(
-                "A data source with this name already exists"
-            )
+            raise serializers.ValidationError("A data source with this name already exists")
         return value
 
     def validate_user_username(self, value):
         if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError(
-                "A data source with this name already exists"
-            )
+            raise serializers.ValidationError("A data source with this name already exists")
         return value
 
     def create(self, validated_data):
@@ -62,9 +56,7 @@ class SetupAccountSerializer(serializers.Serializer):
         permissions_to_add = CustomPermissionSupport.DEFAULT_PERMISSIONS_FOR_NEW_ACCOUNT_USER
         content_type = ContentType.objects.get_for_model(CustomPermissionSupport)
         user.user_permissions.set(
-            Permission.objects.filter(
-                codename__in=permissions_to_add, content_type=content_type
-            )
+            Permission.objects.filter(codename__in=permissions_to_add, content_type=content_type)
         )
         return validated_data
 

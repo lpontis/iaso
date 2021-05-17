@@ -34,8 +34,8 @@ REQUEST_HEADER_INFO_KEYS = [
 def safe_api_import(key: str, fallback_status=200):
     """This decorator allows to mark api views as "safe imports". This has two effects:
 
-        1. The view will always return a 200 OK status, even if there was an exception while executing it
-        2. The posted data will be saved in a APIImport record
+    1. The view will always return a 200 OK status, even if there was an exception while executing it
+    2. The posted data will be saved in a APIImport record
     """
 
     def decorator(f):
@@ -47,7 +47,8 @@ def safe_api_import(key: str, fallback_status=200):
                 api_import.user = request.user
             api_import.import_type = key
             api_import.headers = {
-                request_key: request.META.get(request_key) for request_key in REQUEST_HEADER_INFO_KEYS
+                request_key: request.META.get(request_key)
+                for request_key in REQUEST_HEADER_INFO_KEYS
             }
             api_import.json_body = request.data
 
@@ -59,7 +60,9 @@ def safe_api_import(key: str, fallback_status=200):
                 logger.error("Exception" + str(e))  # For logs
                 api_import.has_problem = True
                 api_import.exception = format_exc()
-                response = Response({"res": "a problem happened, but your data was saved"}, status=fallback_status)
+                response = Response(
+                    {"res": "a problem happened, but your data was saved"}, status=fallback_status
+                )
 
             # Save the APIImport record
             api_import.save()
@@ -96,7 +99,7 @@ class HasPermission:
 
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
-    """ A ModelSerializer that
+    """A ModelSerializer that
     - inspects the request to check if a specific field set has been requested through the "fields" query param
     - accepts an additional optional `fields` constructor argument that allows to specify which
       fields should be included if the request does not contain the "fields" query param
@@ -127,18 +130,33 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         # Don't pass the 'fields' arg up to the superclass
-        requested_fields = kwargs["context"]["request"].query_params.get("fields", kwargs.pop("fields", ":default"))
+        requested_fields = kwargs["context"]["request"].query_params.get(
+            "fields", kwargs.pop("fields", ":default")
+        )
         if requested_fields == ":all":
             fields = self.Meta.fields
         elif requested_fields == ":default":
-            fields = self.Meta.default_fields if hasattr(self.Meta, "default_fields") else self.Meta.fields
+            fields = (
+                self.Meta.default_fields
+                if hasattr(self.Meta, "default_fields")
+                else self.Meta.fields
+            )
         else:
             # fields could be a string (query param) or a list (constructor argument)
-            fields = requested_fields.split(",") if isinstance(requested_fields, str) else requested_fields
+            fields = (
+                requested_fields.split(",")
+                if isinstance(requested_fields, str)
+                else requested_fields
+            )
             for field in fields:
                 if field not in self.Meta.fields:
                     raise serializers.ValidationError(
-                        {"fields": "field unknown '" + field + "', known fields :" + ", ".join(self.Meta.fields)}
+                        {
+                            "fields": "field unknown '"
+                            + field
+                            + "', known fields :"
+                            + ", ".join(self.Meta.fields)
+                        }
                     )
 
         # Instantiate the superclass normally

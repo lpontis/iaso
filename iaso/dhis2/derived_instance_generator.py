@@ -49,7 +49,9 @@ def generate_instances(project, cvs_form, cvs_stat_mapping_version, period):
 
     # build query set for aggregation
 
-    queryset = cvs_form.instances.filter(form=cvs_form, period=period).values("period", "org_unit_id", "form_id")
+    queryset = cvs_form.instances.filter(form=cvs_form, period=period).values(
+        "period", "org_unit_id", "form_id"
+    )
     # don't aggregate deleted instances
     queryset = queryset.filter(deleted=False)
     # don't aggregate instances with json empty or test devices
@@ -67,11 +69,17 @@ def generate_instances(project, cvs_form, cvs_stat_mapping_version, period):
         # sql injection shouldn't be problematic since I'm using the params
         filter_out_blanks = RawSQL("json ->> %s != ''", [aggregation["questionName"]])
         if aggregation["aggregationType"] == "sum":
-            queryset = queryset.annotate(**{aggregation["id"]: Sum(answer, filter=filter_out_blanks)})
+            queryset = queryset.annotate(
+                **{aggregation["id"]: Sum(answer, filter=filter_out_blanks)}
+            )
         elif aggregation["aggregationType"] == "avg":
-            queryset = queryset.annotate(**{aggregation["id"]: Avg(answer, filter=filter_out_blanks)})
+            queryset = queryset.annotate(
+                **{aggregation["id"]: Avg(answer, filter=filter_out_blanks)}
+            )
         elif aggregation["aggregationType"] == "count":
-            queryset = queryset.annotate(**{aggregation["id"]: Count(answer, filter=filter_out_blanks)})
+            queryset = queryset.annotate(
+                **{aggregation["id"]: Count(answer, filter=filter_out_blanks)}
+            )
         else:
             raise Exception("unsupported aggregationType : " + aggregation["aggregationType"])
 
@@ -94,7 +102,9 @@ def generate_instances(project, cvs_form, cvs_stat_mapping_version, period):
 
     nullify_stats_without_cvs(progress, cvs_form, cvs_stat_mapping_version, period)
 
-    instances = Instance.objects.filter(period=period, form=cvs_stat_mapping_version.form_version.form, project=project)
+    instances = Instance.objects.filter(
+        period=period, form=cvs_stat_mapping_version.form_version.form, project=project
+    )
     logger.debug(
         "generate_instances : took"
         + str(batch_time)
@@ -114,7 +124,9 @@ def process_page(paginator, page, project, cvs_stat_mapping_version, progress, a
     logger.debug("generate_instances : page : " + str(page))
 
     for record in counts:
-        instance = process_instance(record, project, cvs_stat_mapping_version, progress, aggregations)
+        instance = process_instance(
+            record, project, cvs_stat_mapping_version, progress, aggregations
+        )
 
     page_time = timer() - page_start
     logger.debug("generate_instances :" + str(progress) + "in" + str(page_time) + "seconds")
@@ -156,8 +168,12 @@ def process_instance(record, project, cvs_stat_mapping_version, progress, aggreg
         instance.json = json_data
         xml_string = generate_instance_xml(instance, cvs_stat_mapping_version.form_version)
         buffer = BytesIO(xml_string)
-        buffer.seek(0, 2)  # Seek to the end of the stream, so we can get its length with `buf.tell()`
-        instance.file_name = cvs_stat_mapping_version.form_version.form.form_id + "_" + instance.uuid
+        buffer.seek(
+            0, 2
+        )  # Seek to the end of the stream, so we can get its length with `buf.tell()`
+        instance.file_name = (
+            cvs_stat_mapping_version.form_version.form.form_id + "_" + instance.uuid
+        )
         file = InMemoryUploadedFile(
             file=buffer,
             field_name="file",
@@ -181,7 +197,9 @@ def nullify_stats_without_cvs(progress, cvs_form, cvs_stat_mapping_version, peri
         .exclude(device__test_device=True)
     )
     stats_instances = stats_instances.annotate(
-        cvs_exists=Exists(subquery_cvs.filter(period=OuterRef("period"), org_unit_id=OuterRef("org_unit_id")))
+        cvs_exists=Exists(
+            subquery_cvs.filter(period=OuterRef("period"), org_unit_id=OuterRef("org_unit_id"))
+        )
     ).filter(cvs_exists=False)
     aggregations = cvs_stat_mapping_version.json["aggregations"]
 

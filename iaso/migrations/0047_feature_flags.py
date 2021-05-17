@@ -11,7 +11,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="FeatureFlag",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
                 ("code", models.CharField(max_length=30)),
                 ("name", models.CharField(max_length=100)),
                 ("description", models.TextField(blank=True)),
@@ -22,6 +27,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="project",
             name="feature_flags",
-            field=models.ManyToManyField(blank=True, related_name="_project_feature_flags_+", to="iaso.FeatureFlag"),
+            field=models.ManyToManyField(
+                blank=True, related_name="_project_feature_flags_+", to="iaso.FeatureFlag"
+            ),
         ),
     ]

@@ -23,29 +23,47 @@ class InstancesAPITestCase(APITestCase):
         star_wars.save()
         cls.sw_version = sw_version
 
-        cls.yoda = cls.create_user_with_profile(username="yoda", account=star_wars, permissions=["iaso_forms"])
+        cls.yoda = cls.create_user_with_profile(
+            username="yoda", account=star_wars, permissions=["iaso_forms"]
+        )
 
         cls.jedi_council = m.OrgUnitType.objects.create(name="Jedi Council", short_name="Cnc")
 
         cls.jedi_council_corruscant = m.OrgUnit.objects.create(name="Corruscant Jedi Council")
 
         cls.project = m.Project.objects.create(
-            name="Hydroponic gardens", app_id="stars.empire.agriculture.hydroponics", account=star_wars
+            name="Hydroponic gardens",
+            app_id="stars.empire.agriculture.hydroponics",
+            account=star_wars,
         )
 
-        cls.form_1 = m.Form.objects.create(name="Hydroponics study", period_type=m.MONTH, single_per_period=True)
+        cls.form_1 = m.Form.objects.create(
+            name="Hydroponics study", period_type=m.MONTH, single_per_period=True
+        )
 
         cls.create_form_instance(
-            form=cls.form_1, period="202001", org_unit=cls.jedi_council_corruscant, project=cls.project
+            form=cls.form_1,
+            period="202001",
+            org_unit=cls.jedi_council_corruscant,
+            project=cls.project,
         )
         cls.create_form_instance(
-            form=cls.form_1, period="202002", org_unit=cls.jedi_council_corruscant, project=cls.project
+            form=cls.form_1,
+            period="202002",
+            org_unit=cls.jedi_council_corruscant,
+            project=cls.project,
         )
         cls.create_form_instance(
-            form=cls.form_1, period="202002", org_unit=cls.jedi_council_corruscant, project=cls.project
+            form=cls.form_1,
+            period="202002",
+            org_unit=cls.jedi_council_corruscant,
+            project=cls.project,
         )
         cls.create_form_instance(
-            form=cls.form_1, period="202003", org_unit=cls.jedi_council_corruscant, project=cls.project
+            form=cls.form_1,
+            period="202003",
+            org_unit=cls.jedi_council_corruscant,
+            project=cls.project,
         )
 
         cls.form_2 = m.Form.objects.create(
@@ -80,7 +98,9 @@ class InstancesAPITestCase(APITestCase):
         form_2_file_mock.name = "test.xml"
         cls.form_2.form_versions.create(file=form_2_file_mock, version_id="2020022401")
         cls.form_2.org_unit_types.add(cls.jedi_council)
-        cls.create_form_instance(form=cls.form_2, period="202001", org_unit=cls.jedi_council_corruscant)
+        cls.create_form_instance(
+            form=cls.form_2, period="202001", org_unit=cls.jedi_council_corruscant
+        )
         cls.form_2.save()
 
         # Instance saved without period
@@ -92,7 +112,9 @@ class InstancesAPITestCase(APITestCase):
         # A deleted Instance
         cls.form_4.form_versions.create(file=form_2_file_mock, version_id="2020022402")
         cls.form_4.org_unit_types.add(cls.jedi_council)
-        cls.create_form_instance(form=cls.form_4, period="2020Q1", org_unit=cls.jedi_council_corruscant, deleted=True)
+        cls.create_form_instance(
+            form=cls.form_4, period="2020Q1", org_unit=cls.jedi_council_corruscant, deleted=True
+        )
         cls.form_4.save()
 
         cls.project.unit_types.add(cls.jedi_council)
@@ -146,7 +168,9 @@ class InstancesAPITestCase(APITestCase):
 
         last_instance = m.Instance.objects.last()
         self.assertEqual(instance_uuid, last_instance.uuid)
-        self.assertEquals("RDC Collecte Data DPS_2_2019-08-08_11-54-46.xml", last_instance.file_name)
+        self.assertEquals(
+            "RDC Collecte Data DPS_2_2019-08-08_11-54-46.xml", last_instance.file_name
+        )
         self.assertEqual("202002", last_instance.period)
         self.assertIsInstance(last_instance.location, Point)
         self.assertEqual(10, last_instance.accuracy)
@@ -199,7 +223,9 @@ class InstancesAPITestCase(APITestCase):
 
         self.assertAPIImport("instance", request_body=body, has_problems=False)
 
-        self.assertEqual(pre_existing_instance_count, m.Instance.objects.count())  # No added instance
+        self.assertEqual(
+            pre_existing_instance_count, m.Instance.objects.count()
+        )  # No added instance
         pre_existing_instance.refresh_from_db()
         self.assertTrue(pre_existing_instance.deleted)
         self.assertEqual("Pre-existing name", pre_existing_instance.name)
@@ -252,7 +278,9 @@ class InstancesAPITestCase(APITestCase):
 
         self.assertAPIImport("instance", request_body=body, has_problems=False)
 
-        self.assertEqual(pre_existing_instance_count + 1, m.Instance.objects.count())  # One added instance
+        self.assertEqual(
+            pre_existing_instance_count + 1, m.Instance.objects.count()
+        )  # One added instance
         pre_existing_instance.refresh_from_db()
         self.assertEqual("Pre-existing name", pre_existing_instance.name)
 
@@ -283,9 +311,13 @@ class InstancesAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(pre_existing_instance_count, m.Instance.objects.count())  # No-added instance
+        self.assertEqual(
+            pre_existing_instance_count, m.Instance.objects.count()
+        )  # No-added instance
         pre_existing_instance.refresh_from_db()
-        self.assertEqual("RDC Collecte Data DPS_2_2019-08-08_11-54-46.xml", pre_existing_instance.file_name)
+        self.assertEqual(
+            "RDC Collecte Data DPS_2_2019-08-08_11-54-46.xml", pre_existing_instance.file_name
+        )
         self.assertEqual("Mobile app name", pre_existing_instance.name)
 
     @tag("iaso_only")
@@ -361,9 +393,14 @@ class InstancesAPITestCase(APITestCase):
 
         self.assertValidInstanceListData(response.json(), 2)
 
-    def assertValidInstanceListData(self, list_data: typing.Mapping, expected_length: int, paginated: bool = False):
+    def assertValidInstanceListData(
+        self, list_data: typing.Mapping, expected_length: int, paginated: bool = False
+    ):
         self.assertValidListData(
-            list_data=list_data, expected_length=expected_length, results_key="instances", paginated=paginated
+            list_data=list_data,
+            expected_length=expected_length,
+            results_key="instances",
+            paginated=paginated,
         )
 
         for instance_data in list_data["instances"]:
@@ -379,7 +416,9 @@ class InstancesAPITestCase(APITestCase):
         """PATCH /instances/:pk"""
         self.client.force_authenticate(self.yoda)
         new_org_unit = m.OrgUnit.objects.create(
-            name="Corruscant Jedi Council New New", version=self.sw_version, org_unit_type=self.jedi_council
+            name="Corruscant Jedi Council New New",
+            version=self.sw_version,
+            org_unit_type=self.jedi_council,
         )
         instance_to_patch = self.form_2.instances.first()
 
@@ -401,7 +440,9 @@ class InstancesAPITestCase(APITestCase):
         self.assertEqual(self.yoda, modification.user)
         self.assertEqual("202001", modification.past_value[0]["fields"]["period"])
         self.assertEqual("2022Q1", modification.new_value[0]["fields"]["period"])
-        self.assertEqual(self.jedi_council_corruscant.id, modification.past_value[0]["fields"]["org_unit"])
+        self.assertEqual(
+            self.jedi_council_corruscant.id, modification.past_value[0]["fields"]["org_unit"]
+        )
         self.assertEqual(new_org_unit.id, modification.new_value[0]["fields"]["org_unit"])
         self.assertEqual(instance_to_patch, modification.content_object)
 
@@ -410,7 +451,9 @@ class InstancesAPITestCase(APITestCase):
         """PATCH /instances/:pk"""
         self.client.force_authenticate(self.yoda)
         new_org_unit = m.OrgUnit.objects.create(
-            name="Corruscant Jedi Council Hospital", version=self.sw_version, org_unit_type=self.jedi_council
+            name="Corruscant Jedi Council Hospital",
+            version=self.sw_version,
+            org_unit_type=self.jedi_council,
         )
         instance_to_patch = self.form_3.instances.first()
 
@@ -432,7 +475,9 @@ class InstancesAPITestCase(APITestCase):
         self.assertEqual(self.yoda, modification.user)
         self.assertEqual(None, modification.past_value[0]["fields"]["period"])
         self.assertEqual(None, modification.new_value[0]["fields"]["period"])
-        self.assertEqual(self.jedi_council_corruscant.id, modification.past_value[0]["fields"]["org_unit"])
+        self.assertEqual(
+            self.jedi_council_corruscant.id, modification.past_value[0]["fields"]["org_unit"]
+        )
         self.assertEqual(new_org_unit.id, modification.new_value[0]["fields"]["org_unit"])
         self.assertEqual(instance_to_patch, modification.content_object)
 
@@ -460,5 +505,7 @@ class InstancesAPITestCase(APITestCase):
         # assert audit log works
         modification = Modification.objects.last()
         self.assertEqual(self.yoda, modification.user)
-        self.assertNotEquals(modification.past_value[0]["fields"]["deleted"], modification.content_object.deleted)
+        self.assertNotEquals(
+            modification.past_value[0]["fields"]["deleted"], modification.content_object.deleted
+        )
         self.assertEqual(instance_to_patch, modification.content_object)

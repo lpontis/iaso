@@ -15,7 +15,9 @@ class OrgUnitAPITestCase(APITestCase):
         star_wars = m.Account.objects.create(name="Star Wars")
         marvel = m.Account.objects.create(name="MCU")
         cls.project = m.Project.objects.create(
-            name="Hydroponic gardens", app_id="stars.empire.agriculture.hydroponics", account=star_wars
+            name="Hydroponic gardens",
+            app_id="stars.empire.agriculture.hydroponics",
+            account=star_wars,
         )
         sw_source = m.DataSource.objects.create(name="Evil Empire")
         sw_source.projects.add(cls.project)
@@ -30,7 +32,9 @@ class OrgUnitAPITestCase(APITestCase):
         cls.jedi_council = m.OrgUnitType.objects.create(name="Jedi Council", short_name="Cnc")
         cls.jedi_council.sub_unit_types.add(cls.jedi_squad)
 
-        cls.mock_multipolygon = MultiPolygon(Polygon([[-1.3, 2.5], [-1.7, 2.8], [-1.1, 4.1], [-1.3, 2.5]]))
+        cls.mock_multipolygon = MultiPolygon(
+            Polygon([[-1.3, 2.5], [-1.7, 2.8], [-1.1, 4.1], [-1.3, 2.5]])
+        )
         cls.mock_point = Point(x=4, y=50, z=100)
 
         cls.elite_group = m.Group.objects.create(name="Elite councils")
@@ -95,24 +99,42 @@ class OrgUnitAPITestCase(APITestCase):
             validation_status=m.OrgUnit.VALIDATION_VALID,
         )
 
-        cls.yoda = cls.create_user_with_profile(username="yoda", account=star_wars, permissions=["iaso_org_units"])
+        cls.yoda = cls.create_user_with_profile(
+            username="yoda", account=star_wars, permissions=["iaso_org_units"]
+        )
         cls.luke = cls.create_user_with_profile(
-            username="luke", account=star_wars, permissions=["iaso_org_units"], org_units=[cls.jedi_council_endor]
+            username="luke",
+            account=star_wars,
+            permissions=["iaso_org_units"],
+            org_units=[cls.jedi_council_endor],
         )
-        cls.raccoon = cls.create_user_with_profile(username="raccoon", account=marvel, permissions=["iaso_org_units"])
-
-        cls.form_1 = m.Form.objects.create(name="Hydroponics study", period_type=m.MONTH, single_per_period=True)
-
-        cls.create_form_instance(
-            form=cls.form_1, period="202001", org_unit=cls.jedi_council_corruscant, project=cls.project
-        )
-
-        cls.create_form_instance(
-            form=cls.form_1, period="202001", org_unit=cls.jedi_council_corruscant, project=cls.project
+        cls.raccoon = cls.create_user_with_profile(
+            username="raccoon", account=marvel, permissions=["iaso_org_units"]
         )
 
+        cls.form_1 = m.Form.objects.create(
+            name="Hydroponics study", period_type=m.MONTH, single_per_period=True
+        )
+
         cls.create_form_instance(
-            form=cls.form_1, period="202003", org_unit=cls.jedi_council_corruscant, project=cls.project
+            form=cls.form_1,
+            period="202001",
+            org_unit=cls.jedi_council_corruscant,
+            project=cls.project,
+        )
+
+        cls.create_form_instance(
+            form=cls.form_1,
+            period="202001",
+            org_unit=cls.jedi_council_corruscant,
+            project=cls.project,
+        )
+
+        cls.create_form_instance(
+            form=cls.form_1,
+            period="202003",
+            org_unit=cls.jedi_council_corruscant,
+            project=cls.project,
         )
 
     @tag("iaso_only")
@@ -145,7 +167,11 @@ class OrgUnitAPITestCase(APITestCase):
         self.assertJSONResponse(response, 201)
         self.assertValidBulkupdateData(response.json())
 
-        for jedi_council in [self.jedi_council_endor, self.jedi_council_brussels, self.jedi_council_corruscant]:
+        for jedi_council in [
+            self.jedi_council_endor,
+            self.jedi_council_brussels,
+            self.jedi_council_corruscant,
+        ]:
             jedi_council.refresh_from_db()
             self.assertEqual(jedi_council.validation_status, m.OrgUnit.VALIDATION_VALID)
 
@@ -166,7 +192,11 @@ class OrgUnitAPITestCase(APITestCase):
         self.assertJSONResponse(response, 201)
         self.assertValidBulkupdateData(response.json())
 
-        for jedi_council in [self.jedi_council_endor, self.jedi_council_brussels, self.jedi_council_corruscant]:
+        for jedi_council in [
+            self.jedi_council_endor,
+            self.jedi_council_brussels,
+            self.jedi_council_corruscant,
+        ]:
             jedi_council.refresh_from_db()
             self.assertEqual(jedi_council.validation_status, m.OrgUnit.VALIDATION_VALID)
 
@@ -184,7 +214,9 @@ class OrgUnitAPITestCase(APITestCase):
             "groups_added": [self.unofficial_group.pk],
             "validation_status": m.OrgUnit.VALIDATION_REJECTED,
         }
-        response = self.client.post(f"/api/orgunits/bulkupdate/", data=operation_payload, format="json")
+        response = self.client.post(
+            f"/api/orgunits/bulkupdate/", data=operation_payload, format="json"
+        )
         self.assertJSONResponse(response, 201)
         self.assertValidBulkupdateData(response.json())
 
@@ -208,11 +240,19 @@ class OrgUnitAPITestCase(APITestCase):
         self.assertEqual(2, operation.operation_count)
 
         modification_endor = am.Modification.objects.get(object_id=self.jedi_council_endor.pk)
-        self.assertEqual(ContentType.objects.get_for_model(m.OrgUnit), modification_endor.content_type)
+        self.assertEqual(
+            ContentType.objects.get_for_model(m.OrgUnit), modification_endor.content_type
+        )
         self.assertEqual(self.yoda, modification_endor.user)
         self.assertEqual(am.ORG_UNIT_API_BULK, modification_endor.source)
-        self.assertEqual(m.OrgUnit.VALIDATION_VALID, modification_endor.past_value[0]["fields"]["validation_status"])
-        self.assertEqual(m.OrgUnit.VALIDATION_REJECTED, modification_endor.new_value[0]["fields"]["validation_status"])
+        self.assertEqual(
+            m.OrgUnit.VALIDATION_VALID,
+            modification_endor.past_value[0]["fields"]["validation_status"],
+        )
+        self.assertEqual(
+            m.OrgUnit.VALIDATION_REJECTED,
+            modification_endor.new_value[0]["fields"]["validation_status"],
+        )
 
     @tag("iaso_only")
     def test_org_unit_bulkupdate_select_all(self):
@@ -227,7 +267,11 @@ class OrgUnitAPITestCase(APITestCase):
         self.assertJSONResponse(response, 201)
         self.assertValidBulkupdateData(response.json())
 
-        for jedi_council in [self.jedi_council_endor, self.jedi_council_corruscant, self.jedi_council_brussels]:
+        for jedi_council in [
+            self.jedi_council_endor,
+            self.jedi_council_corruscant,
+            self.jedi_council_brussels,
+        ]:
             jedi_council.refresh_from_db()
             self.assertEqual(jedi_council.validation_status, m.OrgUnit.VALIDATION_VALID)
 
@@ -252,7 +296,9 @@ class OrgUnitAPITestCase(APITestCase):
         self.assertValidBulkupdateData(response.json())
 
         self.jedi_council_corruscant.refresh_from_db()
-        self.assertEqual(self.jedi_council_corruscant.validation_status, m.OrgUnit.VALIDATION_REJECTED)
+        self.assertEqual(
+            self.jedi_council_corruscant.validation_status, m.OrgUnit.VALIDATION_REJECTED
+        )
 
         for jedi_council in [self.jedi_council_endor, self.jedi_council_brussels]:
             jedi_council.refresh_from_db()
@@ -293,7 +339,7 @@ class OrgUnitAPITestCase(APITestCase):
 
     @tag("iaso_only")
     def test_org_unit_search(self):
-        """GET /orgunits/ with a search based on name """
+        """GET /orgunits/ with a search based on name"""
 
         self.client.force_authenticate(self.yoda)
 
@@ -307,7 +353,7 @@ class OrgUnitAPITestCase(APITestCase):
 
     @tag("iaso_only")
     def test_org_unit_instance_duplicate_search(self):
-        """GET /orgunits/ with a search based on duplicates """
+        """GET /orgunits/ with a search based on duplicates"""
 
         self.client.force_authenticate(self.yoda)
 
@@ -321,7 +367,7 @@ class OrgUnitAPITestCase(APITestCase):
 
     @tag("iaso_only")
     def test_org_unit_instance_dates_search(self):
-        """GET /orgunits/ with a search based on dates """
+        """GET /orgunits/ with a search based on dates"""
 
         self.client.force_authenticate(self.yoda)
 
@@ -343,14 +389,21 @@ class OrgUnitAPITestCase(APITestCase):
             data={
                 "select_all": True,
                 "groups_added": [self.another_group.pk],
-                "searches": [{"validation_status": "all"}, {"validation_status": m.OrgUnit.VALIDATION_REJECTED}],
+                "searches": [
+                    {"validation_status": "all"},
+                    {"validation_status": m.OrgUnit.VALIDATION_REJECTED},
+                ],
             },
             format="json",
         )
         self.assertJSONResponse(response, 201)
         self.assertValidBulkupdateData(response.json())
 
-        for jedi_council in [self.jedi_council_endor, self.jedi_council_brussels, self.jedi_council_corruscant]:
+        for jedi_council in [
+            self.jedi_council_endor,
+            self.jedi_council_brussels,
+            self.jedi_council_corruscant,
+        ]:
             jedi_council.refresh_from_db()
             self.assertIn(self.another_group, jedi_council.groups.all())
 
@@ -376,7 +429,9 @@ class OrgUnitAPITestCase(APITestCase):
         self.assertValidBulkupdateData(response.json())
 
         self.jedi_council_corruscant.refresh_from_db()
-        self.assertEqual(self.jedi_council_corruscant.validation_status, m.OrgUnit.VALIDATION_REJECTED)
+        self.assertEqual(
+            self.jedi_council_corruscant.validation_status, m.OrgUnit.VALIDATION_REJECTED
+        )
         self.assertNotIn(self.elite_group, self.jedi_council_corruscant.groups.all())
 
         for jedi_council in [self.jedi_council_endor, self.jedi_council_brussels]:
@@ -449,7 +504,9 @@ class OrgUnitAPITestCase(APITestCase):
         self.assertValidOrgUnitData(response.json())
 
     def assertValidOrgUnitListData(self, *, list_data: typing.Mapping, expected_length: int):
-        self.assertValidListData(list_data=list_data, results_key="orgUnits", expected_length=expected_length)
+        self.assertValidListData(
+            list_data=list_data, results_key="orgUnits", expected_length=expected_length
+        )
         for org_unit_data in list_data["orgUnits"]:
             self.assertValidOrgUnitData(org_unit_data)
 

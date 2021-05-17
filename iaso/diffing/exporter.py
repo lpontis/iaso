@@ -111,7 +111,11 @@ class Exporter:
     def update_orgunits(self, api, diffs):
         support_by_update_fields = ("name", "parent", "geometry")
         to_update_diffs = list(
-            filter(lambda x: x.status == "modified" and x.are_fields_modified(support_by_update_fields), diffs)
+            filter(
+                lambda x: x.status == "modified"
+                and x.are_fields_modified(support_by_update_fields),
+                diffs,
+            )
         )
         self.iaso_logger.info("orgunits to update : ", len(to_update_diffs))
         to_update_diffs = sort_by_path(to_update_diffs)
@@ -126,7 +130,11 @@ class Exporter:
             resp = api.get("organisationUnits?", params={"filter": filter_params, "fields": ":all"})
             dhis2_payloads = resp.json()["organisationUnits"]
             for dhis2_payload in dhis2_payloads:
-                diff = [diff for diff in current_slice if diff.org_unit.source_ref == dhis2_payload["id"]]
+                diff = [
+                    diff
+                    for diff in current_slice
+                    if diff.org_unit.source_ref == dhis2_payload["id"]
+                ]
 
                 if len(diff) == 0:
                     raise Exception(
@@ -181,7 +189,9 @@ class Exporter:
         groupset_field_types = as_field_types(support_by_update_fields)
 
         for groupset_field_type in groupset_field_types:
-            self.iaso_logger.info("---", groupset_field_type.groupset_ref, groupset_field_type.groupset_name)
+            self.iaso_logger.info(
+                "---", groupset_field_type.groupset_ref, groupset_field_type.groupset_name
+            )
             dhis2_groups = api.get(
                 "organisationUnitGroups",
                 params={
@@ -196,12 +206,20 @@ class Exporter:
                 for diff in to_update_diffs:
                     comparison = diff.comparison(groupset_field_type.field_name)
                     if comparison.status == "new" or comparison.status == "modified":
-                        tokeep = [group["id"] for group in comparison.after if group["id"] == dhis2_group["id"]]
+                        tokeep = [
+                            group["id"]
+                            for group in comparison.after
+                            if group["id"] == dhis2_group["id"]
+                        ]
                         if len(tokeep) > 0:
                             if not dhis2_group_contains(dhis2_group, diff.org_unit):
-                                dhis2_group["organisationUnits"].append({"id": diff.org_unit.source_ref})
+                                dhis2_group["organisationUnits"].append(
+                                    {"id": diff.org_unit.source_ref}
+                                )
                                 modified = True
-                                self.iaso_logger.info("\t added : ", diff.org_unit.name, diff.org_unit.source_ref)
+                                self.iaso_logger.info(
+                                    "\t added : ", diff.org_unit.name, diff.org_unit.source_ref
+                                )
                         else:
                             if dhis2_group_contains(dhis2_group, diff.org_unit):
                                 dhis2_group["organisationUnits"] = list(
@@ -211,9 +229,13 @@ class Exporter:
                                     )
                                 )
                                 modified = True
-                                self.iaso_logger.info("\t removed : ", diff.org_unit.name, diff.org_unit.id)
+                                self.iaso_logger.info(
+                                    "\t removed : ", diff.org_unit.name, diff.org_unit.id
+                                )
                 if modified:
                     self.iaso_logger.info("updating ", dhis2_group["id"], dhis2_group["name"])
                     resp = api.put("organisationUnitGroups/" + dhis2_group["id"], dhis2_group)
-                    self.iaso_logger.info("updated  ", dhis2_group["id"], dhis2_group["name"], resp, resp.json())
+                    self.iaso_logger.info(
+                        "updated  ", dhis2_group["id"], dhis2_group["name"], resp, resp.json()
+                    )
         return

@@ -11,7 +11,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="orgunit", name="path", field=django_ltree.fields.PathField(blank=True, null=True, unique=True)
+            model_name="orgunit",
+            name="path",
+            field=django_ltree.fields.PathField(blank=True, null=True, unique=True),
         ),
         migrations.AddIndex(
             model_name="orgunit",

@@ -27,13 +27,19 @@ class FormsVersionAPITestCase(APITestCase):
         star_wars.default_version = sw_version
         cls.sw_source = sw_source
 
-        cls.yoda = cls.create_user_with_profile(username="yoda", account=star_wars, permissions=["iaso_mappings"])
-        cls.batman = cls.create_user_with_profile(username="batman", account=dc, permissions=["iaso_mappings"])
+        cls.yoda = cls.create_user_with_profile(
+            username="yoda", account=star_wars, permissions=["iaso_mappings"]
+        )
+        cls.batman = cls.create_user_with_profile(
+            username="batman", account=dc, permissions=["iaso_mappings"]
+        )
 
         cls.sith_council = m.OrgUnitType.objects.create(name="Sith Council", short_name="Cnc")
 
         cls.project = m.Project.objects.create(
-            name="Hydroponic gardens", app_id="stars.empire.agriculture.hydroponics", account=star_wars
+            name="Hydroponic gardens",
+            app_id="stars.empire.agriculture.hydroponics",
+            account=star_wars,
         )
         cls.project.unit_types.add(cls.sith_council)
         sw_source.projects.add(cls.project)
@@ -49,7 +55,10 @@ class FormsVersionAPITestCase(APITestCase):
         cls.project.save()
 
         cls.form_2 = m.Form.objects.create(
-            name="Death Start survey", form_id="sample2", period_type="MONTH", single_per_period=False
+            name="Death Start survey",
+            form_id="sample2",
+            period_type="MONTH",
+            single_per_period=False,
         )
         cls.form_2.org_unit_types.add(cls.sith_council)
         cls.form_1.save()
@@ -105,7 +114,9 @@ class FormsVersionAPITestCase(APITestCase):
             HTTP_ACCEPT="application/json",
         )
         mapping_version = self.client.get(
-            f"/api/mappingversions/" + mappingversionid + "/?fields=:all", format="json", HTTP_ACCEPT="application/json"
+            f"/api/mappingversions/" + mappingversionid + "/?fields=:all",
+            format="json",
+            HTTP_ACCEPT="application/json",
         )
 
         self.assertEqual(mapping_version.json()["question_mappings"]["question_1"], data_element_1)
@@ -137,7 +148,9 @@ class FormsVersionAPITestCase(APITestCase):
         )
 
         mapping_version = self.client.get(
-            f"/api/mappingversions/" + mappingversionid + "/?fields=:all", format="json", HTTP_ACCEPT="application/json"
+            f"/api/mappingversions/" + mappingversionid + "/?fields=:all",
+            format="json",
+            HTTP_ACCEPT="application/json",
         )
         self.assertEqual(mapping_version.json()["question_mappings"]["question_2"], data_element_2)
         self.client.patch(
@@ -148,7 +161,9 @@ class FormsVersionAPITestCase(APITestCase):
         )
 
         mapping_version = self.client.get(
-            f"/api/mappingversions/" + mappingversionid + "/?fields=:all", format="json", HTTP_ACCEPT="application/json"
+            f"/api/mappingversions/" + mappingversionid + "/?fields=:all",
+            format="json",
+            HTTP_ACCEPT="application/json",
         )
 
         self.assertEqual(list(mapping_version.json()["question_mappings"].keys()), ["question_1"])
@@ -167,7 +182,7 @@ class FormsVersionAPITestCase(APITestCase):
 
     @tag("iaso_only")
     def test_mappingversions_create_ko_non_allowed_datasource(self):
-        """POST /mappingversions/ mapping """
+        """POST /mappingversions/ mapping"""
 
         self.client.force_authenticate(self.yoda)
         formversion = self.create_form_version()
@@ -187,7 +202,7 @@ class FormsVersionAPITestCase(APITestCase):
 
     @tag("iaso_only")
     def test_mappingversions_create_ko_non_existing_form_version(self):
-        """POST /mappingversions/ mapping """
+        """POST /mappingversions/ mapping"""
 
         self.client.force_authenticate(self.yoda)
 
@@ -225,7 +240,9 @@ class FormsVersionAPITestCase(APITestCase):
             HTTP_ACCEPT="application/json",
         )
 
-        self.assertEqual(resp.json(), {"question_mappings.question_1": "should have a least an data element id"})
+        self.assertEqual(
+            resp.json(), {"question_mappings.question_1": "should have a least an data element id"}
+        )
 
     @tag("iaso_only")
     def test_mappingversions_create_ko_data_element_value_type(self):

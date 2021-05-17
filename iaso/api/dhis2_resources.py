@@ -10,7 +10,7 @@ from iaso.models import DataSource
 
 
 class Dhis2ViewSet(viewsets.ViewSet):
-    """ DHIS2 datasources API
+    """DHIS2 datasources API
 
     This API is restricted to authenticated users (no specific permission check)
 
@@ -28,10 +28,14 @@ class Dhis2ViewSet(viewsets.ViewSet):
         data_source = sources.filter(projects__account=profile.account, id=datasource_id).first()
 
         if data_source is None:
-            return Response({"error": "Data source not available"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Data source not available"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         if data_source.credentials is None:
-            return Response({"error": "No credentials configured"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"error": "No credentials configured"}, status=status.HTTP_401_UNAUTHORIZED
+            )
 
         credentials = data_source.credentials
 

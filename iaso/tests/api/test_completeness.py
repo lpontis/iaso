@@ -17,7 +17,9 @@ class CompletenessAPITestCase(APITestCase):
         account.default_version = version
         account.save()
 
-        cls.project = m.Project(name="Hyrule", app_id="magic.countries.hyrule.collect", account=account)
+        cls.project = m.Project(
+            name="Hyrule", app_id="magic.countries.hyrule.collect", account=account
+        )
         cls.project.save()
 
         source.projects.add(cls.project)
@@ -27,10 +29,16 @@ class CompletenessAPITestCase(APITestCase):
         cls.project.unit_types.add(unit_type)
         cls.village_unit_type = unit_type
 
-        cls.user = cls.create_user_with_profile(username="link", account=account, permissions=["iaso_completeness"])
+        cls.user = cls.create_user_with_profile(
+            username="link", account=account, permissions=["iaso_completeness"]
+        )
 
-        cls.village_1 = m.OrgUnit.objects.create(name="Akkala", org_unit_type=unit_type, version=version)
-        cls.village_2 = m.OrgUnit.objects.create(name="Kakariko", org_unit_type=unit_type, version=version)
+        cls.village_1 = m.OrgUnit.objects.create(
+            name="Akkala", org_unit_type=unit_type, version=version
+        )
+        cls.village_2 = m.OrgUnit.objects.create(
+            name="Kakariko", org_unit_type=unit_type, version=version
+        )
         form = m.Form(name="Quantity FORM")
         form.period_type = "monthly"
         form.form_id = "quantityf"
@@ -49,7 +57,7 @@ class CompletenessAPITestCase(APITestCase):
         instance.period = period
         instance.form = self.form
         instance.project = self.project
-        instance.file="something_fake"
+        instance.file = "something_fake"
         instance.save()
         return instance
 

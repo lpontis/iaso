@@ -12,7 +12,9 @@ class Migration(migrations.Migration):
             model_name="deviceposition",
             name="transport",
             field=models.CharField(
-                choices=[("car", "Car"), ("foot", "Foot"), ("truck", "Truc")], default="car", max_length=32
+                choices=[("car", "Car"), ("foot", "Foot"), ("truck", "Truc")],
+                default="car",
+                max_length=32,
             ),
             preserve_default=False,
         )

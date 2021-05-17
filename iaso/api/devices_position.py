@@ -29,7 +29,9 @@ class DevicePositionSerializer(serializers.Serializer):
         request = self.context["request"]
 
         device_id = validated_data.pop("device_id")
-        p = Project.objects.get_for_user_and_app_id(request.user, request.query_params.get("app_id"))
+        p = Project.objects.get_for_user_and_app_id(
+            request.user, request.query_params.get("app_id")
+        )
         d, created = Device.objects.get_or_create(imei=device_id)
 
         if created and not request.user.is_anonymous:

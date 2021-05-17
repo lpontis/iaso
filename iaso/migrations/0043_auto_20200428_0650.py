@@ -9,6 +9,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="instance", name="correlation_id", field=models.BigIntegerField(blank=True, null=True)
+            model_name="instance",
+            name="correlation_id",
+            field=models.BigIntegerField(blank=True, null=True),
         )
     ]

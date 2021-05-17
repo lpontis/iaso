@@ -8,5 +8,9 @@ class Migration(migrations.Migration):
     dependencies = [("iaso", "0043_auto_20200428_0650")]
 
     operations = [
-        migrations.AddField(model_name="project", name="needs_authentication", field=models.BooleanField(default=False))
+        migrations.AddField(
+            model_name="project",
+            name="needs_authentication",
+            field=models.BooleanField(default=False),
+        )
     ]

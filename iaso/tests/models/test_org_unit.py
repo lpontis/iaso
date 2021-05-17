@@ -17,7 +17,9 @@ class OrgUnitModelTestCase(TestCase):
         attached to a parent that has a path."""
 
         corrusca = m.OrgUnit.objects.create(org_unit_type=self.sector, name="Corrusca Sector")
-        corruscant = m.OrgUnit.objects.create(parent=corrusca, org_unit_type=self.sector, name="Corruscant System")
+        corruscant = m.OrgUnit.objects.create(
+            parent=corrusca, org_unit_type=self.sector, name="Corruscant System"
+        )
         self.assertEqual(str(corrusca.path), str(corrusca.pk))
         self.assertEqual(str(corruscant.path), f"{corrusca.pk}.{corruscant.pk}")
 
@@ -27,7 +29,9 @@ class OrgUnitModelTestCase(TestCase):
 
         corrusca = m.OrgUnit(org_unit_type=self.sector, name="Corrusca Sector")
         corrusca.save(skip_calculate_path=True)
-        corruscant = m.OrgUnit.objects.create(parent=corrusca, org_unit_type=self.sector, name="Corruscant System")
+        corruscant = m.OrgUnit.objects.create(
+            parent=corrusca, org_unit_type=self.sector, name="Corruscant System"
+        )
         self.assertIsNone(corruscant.path)
         corruscant.save()
         self.assertIsNone(corruscant.path)
@@ -59,16 +63,21 @@ class OrgUnitModelTestCase(TestCase):
         self.assertEqual(str(corrusca.path), str(corrusca.pk))
         self.assertEqual(str(corruscant.path), f"{corrusca.pk}.{corruscant.pk}")
         self.assertEqual(
-            str(jedi_council_corruscant.path), f"{corrusca.pk}.{corruscant.pk}.{jedi_council_corruscant.pk}"
+            str(jedi_council_corruscant.path),
+            f"{corrusca.pk}.{corruscant.pk}.{jedi_council_corruscant.pk}",
         )
 
     @tag("iaso_only")
     def test_org_unit_path_does_not_change(self):
-        """Updating the "name" property should not result in path change queries """
+        """Updating the "name" property should not result in path change queries"""
 
         corrusca = m.OrgUnit.objects.create(org_unit_type=self.sector, name="Corrusca Sector")
-        corruscant = m.OrgUnit.objects.create(org_unit_type=self.system, parent=corrusca, name="Coruscant System")
-        m.OrgUnit.objects.create(org_unit_type=self.jedi_council, parent=corruscant, name="Corruscant Jedi Council")
+        corruscant = m.OrgUnit.objects.create(
+            org_unit_type=self.system, parent=corrusca, name="Coruscant System"
+        )
+        m.OrgUnit.objects.create(
+            org_unit_type=self.jedi_council, parent=corruscant, name="Corruscant Jedi Council"
+        )
 
         corrusca.name = "Corrusca Sector FTW"
         # 2 savepoints, 1 regular update
@@ -95,8 +104,12 @@ class OrgUnitModelTestCase(TestCase):
 
         alderaan = m.OrgUnit.objects.create(org_unit_type=self.sector, name="Alderaan Sector")
         corrusca = m.OrgUnit.objects.create(org_unit_type=self.sector, name="Corrusca Sector")
-        corruscant = m.OrgUnit.objects.create(org_unit_type=self.system, parent=alderaan, name="Coruscant System")
-        m.OrgUnit.objects.create(org_unit_type=self.jedi_council, parent=corruscant, name="Corruscant Jedi Council")
+        corruscant = m.OrgUnit.objects.create(
+            org_unit_type=self.system, parent=alderaan, name="Coruscant System"
+        )
+        m.OrgUnit.objects.create(
+            org_unit_type=self.jedi_council, parent=corruscant, name="Corruscant Jedi Council"
+        )
 
         corruscant.name = "The awesome Coruscant System"
         corruscant.parent = corrusca
@@ -109,10 +122,19 @@ class OrgUnitModelTestCase(TestCase):
     def test_org_unit_hierarchy_children_descendants(self):
         """Test manager methods: hierarchy(), children() and descendants()."""
 
-        (corrusca, corruscant, first_council, second_council, task_force) = self.create_simple_hierarchy()
+        (
+            corrusca,
+            corruscant,
+            first_council,
+            second_council,
+            task_force,
+        ) = self.create_simple_hierarchy()
 
         self.assertEqual(5, m.OrgUnit.objects.hierarchy(corrusca).count())
-        self.assertEqual(5, m.OrgUnit.objects.hierarchy(m.OrgUnit.objects.filter(name__icontains="corrus")).count())
+        self.assertEqual(
+            5,
+            m.OrgUnit.objects.hierarchy(m.OrgUnit.objects.filter(name__icontains="corrus")).count(),
+        )
         self.assertEqual(1, m.OrgUnit.objects.children(corrusca).count())
         self.assertEqual(4, m.OrgUnit.objects.descendants(corrusca).count())
 
@@ -148,12 +170,16 @@ class OrgUnitModelTestCase(TestCase):
 
     def create_simple_hierarchy(self):
         corrusca = m.OrgUnit.objects.create(org_unit_type=self.sector, name="Corrusca Sector")
-        corruscant = m.OrgUnit.objects.create(org_unit_type=self.system, parent=corrusca, name="Coruscant System")
+        corruscant = m.OrgUnit.objects.create(
+            org_unit_type=self.system, parent=corrusca, name="Coruscant System"
+        )
         first_council = m.OrgUnit.objects.create(
             org_unit_type=self.jedi_council, parent=corruscant, name="First Corruscant Jedi Council"
         )
         second_council = m.OrgUnit.objects.create(
-            org_unit_type=self.jedi_council, parent=corruscant, name="Second Corruscant Jedi Council"
+            org_unit_type=self.jedi_council,
+            parent=corruscant,
+            name="Second Corruscant Jedi Council",
         )
         task_force = m.OrgUnit.objects.create(
             org_unit_type=self.jedi_task_force, parent=first_council, name="Jedi Ethics Task Force"

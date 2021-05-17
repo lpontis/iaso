@@ -23,10 +23,15 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--dhis2_url", type=str, help="Dhis2 url to import from (without user/password)", required=True
+            "--dhis2_url",
+            type=str,
+            help="Dhis2 url to import from (without user/password)",
+            required=True,
         )
         parser.add_argument("--dhis2_user", type=str, help="dhis2 user name", required=True)
-        parser.add_argument("--dhis2_password", type=str, help="dhis2 password of the dhis2_user", required=True)
+        parser.add_argument(
+            "--dhis2_password", type=str, help="dhis2 password of the dhis2_user", required=True
+        )
         parser.add_argument(
             "--dhis2_program_id",
             type=str,
@@ -36,7 +41,9 @@ class Command(BaseCommand):
         parser.add_argument("--form_id", type=str, help="iaso form_id eg ", required=True)
 
     def get_api(self, options):
-        return Api(options.get("dhis2_url"), options.get("dhis2_user"), options.get("dhis2_password"))
+        return Api(
+            options.get("dhis2_url"), options.get("dhis2_user"), options.get("dhis2_password")
+        )
 
     def handle(self, *args, **options):
         api = self.get_api(options)

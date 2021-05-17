@@ -87,8 +87,14 @@ def parse_xls_form(xls_file: typing.BinaryIO, *, previous_version: str = None) -
     if not survey.version.isnumeric() or len(survey.version) > 10:
         raise ParsingError("Invalid XLS file: Invalid version (must be a string of 1-10 numbers).")
 
-    if previous_version is not None and previous_version.isnumeric() and int(previous_version) >= int(survey.version):
-        raise ParsingError("Invalid XLS file: Parsed version should be greater than previous version.")
+    if (
+        previous_version is not None
+        and previous_version.isnumeric()
+        and int(previous_version) >= int(survey.version)
+    ):
+        raise ParsingError(
+            "Invalid XLS file: Parsed version should be greater than previous version."
+        )
 
     return Survey(survey, xls_file_name=xls_file.name)
 
@@ -102,9 +108,15 @@ def _generate_form_version(previous_version: typing.Optional[str]) -> str:
     """
 
     today = timezone.now().date()
-    if previous_version is not None and len(previous_version) == 10:  # previous version in yyyymmddrr format
-        previous_version_date_string = f"{previous_version[:4]}-{previous_version[4:6]}-{previous_version[6:8]}"
-        if dateparse.parse_date(previous_version_date_string) == today:  # previous version was created today
+    if (
+        previous_version is not None and len(previous_version) == 10
+    ):  # previous version in yyyymmddrr format
+        previous_version_date_string = (
+            f"{previous_version[:4]}-{previous_version[4:6]}-{previous_version[6:8]}"
+        )
+        if (
+            dateparse.parse_date(previous_version_date_string) == today
+        ):  # previous version was created today
             if previous_version[8:] == "99":
                 raise ParsingError("Invalid XLS file: Too many versions.")
 

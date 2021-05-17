@@ -1,6 +1,15 @@
 from django.test import tag
 
-from ..models import OrgUnit, Form, Instance, OrgUnitType, Account, Project, SourceVersion, DataSource
+from ..models import (
+    OrgUnit,
+    Form,
+    Instance,
+    OrgUnitType,
+    Account,
+    Project,
+    SourceVersion,
+    DataSource,
+)
 from math import floor
 from rest_framework.test import APIClient
 import json
@@ -17,7 +26,9 @@ class BasicAPITestCase(APITestCase):
         account = Account(name="Les Inconnus", default_version=default_version)
         account.save()
 
-        self.project = Project(name="Le spectacle", app_id="org.inconnus.spectacle", account=account)
+        self.project = Project(
+            name="Le spectacle", app_id="org.inconnus.spectacle", account=account
+        )
         self.project.save()
 
         unit_type = OrgUnitType(name="Hospital", short_name="Hosp")
@@ -63,7 +74,9 @@ class BasicAPITestCase(APITestCase):
             }
         ]
 
-        response = c.post("/api/orgunits/?app_id=org.inconnus.spectacle", data=unit_body, format="json")
+        response = c.post(
+            "/api/orgunits/?app_id=org.inconnus.spectacle", data=unit_body, format="json"
+        )
         self.assertEqual(response.status_code, 200)
         velpo_model = OrgUnit.objects.get(uuid=uuid)
         self.assertEqual(velpo_model.name, name)
@@ -134,7 +147,9 @@ class BasicAPITestCase(APITestCase):
             "name": name2,
         }
 
-        response = c.post("/api/orgunits/?app_id=org.inconnus.spectacle", data=[unit_body_2], format="json")
+        response = c.post(
+            "/api/orgunits/?app_id=org.inconnus.spectacle", data=[unit_body_2], format="json"
+        )
         self.assertEqual(response.status_code, 200)
 
         fifre_model = OrgUnit.objects.get(uuid=uuid2)
@@ -145,7 +160,7 @@ class BasicAPITestCase(APITestCase):
 
     @tag("iaso_only")
     def test_org_unit_insertion_new_field_names(self):
-        """Creating Org Units through the API but using org_unit_type_id and parent_id instead of orgUnitTypeId and parentId """
+        """Creating Org Units through the API but using org_unit_type_id and parent_id instead of orgUnitTypeId and parentId"""
         c = APIClient()
         hospital_unit_type = OrgUnitType.objects.get(name="Hospital")
         uuid = "w5dg2671-aa59-4fb2-a4a0-4af80573e2de"
@@ -165,7 +180,9 @@ class BasicAPITestCase(APITestCase):
             }
         ]
 
-        response = c.post("/api/orgunits/?app_id=org.inconnus.spectacle", data=unit_body, format="json")
+        response = c.post(
+            "/api/orgunits/?app_id=org.inconnus.spectacle", data=unit_body, format="json"
+        )
         self.assertEqual(response.status_code, 200)
         velpo_model = OrgUnit.objects.get(uuid=uuid)
         self.assertEqual(velpo_model.name, name)
@@ -228,7 +245,9 @@ class BasicAPITestCase(APITestCase):
             }
         ]
 
-        response = c.post("/api/orgunits/?app_id=org.inconnus.spectacle", data=unit_body_2, format="json")
+        response = c.post(
+            "/api/orgunits/?app_id=org.inconnus.spectacle", data=unit_body_2, format="json"
+        )
         self.assertEqual(response.status_code, 200)
 
         fifre_model = OrgUnit.objects.get(uuid=uuid2)
@@ -275,7 +294,9 @@ class BasicAPITestCase(APITestCase):
             "name": name,
         }
 
-        response = c.post("/api/orgunits/?app_id=org.inconnus.spectacle", data=[unit_body], format="json")
+        response = c.post(
+            "/api/orgunits/?app_id=org.inconnus.spectacle", data=[unit_body], format="json"
+        )
         self.assertJSONResponse(response, 200)
         velpo_model = OrgUnit.objects.get(uuid=uuid)
         uuid = "4b7c3954-f69a-4b99-83b1-db73957b32b8"
@@ -299,7 +320,9 @@ class BasicAPITestCase(APITestCase):
             }
         ]
 
-        response = c.post("/api/instances/?app_id=org.inconnus.spectacle", data=instance_body, format="json")
+        response = c.post(
+            "/api/instances/?app_id=org.inconnus.spectacle", data=instance_body, format="json"
+        )
         self.assertEqual(response.status_code, 200)
 
         instance = Instance.objects.get(uuid=uuid)
@@ -378,9 +401,14 @@ class BasicAPITestCase(APITestCase):
             self.assertValidFormData(form_data)
 
     # noinspection DuplicatedCode
-    def assertValidFormListData(self, list_data: typing.Mapping, expected_length: int, paginated: bool = False):
+    def assertValidFormListData(
+        self, list_data: typing.Mapping, expected_length: int, paginated: bool = False
+    ):
         self.assertValidListData(
-            list_data=list_data, expected_length=expected_length, results_key="forms", paginated=paginated
+            list_data=list_data,
+            expected_length=expected_length,
+            results_key="forms",
+            paginated=paginated,
         )
 
         for form_data in list_data["forms"]:

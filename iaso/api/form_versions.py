@@ -60,7 +60,9 @@ class FormVersionSerializer(DynamicFieldsModelSerializer):
 
     form_id = serializers.PrimaryKeyRelatedField(source="form", queryset=Form.objects.all())
     form_name = serializers.SerializerMethodField()
-    xls_file = serializers.FileField(required=False, allow_empty_file=False)  # field is not required in model
+    xls_file = serializers.FileField(
+        required=False, allow_empty_file=False
+    )  # field is not required in model
     mapped = serializers.BooleanField(read_only=True)
     full_name = serializers.CharField(read_only=True)
     created_at = TimestampField(read_only=True)
@@ -73,14 +75,12 @@ class FormVersionSerializer(DynamicFieldsModelSerializer):
     def get_form_name(self, form_version):
         return form_version.form.name
 
-
     def get_descriptor(self, form_version):
         return form_version.get_or_save_form_descriptor()
 
     @staticmethod
     def get_mapping_versions(obj: FormVersion):
         return [f.as_dict() for f in obj.mapping_versions.all()]
-
 
     def validate(self, data: typing.MutableMapping):
         #  TO_DO: validate start en end period (is a period and start before end)
@@ -89,7 +89,9 @@ class FormVersionSerializer(DynamicFieldsModelSerializer):
         form = data["form"]
         # validate form (access check)
         permission_checker = HasFormPermission()
-        if not permission_checker.has_object_permission(self.context["request"], self.context["view"], form):
+        if not permission_checker.has_object_permission(
+            self.context["request"], self.context["view"], form
+        ):
             raise serializers.ValidationError({"form_id": "Invalid form id"})
 
         # handle xls to xml conversion
@@ -97,18 +99,24 @@ class FormVersionSerializer(DynamicFieldsModelSerializer):
             previous_form_version = FormVersion.objects.latest_version(form)
             survey = parsing.parse_xls_form(
                 data["xls_file"],
-                previous_version=previous_form_version.version_id if previous_form_version is not None else None,
+                previous_version=previous_form_version.version_id
+                if previous_form_version is not None
+                else None,
             )
         except parsing.ParsingError as e:
             raise serializers.ValidationError({"xls_file": str(e)})
 
         # validate that form_id stays constant across versions
         if form.form_id is not None and survey.form_id != form.form_id:
-            raise serializers.ValidationError({"xls_file": "Form id should stay constant across form versions."})
+            raise serializers.ValidationError(
+                {"xls_file": "Form id should stay constant across form versions."}
+            )
 
         # validate form_id (from XLS file) uniqueness across account
         if Form.objects.exists_with_same_version_id_within_projects(form, survey.form_id):
-            raise serializers.ValidationError({"xls_file": "The form_id is already used in another form."})
+            raise serializers.ValidationError(
+                {"xls_file": "The form_id is already used in another form."}
+            )
 
         data["survey"] = survey
 
@@ -118,7 +126,9 @@ class FormVersionSerializer(DynamicFieldsModelSerializer):
         form = validated_data.pop("form")
         survey = validated_data.pop("survey")
 
-        return FormVersion.objects.create_for_form_and_survey(form=form, survey=survey, **validated_data)
+        return FormVersion.objects.create_for_form_and_survey(
+            form=form, survey=survey, **validated_data
+        )
 
     def update(self, form_version, validated_data):
         form_version.start_period = validated_data.pop("start_period", None)
@@ -126,8 +136,9 @@ class FormVersionSerializer(DynamicFieldsModelSerializer):
         form_version.save()
         return form_version
 
+
 class FormVersionsViewSet(ModelViewSet):
-    """ Form versions API
+    """Form versions API
 
     This API is restricted to authenticated users having the "menupermissions.iaso_forms" permission
 
@@ -162,7 +173,11 @@ class FormVersionsViewSet(ModelViewSet):
         queryset = queryset.annotate(mapping_versions_count=Count("mapping_versions"))
 
         queryset = queryset.annotate(
-            mapped=Case(When(mapping_versions_count__gt=0, then=True), default=False, output_field=BooleanField())
+            mapped=Case(
+                When(mapping_versions_count__gt=0, then=True),
+                default=False,
+                output_field=BooleanField(),
+            )
         )
 
         if mapped_filter:

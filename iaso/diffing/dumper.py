@@ -86,7 +86,11 @@ class Dumper:
         res.append(header)
 
         for diff in diffs:
-            results = [diff.org_unit.source_ref, diff.status, diff.org_unit.org_unit_type.name if diff.org_unit else ""]
+            results = [
+                diff.org_unit.source_ref,
+                diff.status,
+                diff.org_unit.org_unit_type.name if diff.org_unit else "",
+            ]
 
             for field in fields:
                 comparison = list(filter(lambda x: x.field == field, diff.comparisons))[0]
@@ -128,7 +132,11 @@ class Dumper:
                         results.append(
                             self.iaso_logger.colorize(
                                 " vs ".join([str(comparison.before), str(comparison.after)])
-                                + ((" Dist : %.2f " % comparison.distance) if comparison.distance else ""),
+                                + (
+                                    (" Dist : %.2f " % comparison.distance)
+                                    if comparison.distance
+                                    else ""
+                                ),
                                 color(comparison.status),
                             )
                         )
@@ -136,7 +144,9 @@ class Dumper:
                 display.append(results)
 
         for d in display:
-            message = "\t".join(map(lambda s: self.iaso_logger.colorize(str(s).ljust(20, " "), color(s)), d))
+            message = "\t".join(
+                map(lambda s: self.iaso_logger.colorize(str(s).ljust(20, " "), color(s)), d)
+            )
             if d[2] == "new":
                 self.iaso_logger.info(self.iaso_logger.colorize(message, CommandLogger.GREEN))
             elif d[2] == "modified":

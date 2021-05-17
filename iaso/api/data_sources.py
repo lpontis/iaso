@@ -19,7 +19,7 @@ class DataSourceSerializer(serializers.ModelSerializer):
             "url",
             "projects",
             "default_version",
-            "credentials"
+            "credentials",
         ]
 
     url = serializers.SerializerMethodField()
@@ -64,9 +64,7 @@ class DataSourceSerializer(serializers.ModelSerializer):
             ds.credentials = new_credentials
 
         ds.save()
-        projects = account.project_set.filter(
-            id__in=self.context["request"].data["project_ids"]
-        )
+        projects = account.project_set.filter(id__in=self.context["request"].data["project_ids"])
         if projects is not None:
             for project in projects:
                 ds.projects.add(project)
@@ -78,7 +76,9 @@ class DataSourceSerializer(serializers.ModelSerializer):
 
         if credentials:
             if data_source.credentials:
-                new_credentials = get_object_or_404(ExternalCredentials, pk=data_source.credentials.pk)
+                new_credentials = get_object_or_404(
+                    ExternalCredentials, pk=data_source.credentials.pk
+                )
             else:
                 new_credentials = ExternalCredentials()
                 new_credentials.account = account
@@ -93,9 +93,7 @@ class DataSourceSerializer(serializers.ModelSerializer):
         read_only = validated_data.pop("read_only", None)
         description = validated_data.pop("description", None)
         default_version_id = self.context["request"].data["default_version_id"]
-        projects = account.project_set.filter(
-            id__in=self.context["request"].data["project_ids"]
-        )
+        projects = account.project_set.filter(id__in=self.context["request"].data["project_ids"])
         if name is not None:
             data_source.name = name
         if read_only is not None:
@@ -140,9 +138,7 @@ class DataSourceViewSet(ModelViewSet):
         linked_to = self.kwargs.get("linkedTo", None)
         profile = self.request.user.iaso_profile
         order = self.request.GET.get("order", "name").split(",")
-        sources = DataSource.objects.filter(
-            projects__account=profile.account
-        ).distinct()
+        sources = DataSource.objects.filter(projects__account=profile.account).distinct()
         if linked_to:
             org_unit = OrgUnit.objects.get(pk=linked_to)
             useful_sources = org_unit.source_set.values_list(

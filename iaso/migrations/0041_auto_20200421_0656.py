@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="mapping",
             name="mapping_type",
-            field=models.TextField(choices=[("AGGREGATE", "Aggregate"), ("EVENT", "Event"), ("DERIVED", "Derived")]),
+            field=models.TextField(
+                choices=[("AGGREGATE", "Aggregate"), ("EVENT", "Event"), ("DERIVED", "Derived")]
+            ),
         )
     ]

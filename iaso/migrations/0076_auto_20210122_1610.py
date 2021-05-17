@@ -8,6 +8,12 @@ class Migration(migrations.Migration):
     dependencies = [("iaso", "0075_task_queue_answer")]
 
     operations = [
-        migrations.AddField(model_name="task", name="progress_message", field=models.TextField(blank=True, null=True)),
-        migrations.AddField(model_name="task", name="should_be_killed", field=models.BooleanField(default=False)),
+        migrations.AddField(
+            model_name="task",
+            name="progress_message",
+            field=models.TextField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name="task", name="should_be_killed", field=models.BooleanField(default=False)
+        ),
     ]

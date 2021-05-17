@@ -10,7 +10,9 @@ class Migration(migrations.Migration):
     dependencies = [("iaso", "0001_initial")]
 
     operations = [
-        migrations.AddField(model_name="orgunit", name="gps_source", field=models.TextField(blank=True, null=True)),
+        migrations.AddField(
+            model_name="orgunit", name="gps_source", field=models.TextField(blank=True, null=True)
+        ),
         migrations.AddField(
             model_name="orgunit",
             name="latitude",
@@ -30,26 +32,38 @@ class Migration(migrations.Migration):
             model_name="orgunit",
             name="org_level",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="iaso.OrgLevel"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="iaso.OrgLevel",
             ),
         ),
         migrations.RemoveField(model_name="orglevel", name="org_unit_type"),
         migrations.AddField(
-            model_name="orglevel", name="org_unit_type", field=models.ManyToManyField(blank=True, to="iaso.OrgUnitType")
+            model_name="orglevel",
+            name="org_unit_type",
+            field=models.ManyToManyField(blank=True, to="iaso.OrgUnitType"),
         ),
         migrations.AlterField(
             model_name="orglevel",
             name="parent",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="iaso.OrgLevel"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="iaso.OrgLevel",
             ),
         ),
         migrations.AlterField(
             model_name="orgunit",
             name="geom",
-            field=django.contrib.gis.db.models.fields.PolygonField(blank=True, null=True, srid=4326),
+            field=django.contrib.gis.db.models.fields.PolygonField(
+                blank=True, null=True, srid=4326
+            ),
         ),
-        migrations.AlterField(model_name="orgunit", name="geom_ref", field=models.IntegerField(blank=True, null=True)),
+        migrations.AlterField(
+            model_name="orgunit", name="geom_ref", field=models.IntegerField(blank=True, null=True)
+        ),
         migrations.AlterField(
             model_name="orgunit",
             name="geom_source",
@@ -68,20 +82,28 @@ class Migration(migrations.Migration):
             model_name="orgunit",
             name="org_unit_type",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="iaso.OrgUnitType"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="iaso.OrgUnitType",
             ),
         ),
         migrations.AlterField(
             model_name="orgunit",
             name="parent",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="iaso.OrgUnit"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="iaso.OrgUnit",
             ),
         ),
         migrations.AlterField(
             model_name="orgunit",
             name="simplified_geom",
-            field=django.contrib.gis.db.models.fields.PolygonField(blank=True, null=True, srid=4326),
+            field=django.contrib.gis.db.models.fields.PolygonField(
+                blank=True, null=True, srid=4326
+            ),
         ),
         migrations.AlterField(
             model_name="orgunit",
@@ -97,5 +119,7 @@ class Migration(migrations.Migration):
                 null=True,
             ),
         ),
-        migrations.AlterField(model_name="orgunit", name="source_ref", field=models.TextField(blank=True, null=True)),
+        migrations.AlterField(
+            model_name="orgunit", name="source_ref", field=models.TextField(blank=True, null=True)
+        ),
     ]

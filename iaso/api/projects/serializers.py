@@ -26,7 +26,15 @@ class FeatureFlagSerializer(serializers.Serializer):
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ["id", "name", "app_id", "feature_flags", "created_at", "updated_at", "needs_authentication"]
+        fields = [
+            "id",
+            "name",
+            "app_id",
+            "feature_flags",
+            "created_at",
+            "updated_at",
+            "needs_authentication",
+        ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
     def validate_app_id(self, data):

@@ -1,4 +1,14 @@
-from iaso.models import OrgUnit, DataSource, SourceVersion, Group, GroupSet, Task, SUCCESS, ERRORED, RUNNING
+from iaso.models import (
+    OrgUnit,
+    DataSource,
+    SourceVersion,
+    Group,
+    GroupSet,
+    Task,
+    SUCCESS,
+    ERRORED,
+    RUNNING,
+)
 from beanstalk_worker import task
 from django.utils.translation import gettext as _
 
@@ -10,11 +20,18 @@ logger = logging.getLogger(__name__)
 
 @task(task_name="copy_version")
 def copy_version(
-    source_source_id, source_version_number, destination_source_id, destination_version_number, force, task=None
+    source_source_id,
+    source_version_number,
+    destination_source_id,
+    destination_version_number,
+    force,
+    task=None,
 ):
     the_task = task
     source_source = DataSource.objects.get(id=source_source_id)
-    source_version = SourceVersion.objects.get(number=source_version_number, data_source=source_source)
+    source_version = SourceVersion.objects.get(
+        number=source_version_number, data_source=source_source
+    )
     logger.debug("source_version", source_version)
     logger.debug("copying source_version %s" % str(source_version))
     destination_source = DataSource.objects.get(id=destination_source_id)
@@ -23,7 +40,9 @@ def copy_version(
     )
     source_version_count = OrgUnit.objects.filter(version=source_version).count()
 
-    the_task.report_progress_and_stop_if_killed(progress_value=source_version_count, progress_message=_("Starting"))
+    the_task.report_progress_and_stop_if_killed(
+        progress_value=source_version_count, progress_message=_("Starting")
+    )
     destination_version_count = OrgUnit.objects.filter(version=destination_version).count()
     if destination_version_count > 0 and not force:
         res_string = (
@@ -87,7 +106,9 @@ def copy_version(
             unit.groups.add(matching_group)
 
         if index % 100 == 0:
-            the_task.report_progress_and_stop_if_killed(progress_value=index, progress_message=_("Copying org units"))
+            the_task.report_progress_and_stop_if_killed(
+                progress_value=index, progress_message=_("Copying org units")
+            )
 
     index = 0
     for unit in new_units:
