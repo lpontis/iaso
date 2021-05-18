@@ -5,22 +5,24 @@ from django.utils.html import strip_tags
 
 from iaso.models import Form
 
+
 @receiver(signals.post_save, sender=Form)
 def send_form_email(sender, **kwargs):
-    created = kwargs['created']
-    form = kwargs['instance']
+    created = kwargs["created"]
+    form = kwargs["instance"]
 
     if created:
-        subject = 'A form has just been created...'
+        subject = "A form has just been created..."
 
-        body_html = 'Hello there! <br /><br />'
-        body_html += 'A form has just been created: <strong>%s</strong> <br /><br />' % form.name
-        body_html += 'Enjoy!'
+        body_html = "Hello there! <br /><br />"
+        body_html += "A form has just been created: <strong>%s</strong> <br /><br />" % form.name
+        body_html += "Enjoy!"
 
         body_text = strip_tags(body_html)
 
-        message = EmailMultiAlternatives(subject=subject, body=body_text, from_email='Iaso <iaso@bluesquare.org>',
-                                         to=['vincent.battaglia@gmail.com'])
+        message = EmailMultiAlternatives(
+            subject=subject, body=body_text, from_email="Iaso <iaso@bluesquare.org>", to=["vincent.battaglia@gmail.com"]
+        )
         message.attach_alternative(body_html, "text/html")
 
         message.send()

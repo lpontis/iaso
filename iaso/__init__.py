@@ -1,1 +1,1 @@
-default_app_config = 'iaso.apps.IasoConfig'
+default_app_config = "iaso.apps.IasoConfig"
