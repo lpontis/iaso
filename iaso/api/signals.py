@@ -2,18 +2,13 @@ from django.db.models import signals
 from django.dispatch import receiver
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
-import logging
 
 from iaso.models import Form
-
-logger = logging.getLogger(__name__)
 
 @receiver(signals.post_save, sender=Form)
 def send_form_email(sender, **kwargs):
     created = kwargs['created']
     form = kwargs['instance']
-
-    logger.warning('SIGNAL send_form_email')
 
     if created:
         subject = 'A form has just been created...'
