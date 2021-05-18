@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const BundleTracker = require('webpack-bundle-tracker');
+const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
 // Switch here for french. This is set to 'en' in dev to not get react-intl warnings
 // remember to switch in webpack.prod.js and
 // django settings as well
@@ -30,6 +31,18 @@ module.exports = {
     },
 
     plugins: [
+        new ModuleFederationPlugin({
+          name: 'iaso_root',
+          library: { type: 'var', name: 'iaso_root' },
+          filename: 'remoteEntry.js',
+          exposes: {
+            'IasoRoot': './index',
+          },
+          remotes: {
+            'polio_app': 'polio_app',
+          },
+          shared: ['react', 'react-dom'],
+        }),
         new webpack.NormalModuleReplacementPlugin(
             /^__intl\/messages\/en$/,
             '../translations/en.json',

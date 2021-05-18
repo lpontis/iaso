@@ -5,9 +5,10 @@
     "hat/assets/js/apps/Iaso/"
   ],
   "scripts": {
-    "start": "npm run build --workspaces",
-    "webpack-server": "npm run webpack-server --workspaces",
-    "test": "npm run test --workspaces"
+    "build-iaso-root": "npm run build --workspace=iaso-root",
+    "webpack-server": "npm run webpack-server --workspace=iaso-root",
+    "test": "npm run test --workspace=iaso-root",
+    "webpack-prod": "npm run webpack-prod --workspace=iaso-root"
   },
   "devDependencies": {
     "glob": "^7.1.7"

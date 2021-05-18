@@ -45,7 +45,7 @@ RUN npm install --loglevel silent
 ENV PATH /opt/app/node_modules/.bin:$PATH
 
 COPY . /opt/app
-RUN npm run start
+RUN npm run build-iaso-root
 
 ENV PATH /opt/app/node_modules/.bin:$PATH
 ENTRYPOINT ["/opt/app/entrypoint.sh"]
