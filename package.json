@@ -25,12 +25,6 @@
     "url": "https://github.com/BLSQ/iaso/issues"
   },
   "homepage": "https://github.com/BLSQ/iaso#readme",
-  "standard": {
-    "ignore": [
-      "hat/assets/bundles",
-      "hat/dashboard/static/docs"
-    ]
-  },
   "dependencies": {
     "@babel/runtime": "^7.12.1",
     "@date-io/moment": "1.x",
@@ -53,7 +47,6 @@
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-color": "^2.17.3",
-    "react-datepicker": "~1.2.1",
     "react-dom": "^16.8.6",
     "react-hot-loader": "^4.12.0",
     "react-intersection-observer": "^8.26.1",
@@ -65,12 +58,10 @@
     "react-leaflet-markercluster": "^2.0.0-rc3",
     "react-modal": "^3.8.2",
     "react-redux": "^7.2.0",
-    "react-resize-detector": "^4.2.0",
     "react-router": "^3.0.0",
     "react-router-redux": "^4.0.0",
     "react-select": "~1.2.1",
     "react-table": "6.8.2",
-    "recursive-readdir": "^2.2.2",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "standard": "^12.0.1",
@@ -105,9 +96,7 @@
     "extract-react-intl-messages": "^4.1.1",
     "fetch-mock": "^7.3.3",
     "file-loader": "^6.2.0",
-    "husky": "^3.0.0",
     "jsdom": "^15.1.1",
-    "lint-staged": "^9.0.1",
     "mini-css-extract-plugin": "^1.6.0",
     "mocha": "^8.2.0",
     "mock-require": "^3.0.3",
