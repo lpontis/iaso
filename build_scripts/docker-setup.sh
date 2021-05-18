@@ -16,7 +16,7 @@ export DUMB_INIT=1.2.0
 
 # https://nodejs.org
 export NPM_CONFIG_LOGLEVEL=info
-export NODE_VERSION=10.15.0
+export NODE_VERSION=15.14.0
 
 
 ################################################################################
@@ -29,7 +29,7 @@ cat /tmp/apt-packages.txt | xargs apt-get -qq --yes --force-yes install
 
 ################################################################################
 # install nodejs, taken from https://github.com/nodesource/distributions/blob/master/README.md
-curl -fsSL https://deb.nodesource.com/setup_10.x | bash -
+curl -fsSL https://deb.nodesource.com/setup_15.x | bash -
 apt-get install -y nodejs
 
 ################################################################################
