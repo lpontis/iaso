@@ -7,8 +7,9 @@
   "scripts": {
     "build-iaso-root": "npm run build --workspace=iaso-root",
     "start-iaso-root": "npm run webpack-server --workspace=iaso-root",
-    "test": "npm run test --workspace=iaso-root",
-    "webpack-prod": "npm run webpack-prod --workspace=iaso-root"
+    "test-iaso-root": "npm run test --workspace=iaso-root",
+    "webpack-prod": "npm run webpack-prod --workspace=iaso-root",
+    "test-coverage-iaso-root": "npm run test-coverage --workspace=iaso-root"
   },
   "devDependencies": {
     "glob": "^7.1.7"

@@ -5,9 +5,9 @@ import { AddTask } from './AddTaskComponent';
 import IconButtonComponent from '../../../components/buttons/IconButtonComponent';
 import InputComponent from '../../../components/forms/InputComponent';
 import ConfirmCancelDialogComponent from '../../../components/dialogs/ConfirmCancelDialogComponent';
-import { mockPostRequest } from '../../../../../test/utils/requests';
-import { renderWithStore } from '../../../../../test/utils/redux';
-import { awaitUseEffect, fillFields } from '../../../../../test/utils';
+import { mockPostRequest } from '../../../test/utils/requests';
+import { renderWithStore } from '../../../test/utils/redux';
+import { awaitUseEffect, fillFields } from '../../../test/utils';
 
 const existingCredentials = {
     name: 'Goron',

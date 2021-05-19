@@ -5,12 +5,12 @@ import { expect } from 'chai';
 import Detail from './detail';
 import SingleTable from '../../components/tables/SingleTable';
 import LoadingSpinner from '../../components/LoadingSpinnerComponent';
-import { renderWithStore } from '../../../../test/utils/redux';
+import { renderWithStore } from '../../test/utils/redux';
 import {
     mockGetRequestsList,
     mockPostRequest,
     mockDeleteRequest,
-} from '../../../../test/utils/requests';
+} from '../../test/utils/requests';
 import formsFixture from './fixtures/forms.json';
 import TopBar from '../../components/nav/TopBarComponent';
 

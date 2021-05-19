@@ -4,8 +4,8 @@ import nock from 'nock';
 import Forms from './index';
 import TopBar from '../../components/nav/TopBarComponent';
 import SingleTable from '../../components/tables/SingleTable';
-import { renderWithStore } from '../../../../test/utils/redux';
-import { mockGetRequestsList } from '../../../../test/utils/requests';
+import { renderWithStore } from '../../test/utils/redux';
+import { mockGetRequestsList } from '../../test/utils/requests';
 import AddButtonComponent from '../../components/buttons/AddButtonComponent';
 
 const redirectActions = require('../../routing/actions');

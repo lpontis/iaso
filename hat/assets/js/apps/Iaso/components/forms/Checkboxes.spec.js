@@ -45,7 +45,7 @@ const renderComponent = props => {
         ),
     );
 };
-describe.only('Checkboxes component', () => {
+describe('Checkboxes component', () => {
     describe("when no 'inline props is passed", () => {
         beforeEach(() => {
             renderComponent({ checkboxes: checkboxesProp() });

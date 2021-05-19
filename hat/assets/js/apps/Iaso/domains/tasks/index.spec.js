@@ -3,9 +3,9 @@ import nock from 'nock';
 
 import TasksList from './index';
 
-import { mockGetRequestsList } from '../../../../test/utils/requests';
-import { renderWithStore } from '../../../../test/utils/redux';
-import { renderWithMuiTheme } from '../../../../test/utils/muiTheme';
+import { mockGetRequestsList } from '../../test/utils/requests';
+import { renderWithStore } from '../../test/utils/redux';
+import { renderWithMuiTheme } from '../../test/utils/muiTheme';
 
 const requests = [
     {

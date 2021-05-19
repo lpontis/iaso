@@ -265,8 +265,8 @@ export class Period {
     // more period functions -----------------
 
     nextYearMonth(period) {
-        let year = parseInt(period.slice(0, 4), 0);
-        let month = parseInt(period.slice(4, 6), 0);
+        let year = parseInt(period.slice(0, 4), 10);
+        let month = parseInt(period.slice(4, 6), 10);
         if (month === 12) {
             year += 1;
             month = 1;
@@ -277,8 +277,8 @@ export class Period {
     }
 
     previousYearMonth(period) {
-        let year = parseInt(period.slice(0, 4), 0);
-        let month = parseInt(period.slice(4, 6), 0);
+        let year = parseInt(period.slice(0, 4), 10);
+        let month = parseInt(period.slice(4, 6), 10);
         if (month === 1) {
             year -= 1;
             month = 12;
@@ -289,28 +289,28 @@ export class Period {
     }
 
     nextYear(period) {
-        const year = parseInt(period.slice(0, 4), 0);
+        const year = parseInt(period.slice(0, 4), 10);
         return `${year + 1}`;
     }
 
     previousYear(period) {
-        const year = parseInt(period.slice(0, 4), 0);
+        const year = parseInt(period.slice(0, 4), 10);
         return `${year - 1}`;
     }
 
     nextFinancialJuly(period) {
-        const year = parseInt(period.slice(0, 4), 0);
+        const year = parseInt(period.slice(0, 4), 10);
         return `${year + 1}July`;
     }
 
     previousFinancialJuly(period) {
-        const year = parseInt(period.slice(0, 4), 0);
+        const year = parseInt(period.slice(0, 4), 10);
         return `${year - 1}July`;
     }
 
     nextQuarter(period) {
-        let year = parseInt(period.slice(0, 4), 0);
-        let quarter = parseInt(period.slice(5, 6), 0);
+        let year = parseInt(period.slice(0, 4), 10);
+        let quarter = parseInt(period.slice(5, 6), 10);
         if (quarter === 4) {
             year += 1;
             quarter = 1;
@@ -321,8 +321,8 @@ export class Period {
     }
 
     nextSixMonth(period) {
-        let year = parseInt(period.slice(0, 4), 0);
-        let sixMonth = parseInt(period.slice(5, 6), 0);
+        let year = parseInt(period.slice(0, 4), 10);
+        let sixMonth = parseInt(period.slice(5, 6), 10);
         if (sixMonth === 2) {
             year += 1;
             sixMonth = 1;
@@ -333,8 +333,8 @@ export class Period {
     }
 
     previousQuarter(period) {
-        let year = parseInt(period.slice(0, 4), 0);
-        let quarter = parseInt(period.slice(5, 6), 0);
+        let year = parseInt(period.slice(0, 4), 10);
+        let quarter = parseInt(period.slice(5, 6), 10);
         if (quarter === 1) {
             year -= 1;
             quarter = 4;
@@ -345,8 +345,8 @@ export class Period {
     }
 
     previousSixMonth(period) {
-        let year = parseInt(period.slice(0, 4), 0);
-        let sixMonth = parseInt(period.slice(5, 6), 0);
+        let year = parseInt(period.slice(0, 4), 10);
+        let sixMonth = parseInt(period.slice(5, 6), 10);
         if (sixMonth === 1) {
             year -= 1;
             sixMonth = 2;
