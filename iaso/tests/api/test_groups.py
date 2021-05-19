@@ -6,6 +6,7 @@ from django.utils.timezone import now
 from iaso import models as m
 from iaso.test import APITestCase
 
+from django.db.models.functions import Now
 
 class GroupsAPITestCase(APITestCase):
     @classmethod
