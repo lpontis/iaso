@@ -1,12 +1,5 @@
 version: "3"
 services:
-  # testapp:
-  #   build:
-  #     context: ./plugins/react-webpack-main/
-  #   ports:
-  #     - "3001:3001"
-  #   container_name: test_app
-  #   stdin_open: true
   iaso:
     stdin_open: true
     tty: true
