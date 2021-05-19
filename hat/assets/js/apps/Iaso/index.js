@@ -9,6 +9,7 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import theme from './utils/theme';
+import { getPluginConfig } from './utils/plugins';
 
 import createStore from './redux/createStore';
 
@@ -80,8 +81,10 @@ import ProtectedRoute from './domains/users/components/ProtectedRoute';
 // eslint-disable-next-line no-unused-vars
 import * as zoomBar from './components/leaflet/zoom-bar'; // don't delete - needed to override leaflet zoombar
 
-export default function iasoApp(element, baseUrl) {
-    let routes = routeConfigs.map(routeConfig => (
+const iasoApp = async (element, baseUrl) => {
+    const pluginConfig = await getPluginConfig();
+    const allRoutes = routeConfigs.concat(pluginConfig.routes);
+    let routes = allRoutes.map(routeConfig => (
         <Route
             path={getPath(routeConfig)}
             component={props => (
@@ -90,6 +93,7 @@ export default function iasoApp(element, baseUrl) {
                     permission={routeConfig.permission}
                     component={routeConfig.component(props)}
                     isRootUrl={routeConfig.isRootUrl}
+                    pluginConfig={pluginConfig}
                 />
             )}
         />
@@ -183,4 +187,5 @@ export default function iasoApp(element, baseUrl) {
         </MuiThemeProvider>,
         element,
     );
-}
+};
+export default iasoApp;

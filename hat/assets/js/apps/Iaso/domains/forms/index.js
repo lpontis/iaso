@@ -20,8 +20,6 @@ import { useSafeIntl } from '../../hooks/intl';
 import { baseUrls } from '../../constants/urls';
 import { formsFilters } from '../../constants/filters';
 
-const TestApp = React.lazy(() => import('test_app/TestApp'));
-
 const baseUrl = baseUrls.forms;
 
 const Forms = ({ params, showOnlyDeleted }) => {
@@ -54,9 +52,6 @@ const Forms = ({ params, showOnlyDeleted }) => {
     return (
         <>
             <TopBar title={intl.formatMessage(MESSAGES.title)} />
-            <React.Suspense fallback="Loading testApp">
-                <TestApp />
-            </React.Suspense>
             <SingleTable
                 baseUrl={baseUrl}
                 endPointPath="forms"
