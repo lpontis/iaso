@@ -75,7 +75,7 @@ case "$1" in
     if [ -n "$TEST_PROD" ]; then
       exit 0
     fi
-    npm run webpack-server
+    npm run start-iaso-root
   ;;
 
   "manage" )

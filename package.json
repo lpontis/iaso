@@ -2,15 +2,19 @@
   "name": "Iaso",
   "private": true,
   "workspaces": [
-    "hat/assets/js/apps/Iaso/"
+    "hat/assets/js/apps/Iaso/",
+    "plugins/react-webpack-main/"
   ],
   "scripts": {
+    "start-test": "npm run serve --workspace=react-webpack",
     "build-iaso-root": "npm run build --workspace=iaso-root",
-    "webpack-server": "npm run webpack-server --workspace=iaso-root",
+    "start-iaso-root": "npm run webpack-server --workspace=iaso-root",
     "test": "npm run test --workspace=iaso-root",
-    "webpack-prod": "npm run webpack-prod --workspace=iaso-root"
+    "webpack-prod": "npm run webpack-prod --workspace=iaso-root",
+    "start": "concurrently  \"npm run start-iaso-root\" \"npm run start-test\""
   },
   "devDependencies": {
-    "glob": "^7.1.7"
+    "glob": "^7.1.7",
+    "concurrently": "^6.1.0"
   }
 }

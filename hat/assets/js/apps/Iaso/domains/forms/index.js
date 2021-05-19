@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
+// import TestApp from 'test_app/TestApp';
 
 import { setForms } from './actions';
 import { fetchAllProjects } from '../projects/actions';
@@ -20,6 +21,8 @@ import { useSafeIntl } from '../../hooks/intl';
 
 import { baseUrls } from '../../constants/urls';
 import { formsFilters } from '../../constants/filters';
+
+const TestApp = React.lazy(() => import('test_app/TestApp'));
 
 const baseUrl = baseUrls.forms;
 
@@ -50,9 +53,11 @@ const Forms = ({ params, showOnlyDeleted }) => {
         dispatch(fetchAllProjects());
         dispatch(fetchAllOrgUnitTypes());
     }, []);
-
     return (
         <>
+            <React.Suspense fallback="Loading testApp">
+                <TestApp />
+            </React.Suspense>
             <TopBar title={intl.formatMessage(MESSAGES.title)} />
             <SingleTable
                 baseUrl={baseUrl}

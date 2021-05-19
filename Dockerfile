@@ -39,6 +39,7 @@ RUN pip install --quiet -r requirements.txt
 COPY package.json /opt/app/package.json
 COPY package-lock.json /opt/app/package-lock.json
 COPY hat/assets/js/apps/Iaso/package.json /opt/app/hat/assets/js/apps/Iaso/package.json
+# COPY plugins/react-webpack-main/package.json /opt/app/plugins/react-webpack-main/package.json
 
 RUN npm install --loglevel silent
 

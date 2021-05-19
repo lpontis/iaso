@@ -32,16 +32,16 @@ module.exports = {
 
     plugins: [
         new ModuleFederationPlugin({
-          name: 'iaso_root',
-          library: { type: 'var', name: 'iaso_root' },
-          filename: 'remoteEntry.js',
-          exposes: {
-            'IasoRoot': './index',
-          },
-          remotes: {
-            'polio_app': 'polio_app',
-          },
-          shared: ['react', 'react-dom'],
+            name: 'iaso_root',
+            library: { type: 'var', name: 'iaso_root' },
+            filename: 'remoteEntry.js',
+            exposes: {
+                './TestComponent': './components/TestComponent.js',
+            },
+            remotes: {
+                test_app: 'test_app',
+            },
+            shared: [],
         }),
         new webpack.NormalModuleReplacementPlugin(
             /^__intl\/messages\/en$/,
