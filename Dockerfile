@@ -40,7 +40,7 @@ COPY package.json /opt/app/package.json
 COPY package-lock.json /opt/app/package-lock.json
 COPY hat/assets/js/apps/Iaso/package.json /opt/app/hat/assets/js/apps/Iaso/package.json
 
-RUN npm install --loglevel silent
+RUN npm ci --loglevel silent
 
 ENV PATH /opt/app/node_modules/.bin:$PATH
 

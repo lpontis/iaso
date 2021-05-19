@@ -43,7 +43,7 @@ export const getPluginConfig = async () => {
             routes,
         };
     } catch (error) {
-        console.error(`module not found: ${process.env.PLUGINS[0]}`);
+        console.warn('module not found');
         return pluginConfig;
     }
 };
