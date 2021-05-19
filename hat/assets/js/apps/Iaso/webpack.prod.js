@@ -1,11 +1,13 @@
-var path = require('path');
-var webpack = require('webpack');
-var BundleTracker = require('webpack-bundle-tracker');
+const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
+
+const path = require('path');
+const webpack = require('webpack');
+const BundleTracker = require('webpack-bundle-tracker');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 // Switch here for french
 // remember to switch in webpack.dev.js and
 // django settings as well
-var LOCALE = 'fr';
+const LOCALE = 'fr';
 
 module.exports = {
     // fail the entire build on 'module not found'
@@ -15,19 +17,30 @@ module.exports = {
     target: ['web', 'es2017'],
     entry: {
         common: ['react', 'react-dom', 'react-intl'],
-        styles: './assets/css/index.scss',
-        iaso: './assets/js/apps/Iaso/index',
+        styles: './css/index.scss',
+        iaso: './index',
     },
 
     output: {
         library: ['HAT', '[name]'],
         libraryTarget: 'var',
-        path: path.resolve(__dirname, './assets/webpack'),
+        path: path.resolve(__dirname, '../../../webpack/'),
         filename: '[name]-[chunkhash].js',
         publicPath: '',
     },
 
     plugins: [
+        new ModuleFederationPlugin({
+            name: 'iaso_root',
+            library: { type: 'var', name: 'iaso_root' },
+            filename: 'remoteEntry.js',
+            exposes: {
+                './TestComponent': './components/TestComponent.js',
+            },
+            remotes: {
+                test_app: 'test_app',
+            },
+        }),
         new webpack.NormalModuleReplacementPlugin(
             /^__intl\/messages\/en$/,
             '../translations/en.json',
@@ -38,7 +51,7 @@ module.exports = {
         ),
         new BundleTracker({
             path: __dirname,
-            filename: './assets/webpack/webpack-stats-prod.json',
+            filename: '../../../webpack/webpack-stats-prod.json',
         }),
         new MiniCssExtractPlugin({ filename: '[name]-[chunkhash].css' }),
         new webpack.DefinePlugin({
@@ -94,7 +107,7 @@ module.exports = {
                                     {
                                         messagesDir: path.join(
                                             __dirname,
-                                            '/assets/messages',
+                                            '../../../messages',
                                         ),
                                     },
                                 ],

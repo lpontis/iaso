@@ -6,7 +6,7 @@ function App() {
     return (<div>
         <h1>TEST APP</h1>
         {/* <Temp /> */}
-        {/* <Form /> */}
+        <Form />
     </div>)
 }
 

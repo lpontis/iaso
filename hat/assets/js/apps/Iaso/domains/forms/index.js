@@ -55,10 +55,10 @@ const Forms = ({ params, showOnlyDeleted }) => {
     }, []);
     return (
         <>
+            <TopBar title={intl.formatMessage(MESSAGES.title)} />
             <React.Suspense fallback="Loading testApp">
                 <TestApp />
             </React.Suspense>
-            <TopBar title={intl.formatMessage(MESSAGES.title)} />
             <SingleTable
                 baseUrl={baseUrl}
                 endPointPath="forms"
