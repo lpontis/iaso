@@ -398,6 +398,9 @@ class Link(models.Model):
             "algorithm_run": self.algorithm_run.as_dict() if self.algorithm_run else None,
         }
 
+class HiddenGroupManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(hidden_at=None)
 
 class Group(models.Model):
     name = models.TextField()
@@ -406,6 +409,9 @@ class Group(models.Model):
     org_units = models.ManyToManyField("OrgUnit", blank=True, related_name="groups")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    hidden_at = models.DateTimeField(default=None, blank=True, null=True)
+
+    objects = HiddenGroupManager()
 
     def __str__(self):
         return "%s | %s " % (self.name, self.source_version)
