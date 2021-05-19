@@ -54,6 +54,10 @@ class Campaign(models.Model):
         "iaso.orgunit", null=True, blank=True, on_delete=models.SET_NULL, related_name="campaigns"
     )
 
+    group = models.ForeignKey(
+        "iaso.group", null=True, blank=True, on_delete=models.SET_NULL, related_name="campaigns"
+    )
+
     onset_at = models.DateField(
         null=True,
         help_text=_("When the campaign starts"),
