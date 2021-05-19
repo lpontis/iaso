@@ -3,7 +3,7 @@
   "private": true,
   "workspaces": [
     "hat/assets/js/apps/Iaso/",
-    "plugins/react-webpack-main/"
+    "/Users/beygorghor/WORK/2019/BLSQ/react-webpack-main"
   ],
   "scripts": {
     "start-test": "npm run serve --workspace=react-webpack",
