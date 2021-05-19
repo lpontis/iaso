@@ -11,8 +11,11 @@ export const getPluginConfig = async () => {
         menuItems: [],
         routes: [],
     };
+    if (!process.env.PLUGIN_1) {
+        return pluginConfig;
+    }
     try {
-        pluginConfig = await import('test_app/pluginConfig'); // TODO find way to unse variable here
+        pluginConfig = await import(process.env.PLUGIN_1); // TODO: find a way to have multiple plugins
         let routes = pluginConfig.routes ?? [];
         routes = routes.map(r => {
             const newRoute = {
@@ -40,7 +43,7 @@ export const getPluginConfig = async () => {
             routes,
         };
     } catch (error) {
-        console.error('module not found: ' + 'test_app/pluginConfigs');
+        console.error(`module not found: ${process.env.PLUGINS[0]}`);
         return pluginConfig;
     }
 };

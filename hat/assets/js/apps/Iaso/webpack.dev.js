@@ -8,7 +8,7 @@ const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPl
 const LOCALE = 'fr';
 const WEBPACK_URL = 'http://localhost:3000';
 
-module.exports = {
+const config = {
     context: __dirname,
     mode: 'development',
     target: ['web', 'es2017'],
@@ -31,14 +31,6 @@ module.exports = {
     },
 
     plugins: [
-        new ModuleFederationPlugin({
-            name: 'iaso_root',
-            library: { type: 'var', name: 'iaso_root' },
-            remotes: {
-                test_app: 'test_app',
-            },
-            shared: [],
-        }),
         new webpack.NormalModuleReplacementPlugin(
             /^__intl\/messages\/en$/,
             '../translations/en.json',
@@ -55,8 +47,6 @@ module.exports = {
         new webpack.DefinePlugin({
             __LOCALE: JSON.stringify(LOCALE),
         }),
-        // XLSX
-        new webpack.IgnorePlugin(/cptable/),
     ],
 
     module: {
@@ -167,3 +157,21 @@ module.exports = {
         extensions: ['.js'],
     },
 };
+
+config.plugins = [
+    ...config.plugins,
+    new webpack.IgnorePlugin(/cptable/),
+    // ******
+    new webpack.DefinePlugin({
+        'process.env.PLUGIN_1': JSON.stringify('test_app/pluginConfig'),
+    }),
+    new ModuleFederationPlugin({
+        name: 'iaso_root',
+        library: { type: 'var', name: 'iaso_root' },
+        remotes: {
+            test_app: 'test_app',
+        },
+    }),
+    // ****** TODO: Populate plugins with python variable from settings
+];
+module.exports = config;

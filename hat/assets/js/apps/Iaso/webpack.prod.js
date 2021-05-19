@@ -9,7 +9,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 // django settings as well
 const LOCALE = 'fr';
 
-module.exports = {
+const config = {
     // fail the entire build on 'module not found'
     bail: true,
     context: __dirname,
@@ -30,15 +30,6 @@ module.exports = {
     },
 
     plugins: [
-        new ModuleFederationPlugin({
-            name: 'iaso_root',
-            library: { type: 'var', name: 'iaso_root' },
-            filename: 'remoteEntry.js',
-            exposes: {},
-            remotes: {
-                test_app: 'test_app',
-            },
-        }),
         new webpack.NormalModuleReplacementPlugin(
             /^__intl\/messages\/en$/,
             '../translations/en.json',
@@ -193,3 +184,22 @@ module.exports = {
         extensions: ['.js'],
     },
 };
+
+config.plugins = [
+    ...config.plugins,
+    new webpack.IgnorePlugin(/cptable/),
+    // ******
+    new webpack.DefinePlugin({
+        'process.env.PLUGIN_1': JSON.stringify('test_app/pluginConfig'),
+    }),
+    new ModuleFederationPlugin({
+        name: 'iaso_root',
+        library: { type: 'var', name: 'iaso_root' },
+        remotes: {
+            test_app: 'test_app',
+        },
+    }),
+    // ****** TODO: Populate plugins with python variable from settings
+];
+
+module.exports = config;
