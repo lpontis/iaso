@@ -4,9 +4,9 @@ import nock from 'nock';
 import ConnectedFormsChipsFilterComponent, {
     FormsChipsFilterComponent,
 } from './FormsChipsFilterComponent';
-import { renderWithStore } from '../../../../../test/utils/redux';
+import { renderWithStore } from '../../../test/utils/redux';
 import ChipsFilterComponent from '../../../components/filters/chips/ChipsFilterComponent';
-import { mockGetRequest } from '../../../../../test/utils/requests';
+import { mockGetRequest } from '../../../test/utils/requests';
 import { orgUnitsInitialState } from '../../orgUnits/reducer';
 
 const actions = require('../../orgUnits/actions');

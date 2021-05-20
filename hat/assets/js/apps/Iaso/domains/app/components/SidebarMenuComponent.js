@@ -82,7 +82,9 @@ class SidebarMenu extends PureComponent {
             location,
             currentUser,
             intl,
+            pluginConfig,
         } = this.props;
+        const allMenuItems = [...menuItems, ...pluginConfig.menuItems];
         const defaultSourceVersion = getDefaultSourceVersion(currentUser);
         return (
             <Drawer anchor="left" open={isOpen} onClose={toggleSidebar}>
@@ -99,7 +101,7 @@ class SidebarMenu extends PureComponent {
                 </div>
                 <Divider />
                 <List className={classes.list}>
-                    {menuItems.map(menuItem => {
+                    {allMenuItems.map(menuItem => {
                         const permissionsList = listMenuPermission(menuItem);
                         if (
                             userHasOneOfPermissions(
@@ -184,6 +186,7 @@ SidebarMenu.propTypes = {
     location: PropTypes.object.isRequired,
     currentUser: PropTypes.object.isRequired,
     intl: PropTypes.object.isRequired,
+    pluginConfig: PropTypes.object.isRequired,
 };
 
 const MapStateToProps = state => ({

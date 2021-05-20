@@ -13,6 +13,7 @@ urlpatterns = [
     url(r"^orgunits/groups.*$", views.iaso, name="iaso_orgunits_groups"),
     url(r"^orgunits/types.*$", views.iaso, name="iaso_orgunits_types"),
     url(r"^completeness.*$", views.iaso, name="iaso_completeness"),
+    url(r"^plugin.*$", views.iaso, name="iaso_plugin"),
     url(r"^settings.*$", views.iaso, name="iaso_settings"),
     url(r"^401.*$", views.iaso, name="iaso_401"),
     url(r"^404.*$", views.iaso, name="iaso_404"),

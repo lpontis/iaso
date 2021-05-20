@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { mount } from 'enzyme';
 import { Box } from '@material-ui/core';
 import { Checkboxes } from './Checkboxes';
-import { renderWithStore } from '../../../../test/utils/redux';
+import { renderWithStore } from '../../test/utils/redux';
 import InputComponent from './InputComponent';
 
 let component;

@@ -75,6 +75,7 @@ ProtectedRoute.propTypes = {
     currentUser: PropTypes.object,
     isRootUrl: PropTypes.bool,
     activeLocale: PropTypes.object.isRequired,
+    pluginConfig: PropTypes.object.isRequired,
 };
 
 const MapStateToProps = state => ({

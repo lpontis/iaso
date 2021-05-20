@@ -38,13 +38,14 @@ RUN pip install --quiet -r requirements.txt
 # NODE Deps, JS/CSS production build
 COPY package.json /opt/app/package.json
 COPY package-lock.json /opt/app/package-lock.json
+COPY hat/assets/js/apps/Iaso/package.json /opt/app/hat/assets/js/apps/Iaso/package.json
 
-RUN npm install --loglevel silent
+RUN npm ci --loglevel silent
 
 ENV PATH /opt/app/node_modules/.bin:$PATH
 
 COPY . /opt/app
-RUN npm run build
+RUN npm run build-iaso-root
 
 ENV PATH /opt/app/node_modules/.bin:$PATH
 ENTRYPOINT ["/opt/app/entrypoint.sh"]

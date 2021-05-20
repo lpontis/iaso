@@ -1,13 +1,14 @@
-var path = require('path');
-var webpack = require('webpack');
-var BundleTracker = require('webpack-bundle-tracker');
+const path = require('path');
+const webpack = require('webpack');
+const BundleTracker = require('webpack-bundle-tracker');
+const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
 // Switch here for french. This is set to 'en' in dev to not get react-intl warnings
 // remember to switch in webpack.prod.js and
 // django settings as well
-var LOCALE = 'fr';
-var WEBPACK_URL = 'http://localhost:3000';
+const LOCALE = 'fr';
+const WEBPACK_URL = 'http://localhost:3000';
 
-module.exports = {
+const config = {
     context: __dirname,
     mode: 'development',
     target: ['web', 'es2017'],
@@ -15,21 +16,18 @@ module.exports = {
         // use same settings as in Prod
         common: ['react', 'react-dom', 'react-intl'],
         styles: [
-            'webpack-dev-server/client?' + WEBPACK_URL,
-            './assets/css/index.scss',
+            `webpack-dev-server/client?${WEBPACK_URL}`,
+            './css/index.scss',
         ],
-        iaso: [
-            'webpack-dev-server/client?' + WEBPACK_URL,
-            './assets/js/apps/Iaso/index',
-        ],
+        iaso: [`webpack-dev-server/client?${WEBPACK_URL}`, './index'],
     },
 
     output: {
         library: ['HAT', '[name]'],
         libraryTarget: 'var',
-        path: path.resolve(__dirname, './assets/webpack/'),
+        path: path.resolve(__dirname, '../../../webpack/'),
         filename: '[name].js',
-        publicPath: WEBPACK_URL + '/static/', // Tell django to use this URL to load packages and not use STATIC_URL + bundle_name
+        publicPath: `${WEBPACK_URL}/static/`, // Tell django to use this URL to load packages and not use STATIC_URL + bundle_name
     },
 
     plugins: [
@@ -44,13 +42,11 @@ module.exports = {
         new webpack.NoEmitOnErrorsPlugin(), // don't reload if there is an error
         new BundleTracker({
             path: __dirname,
-            filename: './assets/webpack/webpack-stats.json',
+            filename: '../../../webpack/webpack-stats.json',
         }),
         new webpack.DefinePlugin({
             __LOCALE: JSON.stringify(LOCALE),
         }),
-        // XLSX
-        new webpack.IgnorePlugin(/cptable/),
     ],
 
     module: {
@@ -161,3 +157,21 @@ module.exports = {
         extensions: ['.js'],
     },
 };
+
+config.plugins = [
+    ...config.plugins,
+    new webpack.IgnorePlugin(/cptable/),
+    // ******
+    new webpack.DefinePlugin({
+        'process.env.PLUGIN_1': JSON.stringify('test_app/pluginConfig'),
+    }),
+    new ModuleFederationPlugin({
+        name: 'iaso_root',
+        library: { type: 'var', name: 'iaso_root' },
+        remotes: {
+            test_app: 'test_app',
+        },
+    }),
+    // ****** TODO: Populate plugins with python variable from settings
+];
+module.exports = config;

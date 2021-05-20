@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
-
 import { setForms } from './actions';
 import { fetchAllProjects } from '../projects/actions';
 import { fetchAllOrgUnitTypes } from '../orgUnits/types/actions';
@@ -50,7 +49,6 @@ const Forms = ({ params, showOnlyDeleted }) => {
         dispatch(fetchAllProjects());
         dispatch(fetchAllOrgUnitTypes());
     }, []);
-
     return (
         <>
             <TopBar title={intl.formatMessage(MESSAGES.title)} />

@@ -1,31 +1,31 @@
 import React from 'react';
-import nock from 'nock';
+// import nock from 'nock';
 
 import { expect } from 'chai';
 import FormFormComponent from './FormFormComponent';
-import SingleTable from '../../../components/tables/SingleTable';
-import LoadingSpinner from '../../../components/LoadingSpinnerComponent';
-import { renderWithStore } from '../../../../../test/utils/redux';
-import formsFixture from '../fixtures/forms.json';
-import TopBar from '../../../components/nav/TopBarComponent';
+// import SingleTable from '../../../components/tables/SingleTable';
+// import LoadingSpinner from '../../../components/LoadingSpinnerComponent';
+import { renderWithStore } from '../../../test/utils/redux';
+// import formsFixture from '../fixtures/forms.json';
+// import TopBar from '../../../components/nav/TopBarComponent';
 
-const projectActions = require('../../projects/actions');
-const orgUnitTypesActions = require('../../orgUnits/types/actions');
-const redirectActions = require('../../../routing/actions');
-const requestsStub = require('../../../utils/requests');
+// const projectActions = require('../../projects/actions');
+// const orgUnitTypesActions = require('../../orgUnits/types/actions');
+// const redirectActions = require('../../../routing/actions');
+// const requestsStub = require('../../../utils/requests');
 
 let connectedWrapper;
-let singleTable;
-let topBar;
-let redirectAction;
+// let singleTable;
+// let topBar;
+// let redirectAction;
 
 const newName = 'ZELDA';
-const fakeForm = formsFixture.forms[0];
-const formId = '69';
-const newFile = new File([''], 'filename.txt', {
-    type: 'text/plain',
-    lastModified: new Date(),
-});
+// const fakeForm = formsFixture.forms[0];
+// const formId = '69';
+// const newFile = new File([''], 'filename.txt', {
+//     type: 'text/plain',
+//     lastModified: new Date(),
+// });
 const inputsList = [
     {
         keyValue: 'name',

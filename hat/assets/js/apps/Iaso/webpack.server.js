@@ -1,6 +1,7 @@
-var webpack = require('webpack');
-var WebpackDevServer = require('webpack-dev-server');
-var config = require('./webpack.dev');
+/* eslint-disable no-console */
+const webpack = require('webpack');
+const WebpackDevServer = require('webpack-dev-server');
+const config = require('./webpack.dev');
 
 new WebpackDevServer(webpack(config), {
     publicPath: config.output.publicPath,
@@ -26,7 +27,7 @@ new WebpackDevServer(webpack(config), {
         chunks: false,
         chunkModules: false,
     },
-}).listen(3000, '0.0.0.0', function (err, result) {
+}).listen(3000, '0.0.0.0', function (err) {
     if (err) {
         console.log(err);
     }

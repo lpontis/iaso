@@ -3,8 +3,8 @@ import nock from 'nock';
 
 import AppsList from './index';
 
-import { mockGetRequestsList } from '../../../../test/utils/requests';
-import { renderWithStore } from '../../../../test/utils/redux';
+import { mockGetRequestsList } from '../../test/utils/requests';
+import { renderWithStore } from '../../test/utils/redux';
 
 const requests = [
     {

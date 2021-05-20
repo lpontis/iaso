@@ -4,8 +4,8 @@ import nock from 'nock';
 import FormVersionsComponent from './FormVersionsComponent';
 import FormVersionsDialog from './FormVersionsDialogComponent';
 import SingleTable from '../../../components/tables/SingleTable';
-import { renderWithStore } from '../../../../../test/utils/redux';
-import { mockGetRequestsList } from '../../../../../test/utils/requests';
+import { renderWithStore } from '../../../test/utils/redux';
+import { mockGetRequestsList } from '../../../test/utils/requests';
 
 const formId = 'ZELDA';
 const requests = [

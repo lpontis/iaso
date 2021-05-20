@@ -1,6 +1,6 @@
 import React from 'react';
 import { EditableTextFields } from './EditableTextFields';
-import { renderWithIntl } from '../../../../test/utils/intl';
+import { renderWithIntl } from '../../test/utils/intl';
 import InputComponent from './InputComponent';
 
 const onChange1 = sinon.spy();

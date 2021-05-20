@@ -70,7 +70,9 @@ function MenuItem(props) {
                     <ListItemText
                         primary={
                             <Typography type="body2" color={color}>
-                                {intl.formatMessage(menuItem.label)}
+                                {menuItem.label.id &&
+                                    intl.formatMessage(menuItem.label)}
+                                {!menuItem.label.id && menuItem.label}
                             </Typography>
                         }
                     />
