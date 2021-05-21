@@ -398,20 +398,18 @@ class Link(models.Model):
             "algorithm_run": self.algorithm_run.as_dict() if self.algorithm_run else None,
         }
 
-class HiddenGroupManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(hidden_at=None)
-
-class Group(models.Model):
+class GroupAbstract(models.Model):
     name = models.TextField()
     source_ref = models.TextField(null=True, blank=True)
     source_version = models.ForeignKey(SourceVersion, null=True, blank=True, on_delete=models.CASCADE)
-    org_units = models.ManyToManyField("OrgUnit", blank=True, related_name="groups")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    hidden_at = models.DateTimeField(default=None, blank=True, null=True)
 
-    objects = HiddenGroupManager()
+    class Meta:
+        abstract = True
+
+class Group(GroupAbstract):
+    org_units = models.ManyToManyField("OrgUnit", blank=True, related_name="groups")
 
     def __str__(self):
         return "%s | %s " % (self.name, self.source_version)
@@ -431,6 +429,8 @@ class Group(models.Model):
 
         return res
 
+class SingleEntityGroup(GroupAbstract):
+    org_units = models.ManyToManyField("OrgUnit", blank=True, related_name="single_entity_group")
 
 class GroupSet(models.Model):
     name = models.TextField()

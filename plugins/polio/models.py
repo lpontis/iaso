@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext as _
 from uuid import uuid4
+from iaso.models import SingleEntityGroup
 
 VIRUSES = [
     ("PV1", _("PV1")),
@@ -30,7 +31,6 @@ STATUS = [
     ("FINISHED", _("Finished")),
 ]
 
-
 class Round(models.Model):
     started_at = models.DateField(null=True, blank=True)
     ended_at = models.DateField(null=True, blank=True)
@@ -55,7 +55,7 @@ class Campaign(models.Model):
     )
 
     group = models.ForeignKey(
-        "iaso.group", null=True, blank=True, on_delete=models.SET_NULL, related_name="campaigns"
+        SingleEntityGroup, null=True, blank=True, on_delete=models.SET_NULL, related_name="campaigns"
     )
 
     onset_at = models.DateField(
