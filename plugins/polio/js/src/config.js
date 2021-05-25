@@ -1,6 +1,6 @@
 import { Dashboard } from './components/Dashboard';
 
-export const baseUrl = `polio`;
+const baseUrl = `polio`;
 
 const routes = [
     {
