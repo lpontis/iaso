@@ -11,6 +11,7 @@ import { Dashboard } from './components/Dashboard';
 
 import { Router, Route, browserHistory } from 'react-router';
 import React from 'react';
+import { routes } from './config';
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,11 @@ const Wrapper = ({ children }) => {
 ReactDOM.render(
     <Wrapper>
         <Router history={browserHistory}>
-            <Route path={'/polio'} component={Dashboard} />
+            {routes.map(route => {
+                return (
+                    <Route path={route.baseUrl} component={route.component} />
+                );
+            })}
         </Router>
     </Wrapper>,
     document.getElementById('root'),
