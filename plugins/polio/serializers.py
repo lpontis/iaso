@@ -46,7 +46,11 @@ class CampaignSerializer(serializers.ModelSerializer):
 
         Round.objects.filter(pk=instance.round_one_id).update(**round_one_data)
         Round.objects.filter(pk=instance.round_two_id).update(**round_two_data)
-        SingleEntityGroup.objects.filter(pk=instance.group_id).update(**group)
+
+        if group:
+            org_units = group.pop("org_units") if "org_units" in group else []
+            single_entity_group = SingleEntityGroup.objects.get(pk=instance.group_id)
+            single_entity_group.org_units.set(OrgUnit.objects.filter(pk__in=map(lambda org_unit: org_unit.id,org_units)))
 
         return super().update(instance, validated_data)
 
