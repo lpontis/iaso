@@ -12,6 +12,9 @@ module.exports = {
     devServer: {
         port: 3001,
         watchContentBase: true,
+        historyApiFallback: true,
+        open: true,
+        openPage: 'polio',
     },
     module: {
         rules: [
@@ -34,7 +37,7 @@ module.exports = {
             library: { type: 'var', name: 'polio' },
             filename: 'remoteEntry.js',
             exposes: {
-                './pluginConfig': './src/pluginConfig',
+                './config': './src/config',
             },
             remotes: {
                 iaso_root: 'iaso_root',

@@ -7,14 +7,31 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { theme } from './styles/theme';
 
-import { Wrapper } from './components/Wrapper';
 import { Dashboard } from './components/Dashboard';
+
+import { Router, Route, browserHistory } from 'react-router';
+import React from 'react';
 
 const queryClient = new QueryClient();
 
+const Wrapper = ({ children }) => {
+    return (
+        <React.StrictMode>
+            <QueryClientProvider client={queryClient}>
+                <MuiThemeProvider theme={theme}>
+                    <CssBaseline />
+                    {children}
+                </MuiThemeProvider>
+            </QueryClientProvider>
+        </React.StrictMode>
+    );
+};
+
 ReactDOM.render(
     <Wrapper>
-        <Dashboard />
+        <Router history={browserHistory}>
+            <Route path={'/polio'} component={Dashboard} />
+        </Router>
     </Wrapper>,
     document.getElementById('root'),
 );
