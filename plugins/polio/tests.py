@@ -1,4 +1,6 @@
 from rest_framework import status
+
+from iaso.models import OrgUnit
 from iaso.test import APITestCase
 from iaso import models as m
 from django.utils.timezone import now
@@ -17,6 +19,14 @@ class CampaignTests(APITestCase):
 
         cls.yoda = cls.create_user_with_profile(username="yoda", account=star_wars, permissions=["iaso_org_units"])
 
+        cls.org_units = m.OrgUnit.objects.create(
+            org_unit_type=m.OrgUnitType.objects.create(name="Jedi Council", short_name="Cnc"),
+            version=cls.source_version_1,
+            name="Corruscant Jedi Council",
+            validation_status=m.OrgUnit.VALIDATION_VALID,
+            source_ref="PvtAI4RUMkr",
+        )
+
     def test_create_campaign(self):
         """
         Ensure we can create a new campaign object.
@@ -29,8 +39,6 @@ class CampaignTests(APITestCase):
             "round_two": {},
             "obr_name": "campaign name"
         }, format='json')
-
-        print(response.json())
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Campaign.objects.count(), 1)
@@ -50,16 +58,16 @@ class CampaignTests(APITestCase):
                 "round_two": {},
                 "obr_name": "campaign with org units",
                 "group": {
-                    "name": "hidden group"
+                    "name": "hidden group",
+                    "org_units": [self.org_units.id]
                 }
             },
             format='json'
         )
 
-        print(response.json())
-
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Campaign.objects.count(), 1)
         self.assertEqual(Campaign.objects.get().obr_name, 'campaign with org units')
         self.assertEqual(Campaign.objects.get().group.name, 'hidden group')
+        self.assertEqual(Campaign.objects.get().group.org_units.count(), 1)
 

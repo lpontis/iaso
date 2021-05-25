@@ -1,12 +1,14 @@
 from rest_framework import serializers
 
-from iaso.models import SingleEntityGroup
+from iaso.models import SingleEntityGroup, OrgUnit
 from .models import Round, Campaign
 
 class GroupSerializer(serializers.ModelSerializer):
+    org_units = serializers.PrimaryKeyRelatedField(many=True, allow_empty=True, queryset=OrgUnit.objects.all())
+
     class Meta:
         model = SingleEntityGroup
-        fields = "__all__"
+        fields = ['name', 'org_units']
 
 class RoundSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,11 +25,18 @@ class CampaignSerializer(serializers.ModelSerializer):
         round_two_data = validated_data.pop("round_two")
         group = validated_data.pop("group") if "group" in validated_data else None
 
+        if group:
+            org_units = group.pop("org_units") if "org_units" in group else []
+            single_entity_group = SingleEntityGroup.objects.create(**group)
+            single_entity_group.org_units.set(OrgUnit.objects.filter(pk__in=map(lambda org_unit: org_unit.id,org_units)))
+        else:
+            single_entity_group = None
+
         return Campaign.objects.create(
             **validated_data,
             round_one=Round.objects.create(**round_one_data),
             round_two=Round.objects.create(**round_two_data),
-            group = SingleEntityGroup.objects.create(**group) if group else None,
+            group=single_entity_group,
         )
 
     def update(self, instance, validated_data):
