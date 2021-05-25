@@ -33,7 +33,6 @@ import {
     TextInput,
 } from './Inputs';
 
-import { Page } from './Page';
 import { Field, FormikProvider, useFormik, useFormikContext } from 'formik';
 import * as yup from 'yup';
 import { polioVacines, polioViruses } from '../constants/virus';
@@ -743,9 +742,8 @@ const DeleteConfirmDialog = ({ isOpen, onClose, onConfirm }) => {
 
 export const Dashboard = () => {
     const [isCreateEditDialogOpen, setIsCreateEditDialogOpen] = useState(false);
-    const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(
-        false,
-    );
+    const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] =
+        useState(false);
     const [selectedCampaignId, setSelectedCampaignId] = useState();
 
     const classes = useStyles();
@@ -839,13 +837,8 @@ export const Dashboard = () => {
         [],
     );
 
-    const {
-        getTableProps,
-        getTableBodyProps,
-        headerGroups,
-        rows,
-        prepareRow,
-    } = useTable({ columns, data: tableData });
+    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
+        useTable({ columns, data: tableData });
 
     return (
         <>
@@ -859,70 +852,66 @@ export const Dashboard = () => {
                 onClose={closeDeleteConfirmDialog}
                 onConfirm={handleDeleteConfirmDialogConfirm}
             />
-            <Page title={'Campaigns for DRC'}>
-                <Box className={classes.containerFullHeightNoTabPadded}>
-                    <PageActions>
-                        <PageAction
-                            icon={AddIcon}
-                            onClick={handleClickCreateButton}
-                        >
-                            Create
-                        </PageAction>
-                    </PageActions>
-                    {status === 'success' && (
-                        <table className={classes.table} {...getTableProps()}>
-                            <thead>
-                                {headerGroups.map(headerGroup => (
-                                    <tr
-                                        className={classes.tableHeader}
-                                        {...headerGroup.getHeaderGroupProps()}
-                                    >
-                                        {headerGroup.headers.map(column => (
-                                            <TableHeader
-                                                {...column.getHeaderProps()}
-                                            >
-                                                {column.render('Header')}
-                                            </TableHeader>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </thead>
-                            <tbody {...getTableBodyProps()}>
-                                {rows.length > 0 ? (
-                                    rows.map((row, rowIndex) => {
-                                        prepareRow(row);
-                                        return (
-                                            <tr
-                                                className={classes.tableRow}
-                                                {...row.getRowProps()}
-                                            >
-                                                {row.cells.map(cell => {
-                                                    return (
-                                                        <TableCell
-                                                            isOdd={rowIndex % 2}
-                                                            {...cell.getCellProps()}
-                                                        >
-                                                            {cell.render(
-                                                                'Cell',
-                                                            )}
-                                                        </TableCell>
-                                                    );
-                                                })}
-                                            </tr>
-                                        );
-                                    })
-                                ) : (
-                                    <tr>
-                                        <TableCell>
-                                            no campaigns available
-                                        </TableCell>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    )}
-                </Box>
-            </Page>
+            <Box className={classes.containerFullHeightNoTabPadded}>
+                <PageActions>
+                    <PageAction
+                        icon={AddIcon}
+                        onClick={handleClickCreateButton}
+                    >
+                        Create
+                    </PageAction>
+                </PageActions>
+                {status === 'success' && (
+                    <table className={classes.table} {...getTableProps()}>
+                        <thead>
+                            {headerGroups.map(headerGroup => (
+                                <tr
+                                    className={classes.tableHeader}
+                                    {...headerGroup.getHeaderGroupProps()}
+                                >
+                                    {headerGroup.headers.map(column => (
+                                        <TableHeader
+                                            {...column.getHeaderProps()}
+                                        >
+                                            {column.render('Header')}
+                                        </TableHeader>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody {...getTableBodyProps()}>
+                            {rows.length > 0 ? (
+                                rows.map((row, rowIndex) => {
+                                    prepareRow(row);
+                                    return (
+                                        <tr
+                                            className={classes.tableRow}
+                                            {...row.getRowProps()}
+                                        >
+                                            {row.cells.map(cell => {
+                                                return (
+                                                    <TableCell
+                                                        isOdd={rowIndex % 2}
+                                                        {...cell.getCellProps()}
+                                                    >
+                                                        {cell.render('Cell')}
+                                                    </TableCell>
+                                                );
+                                            })}
+                                        </tr>
+                                    );
+                                })
+                            ) : (
+                                <tr>
+                                    <TableCell>
+                                        no campaigns available
+                                    </TableCell>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                )}
+            </Box>
         </>
     );
 };

@@ -1,20 +1,21 @@
 {
-  "name": "Iaso",
-  "private": true,
-  "workspaces": [
-    "hat/assets/js/apps/Iaso/"
-  ],
-  "scripts": {
-    "build-iaso-root": "npm run build --workspace=iaso-root",
-    "start-iaso-root": "npm run webpack-server --workspace=iaso-root",
-    "webpack-prod": "npm run webpack-prod --workspace=iaso-root",
-    "test": "npm run test --workspace=iaso-root",
-    "test-coverage": "npm run test-coverage --workspace=iaso-root",
-    "test-watch": "npm run test-watch --workspace=iaso-root",
-    "show-lint-problems": "npm run show-lint-problems --workspace=iaso-root",
-    "fix-lint": "npm run fix-lint --workspace=iaso-root"
-  },
-  "devDependencies": {
-    "glob": "^7.1.7"
-  }
+    "name": "Iaso",
+    "private": true,
+    "workspaces": [
+        "hat/assets/js/apps/Iaso/",
+        "plugins/polio/js"
+    ],
+    "scripts": {
+        "build-iaso-root": "npm run build --workspace=iaso-root",
+        "start-iaso-root": "npm run webpack-server --workspace=iaso-root",
+        "webpack-prod": "npm run webpack-prod --workspace=iaso-root",
+        "test": "npm run test --workspace=iaso-root",
+        "test-coverage": "npm run test-coverage --workspace=iaso-root",
+        "test-watch": "npm run test-watch --workspace=iaso-root",
+        "show-lint-problems": "npm run show-lint-problems --workspace=iaso-root",
+        "fix-lint": "npm run fix-lint --workspace=iaso-root"
+    },
+    "devDependencies": {
+        "glob": "^7.1.7"
+    }
 }
