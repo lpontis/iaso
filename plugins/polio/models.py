@@ -55,7 +55,7 @@ class Campaign(models.Model):
     )
 
     group = models.ForeignKey(
-        SingleEntityGroup, null=True, blank=True, on_delete=models.SET_NULL, related_name="campaigns"
+        SingleEntityGroup, null=True, blank=True, on_delete=models.SET_NULL, related_name="campaigns", default=None
     )
 
     onset_at = models.DateField(

@@ -13,22 +13,21 @@ class RoundSerializer(serializers.ModelSerializer):
         model = Round
         fields = "__all__"
 
-
 class CampaignSerializer(serializers.ModelSerializer):
     round_one = RoundSerializer()
     round_two = RoundSerializer()
-    group = GroupSerializer()
+    group = GroupSerializer(required=False)
 
     def create(self, validated_data):
         round_one_data = validated_data.pop("round_one")
         round_two_data = validated_data.pop("round_two")
-        group = validated_data.pop("group")
+        group = validated_data.pop("group") if "group" in validated_data else None
 
         return Campaign.objects.create(
             **validated_data,
             round_one=Round.objects.create(**round_one_data),
             round_two=Round.objects.create(**round_two_data),
-            group = SingleEntityGroup.objects.create(**group),
+            group = SingleEntityGroup.objects.create(**group) if group else None,
         )
 
     def update(self, instance, validated_data):

@@ -27,9 +27,6 @@ class CampaignTests(APITestCase):
         response = self.client.post(f"/api/polio/campaigns/", data={
             "round_one": {},
             "round_two": {},
-            "group": {
-                "name": "hidden group"
-            },
             "obr_name": "campaign name"
         }, format='json')
 
@@ -64,4 +61,5 @@ class CampaignTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Campaign.objects.count(), 1)
         self.assertEqual(Campaign.objects.get().obr_name, 'campaign with org units')
+        self.assertEqual(Campaign.objects.get().group.name, 'hidden group')
 
