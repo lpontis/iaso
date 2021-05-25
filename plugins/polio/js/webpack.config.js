@@ -15,6 +15,9 @@ module.exports = {
         historyApiFallback: true,
         open: true,
         openPage: 'polio',
+        proxy: {
+            '/api': 'http://localhost:8081',
+        },
     },
     module: {
         rules: [
