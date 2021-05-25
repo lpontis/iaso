@@ -7,14 +7,21 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('iaso', '0087_auto_20210521_1104'),
-        ('polio', '0004_auto_20210505_1813'),
+        ("iaso", "0087_auto_20210521_1104"),
+        ("polio", "0004_auto_20210505_1813"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='campaign',
-            name='group',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='campaigns', to='iaso.SingleEntityGroup'),
+            model_name="campaign",
+            name="group",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="campaigns",
+                to="iaso.SingleEntityGroup",
+            ),
         ),
     ]

@@ -4,6 +4,7 @@ from iaso import models as m
 from django.utils.timezone import now
 from plugins.polio.models import Campaign
 
+
 class CampaignTests(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -44,15 +45,15 @@ class CampaignTests(APITestCase):
 
         self.client.force_authenticate(self.yoda)
 
-        response = self.client.post(f"/api/polio/campaigns/", data={
-            "round_one": {},
-            "round_two": {},
-            "obr_name": "campaign name"
-        }, format='json')
+        response = self.client.post(
+            f"/api/polio/campaigns/",
+            data={"round_one": {}, "round_two": {}, "obr_name": "campaign name"},
+            format="json",
+        )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Campaign.objects.count(), 1)
-        self.assertEqual(Campaign.objects.get().obr_name, 'campaign name')
+        self.assertEqual(Campaign.objects.get().obr_name, "campaign name")
 
     def test_can_create_and_update_campaign_with_orgunits_group(self):
         """
@@ -67,18 +68,15 @@ class CampaignTests(APITestCase):
                 "round_one": {},
                 "round_two": {},
                 "obr_name": "campaign with org units",
-                "group": {
-                    "name": "hidden group",
-                    "org_units": [self.org_units[0].id]
-                }
+                "group": {"name": "hidden group", "org_units": [self.org_units[0].id]},
             },
-            format='json'
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Campaign.objects.count(), 1)
-        self.assertEqual(Campaign.objects.get().obr_name, 'campaign with org units')
-        self.assertEqual(Campaign.objects.get().group.name, 'hidden group')
+        self.assertEqual(Campaign.objects.get().obr_name, "campaign with org units")
+        self.assertEqual(Campaign.objects.get().group.name, "hidden group")
         self.assertEqual(Campaign.objects.get().group.org_units.count(), 1)
 
         response = self.client.put(
@@ -87,15 +85,10 @@ class CampaignTests(APITestCase):
                 "round_one": {},
                 "round_two": {},
                 "obr_name": "campaign with org units",
-                "group": {
-                    "name": "hidden group",
-                    "org_units": map(lambda org_unit: org_unit.id, self.org_units)
-                }
+                "group": {"name": "hidden group", "org_units": map(lambda org_unit: org_unit.id, self.org_units)},
             },
-            format='json'
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Campaign.objects.get().group.org_units.count(), 2)
-
-

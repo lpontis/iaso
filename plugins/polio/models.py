@@ -31,6 +31,7 @@ STATUS = [
     ("FINISHED", _("Finished")),
 ]
 
+
 class Round(models.Model):
     started_at = models.DateField(null=True, blank=True)
     ended_at = models.DateField(null=True, blank=True)

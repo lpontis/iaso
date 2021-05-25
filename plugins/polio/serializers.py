@@ -3,17 +3,20 @@ from rest_framework import serializers
 from iaso.models import SingleEntityGroup, OrgUnit
 from .models import Round, Campaign
 
+
 class GroupSerializer(serializers.ModelSerializer):
     org_units = serializers.PrimaryKeyRelatedField(many=True, allow_empty=True, queryset=OrgUnit.objects.all())
 
     class Meta:
         model = SingleEntityGroup
-        fields = ['name', 'org_units']
+        fields = ["name", "org_units"]
+
 
 class RoundSerializer(serializers.ModelSerializer):
     class Meta:
         model = Round
         fields = "__all__"
+
 
 class CampaignSerializer(serializers.ModelSerializer):
     round_one = RoundSerializer()
@@ -28,7 +31,9 @@ class CampaignSerializer(serializers.ModelSerializer):
         if group:
             org_units = group.pop("org_units") if "org_units" in group else []
             single_entity_group = SingleEntityGroup.objects.create(**group)
-            single_entity_group.org_units.set(OrgUnit.objects.filter(pk__in=map(lambda org_unit: org_unit.id,org_units)))
+            single_entity_group.org_units.set(
+                OrgUnit.objects.filter(pk__in=map(lambda org_unit: org_unit.id, org_units))
+            )
         else:
             single_entity_group = None
 
@@ -50,7 +55,9 @@ class CampaignSerializer(serializers.ModelSerializer):
         if group:
             org_units = group.pop("org_units") if "org_units" in group else []
             single_entity_group = SingleEntityGroup.objects.get(pk=instance.group_id)
-            single_entity_group.org_units.set(OrgUnit.objects.filter(pk__in=map(lambda org_unit: org_unit.id,org_units)))
+            single_entity_group.org_units.set(
+                OrgUnit.objects.filter(pk__in=map(lambda org_unit: org_unit.id, org_units))
+            )
 
         return super().update(instance, validated_data)
 
