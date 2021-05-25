@@ -12,10 +12,13 @@ export const getPluginConfig = async () => {
         routes: [],
     };
     if (!process.env.PLUGIN_1) {
+        console.log("Plugin not enabled process.env.PLUGIN_1")
         return pluginConfig;
     }
+
     try {
-        pluginConfig = await import(process.env.PLUGIN_1); // TODO: find a way to have multiple plugins
+        const pluginConfig =  await import(process.env.PLUGIN_1); ; // TODO: find a way to have multiple plugins
+
         let routes = pluginConfig.routes ?? [];
         routes = routes.map(r => {
             const newRoute = {

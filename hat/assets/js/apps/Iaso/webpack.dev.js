@@ -167,9 +167,9 @@ config.plugins = [
     }),
     new ModuleFederationPlugin({
         name: 'iaso_root',
-        library: { type: 'var', name: 'iaso_root' },
+        // library: { type: 'var', name: 'iaso_root' },
         remotes: {
-            test_app: 'test_app',
+            test_app: "test_app@http://localhost:3001/remoteEntry.js",
         },
     }),
     // ****** TODO: Populate plugins with python variable from settings
