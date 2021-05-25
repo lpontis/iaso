@@ -1,9 +1,11 @@
 import { Dashboard } from './components/Dashboard';
 
+export const baseUrl = `polio`;
+
 const routes = [
     {
         label: 'Polio',
-        baseUrl: 'polio',
+        baseUrl: baseUrl,
         permission: 'iaso_forms',
         component: Dashboard,
     },
@@ -18,4 +20,4 @@ const menu = [
     },
 ];
 
-export { routes, menu };
+export { routes, menu, baseUrl };
