@@ -45,6 +45,9 @@ const paginationPathParamsWithPrefix = prefix =>
 
 export const getPath = path => {
     let url = `/${path.baseUrl}`;
+    if (!path?.params) {
+        return url;
+    }
     path.params.forEach(p => {
         if (p.isRequired) {
             url += `/${p.key}/:${p.key}`;
