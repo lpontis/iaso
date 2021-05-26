@@ -7,6 +7,7 @@ const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPl
 // django settings as well
 const LOCALE = 'fr';
 const WEBPACK_URL = 'http://localhost:3000';
+const deps = require('./package.json').dependencies;
 
 const config = {
     context: __dirname,
@@ -169,6 +170,17 @@ config.plugins = [
         name: 'iaso_root',
         remotes: {
             polio: 'polio@http://localhost:3001/remoteEntry.js',
+        },
+        shared: {
+            ...deps,
+            react: {
+                singleton: true,
+                requiredVersion: deps.react,
+            },
+            'react-dom': {
+                singleton: true,
+                requiredVersion: deps['react-dom'],
+            },
         },
     }),
     // ****** TODO: Populate plugins with python variable from settings
