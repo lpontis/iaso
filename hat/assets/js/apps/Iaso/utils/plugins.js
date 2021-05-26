@@ -11,11 +11,13 @@ export const getPluginConfig = async () => {
         menuItems: [],
         routes: [],
     };
-    if (!process.env.PLUGIN_1) {
+
+    if (!process.env.POLIO_ENABLED) {
         return pluginConfig;
     }
+
     try {
-        pluginConfig = await import(process.env.PLUGIN_1); // TODO: find a way to have multiple plugins
+        pluginConfig = await import('polio/config'); // TODO: find a way to have multiple plugins
         let routes = pluginConfig.routes ?? [];
         routes = routes.map(r => {
             const newRoute = {
