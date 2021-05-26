@@ -11,7 +11,7 @@ const routes = [
     },
 ];
 
-const menu = [
+const menuItems = [
     {
         label: 'Polio',
         permission: 'iaso_forms',
@@ -20,4 +20,4 @@ const menu = [
     },
 ];
 
-export { routes, menu, baseUrl };
+export { routes, menuItems };
