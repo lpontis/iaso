@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('iaso', '0086_singleentitygroup'),
+        ("iaso", "0086_singleentitygroup"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='singleentitygroup',
-            name='org_units',
-            field=models.ManyToManyField(blank=True, related_name='single_entity_group', to='iaso.OrgUnit'),
+            model_name="singleentitygroup",
+            name="org_units",
+            field=models.ManyToManyField(blank=True, related_name="single_entity_group", to="iaso.OrgUnit"),
         ),
     ]

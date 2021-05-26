@@ -7,23 +7,28 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('iaso', '0085_merge_20210415_2144'),
+        ("iaso", "0085_merge_20210415_2144"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SingleEntityGroup',
+            name="SingleEntityGroup",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.TextField()),
-                ('source_ref', models.TextField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('org_units', models.ManyToManyField(blank=True, related_name='single', to='iaso.OrgUnit')),
-                ('source_version', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='iaso.SourceVersion')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.TextField()),
+                ("source_ref", models.TextField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("org_units", models.ManyToManyField(blank=True, related_name="single", to="iaso.OrgUnit")),
+                (
+                    "source_version",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="iaso.SourceVersion"
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]
