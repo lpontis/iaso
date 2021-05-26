@@ -398,6 +398,7 @@ class Link(models.Model):
             "algorithm_run": self.algorithm_run.as_dict() if self.algorithm_run else None,
         }
 
+
 class GroupAbstract(models.Model):
     name = models.TextField()
     source_ref = models.TextField(null=True, blank=True)
@@ -407,6 +408,7 @@ class GroupAbstract(models.Model):
 
     class Meta:
         abstract = True
+
 
 class Group(GroupAbstract):
     org_units = models.ManyToManyField("OrgUnit", blank=True, related_name="groups")
@@ -429,8 +431,10 @@ class Group(GroupAbstract):
 
         return res
 
+
 class SingleEntityGroup(GroupAbstract):
     org_units = models.ManyToManyField("OrgUnit", blank=True, related_name="single_entity_group")
+
 
 class GroupSet(models.Model):
     name = models.TextField()
