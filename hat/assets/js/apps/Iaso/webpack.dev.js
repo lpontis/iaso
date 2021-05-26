@@ -163,13 +163,12 @@ config.plugins = [
     new webpack.IgnorePlugin(/cptable/),
     // ******
     new webpack.DefinePlugin({
-        'process.env.PLUGIN_1': JSON.stringify('test_app/pluginConfig'),
+        'process.env.POLIO_ENABLED': 'true',
     }),
     new ModuleFederationPlugin({
         name: 'iaso_root',
-        library: { type: 'var', name: 'iaso_root' },
         remotes: {
-            test_app: 'test_app',
+            polio: 'polio@http://localhost:3001/remoteEntry.js',
         },
     }),
     // ****** TODO: Populate plugins with python variable from settings

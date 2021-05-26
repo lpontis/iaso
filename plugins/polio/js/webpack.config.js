@@ -2,7 +2,6 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
-const deps = require('./package.json').dependencies;
 
 module.exports = {
     output: {
@@ -37,13 +36,9 @@ module.exports = {
     plugins: [
         new ModuleFederationPlugin({
             name: 'polio',
-            library: { type: 'var', name: 'polio' },
             filename: 'remoteEntry.js',
             exposes: {
                 './config': './src/config',
-            },
-            remotes: {
-                iaso_root: 'iaso_root',
             },
             shared: [],
         }),
