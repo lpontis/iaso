@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext as _
 from uuid import uuid4
-from iaso.models import SingleEntityGroup
+from iaso.models import Group
 
 VIRUSES = [
     ("PV1", _("PV1")),
@@ -56,7 +56,13 @@ class Campaign(models.Model):
     )
 
     group = models.ForeignKey(
-        SingleEntityGroup, null=True, blank=True, on_delete=models.SET_NULL, related_name="campaigns", default=None
+        Group,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="campaigns",
+        default=None,
+        limit_choices_to={"domain", "POLIO"},
     )
 
     onset_at = models.DateField(
