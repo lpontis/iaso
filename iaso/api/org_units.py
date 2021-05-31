@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import viewsets, status, permissions
 from django.contrib.gis.geos import Polygon, GEOSGeometry
@@ -22,7 +23,7 @@ from time import gmtime, strftime
 from django.http import StreamingHttpResponse, HttpResponse
 from hat.api.export_utils import Echo, generate_xlsx, iter_items, timestamp_to_utc_datetime
 import json
-from django.db.models import Value, IntegerField
+from django.db.models import Value, IntegerField, Count
 from django.db import connection
 
 
@@ -72,7 +73,8 @@ class OrgUnitViewSet(viewsets.ViewSet):
         limit = request.GET.get("limit", None)
         page_offset = request.GET.get("page", 1)
         order = request.GET.get("order", "name").split(",")
-
+        order_by_instance_count = "instances_count" in order or "-instances_count" in order
+        print("order_by_instance_count", order, order_by_instance_count)
         csv_format = bool(request.query_params.get("csv"))
         xlsx_format = bool(request.query_params.get("xlsx"))
         gpkg_format = bool(request.query_params.get("gpkg"))
@@ -97,7 +99,12 @@ class OrgUnitViewSet(viewsets.ViewSet):
             base_queryset = queryset
             for search in json.loads(searches):
                 additional_queryset = build_org_units_queryset(
-                    base_queryset, search, profile, is_export, forms
+                    base_queryset,
+                    search,
+                    profile,
+                    is_export,
+                    forms,
+                    instance_count=order_by_instance_count or is_export,
                 ).annotate(search_index=Value(search_index, IntegerField()))
                 if search_index == 0:
                     queryset = additional_queryset
@@ -158,7 +165,7 @@ class OrgUnitViewSet(viewsets.ViewSet):
                 res["limit"] = limit
 
                 res["orgunits"] = list(res["orgunits"])
-                print("connection.queries", connection.queries)
+
                 for q in connection.queries:
                     print(q)
                 print(len(connection.queries))

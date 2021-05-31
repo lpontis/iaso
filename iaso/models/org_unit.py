@@ -2,6 +2,7 @@ import operator
 import typing
 from copy import deepcopy
 from functools import reduce
+from django.db.models import Q
 from django.db import models, transaction
 from django.contrib.postgres.indexes import GistIndex
 from django.contrib.gis.db.models.fields import PointField, MultiPolygonField
@@ -342,11 +343,11 @@ class OrgUnit(models.Model):
             res["source"] = self.version.data_source.name if self.version else None
             res["source_id"] = self.version.data_source.id if self.version else None
             res["version"] = self.version.number if self.version else None
+            res["instances_count"] = self.instance_set.filter(
+                ~Q(file="") & ~Q(device__test_device=True) & ~Q(deleted=True)
+            ).count()
         if hasattr(self, "search_index"):
             res["search_index"] = self.search_index
-
-        if hasattr(self, "instances_count"):
-            res["instances_count"] = self.instances_count
 
         return res
 
