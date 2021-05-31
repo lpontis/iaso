@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from iaso.models import SingleEntityGroup, OrgUnit
+from iaso.models import Group, OrgUnit
 from .models import Round, Campaign
 
 
@@ -8,7 +8,7 @@ class GroupSerializer(serializers.ModelSerializer):
     org_units = serializers.PrimaryKeyRelatedField(many=True, allow_empty=True, queryset=OrgUnit.objects.all())
 
     class Meta:
-        model = SingleEntityGroup
+        model = Group
         fields = ["name", "org_units"]
 
 
@@ -30,18 +30,16 @@ class CampaignSerializer(serializers.ModelSerializer):
 
         if group:
             org_units = group.pop("org_units") if "org_units" in group else []
-            single_entity_group = SingleEntityGroup.objects.create(**group)
-            single_entity_group.org_units.set(
-                OrgUnit.objects.filter(pk__in=map(lambda org_unit: org_unit.id, org_units))
-            )
+            campaign_group = Group.objects.create(**group)
+            campaign_group.org_units.set(OrgUnit.objects.filter(pk__in=map(lambda org_unit: org_unit.id, org_units)))
         else:
-            single_entity_group = None
+            campaign_group = None
 
         return Campaign.objects.create(
             **validated_data,
             round_one=Round.objects.create(**round_one_data),
             round_two=Round.objects.create(**round_two_data),
-            group=single_entity_group,
+            group=campaign_group,
         )
 
     def update(self, instance, validated_data):
@@ -54,10 +52,8 @@ class CampaignSerializer(serializers.ModelSerializer):
 
         if group:
             org_units = group.pop("org_units") if "org_units" in group else []
-            single_entity_group = SingleEntityGroup.objects.get(pk=instance.group_id)
-            single_entity_group.org_units.set(
-                OrgUnit.objects.filter(pk__in=map(lambda org_unit: org_unit.id, org_units))
-            )
+            campaign_group = Group.objects.get(pk=instance.group_id)
+            campaign_group.org_units.set(OrgUnit.objects.filter(pk__in=map(lambda org_unit: org_unit.id, org_units)))
 
         return super().update(instance, validated_data)
 
