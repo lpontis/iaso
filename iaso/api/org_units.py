@@ -83,8 +83,6 @@ class OrgUnitViewSet(viewsets.ViewSet):
         small_search = request.GET.get("smallSearch", None)
         direct_children = request.GET.get("onlyDirectChildren", False)
 
-        queryset.prefetch_related("group_set")
-
         if as_location:
             queryset = queryset.filter(Q(location__isnull=False) | Q(simplified_geom__isnull=False))
 
@@ -114,9 +112,6 @@ class OrgUnitViewSet(viewsets.ViewSet):
 
         if not is_export:
             if limit and not as_location:
-                queryset = queryset.prefetch_related("version__data_source__credentials")
-                queryset = queryset.prefetch_related("parent__parent__parent")
-                queryset = queryset.prefetch_related("org_unit_type")
                 limit = int(limit)
                 page_offset = int(page_offset)
                 paginator = Paginator(queryset, limit)
@@ -126,10 +121,35 @@ class OrgUnitViewSet(viewsets.ViewSet):
                     page_offset = paginator.num_pages
                 page = paginator.page(page_offset)
 
+                queryset = page.object_list
+                queryset = queryset.prefetch_related("groups")
+                queryset = queryset.prefetch_related("groups__source_version")
+                queryset = queryset.prefetch_related("version")
+                queryset = queryset.prefetch_related("version__data_source")
+                queryset = queryset.prefetch_related("version__data_source__credentials")
+                queryset = queryset.prefetch_related("parent")
+                queryset = queryset.prefetch_related("parent__parent")
+                queryset = queryset.prefetch_related("parent__org_unit_type")
+                queryset = queryset.prefetch_related("parent__parent__org_unit_type")
+                queryset = queryset.prefetch_related("parent__parent__parent__org_unit_type")
+                queryset = queryset.prefetch_related("parent__version")
+                queryset = queryset.prefetch_related("parent__parent__version")
+                queryset = queryset.prefetch_related("parent__parent__parent__version")
+                queryset = queryset.prefetch_related("parent__version__data_source")
+                queryset = queryset.prefetch_related("parent__parent__version__data_source")
+                queryset = queryset.prefetch_related("parent__parent__parent__version__data_source")
+                # queryset = queryset.prefetch_related("parent__version__data_source__credentials")
+                # queryset = queryset.prefetch_related("parent__parent__version__data_source__credentials")
+                # queryset = queryset.prefetch_related("parent__parent__parent__version__data_source__credentials")
+
+                queryset = queryset.prefetch_related("org_unit_type")
+                queryset = queryset.prefetch_related("org_unit_type__sub_unit_types")
+                # queryset = queryset.prefetch_related("org_unit_type__sub_unit_types__super_types")
+
                 if small_search:
-                    res["orgunits"] = map(lambda x: x.as_small_dict(), page.object_list)
+                    res["orgunits"] = map(lambda x: x.as_small_dict(), queryset)
                 else:
-                    res["orgunits"] = map(lambda x: x.as_dict_with_parents(light=False), page.object_list)
+                    res["orgunits"] = map(lambda x: x.as_dict_with_parents(light=False), queryset)
 
                 res["has_next"] = page.has_next()
                 res["has_previous"] = page.has_previous()
