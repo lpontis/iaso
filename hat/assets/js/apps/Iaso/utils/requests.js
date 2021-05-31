@@ -79,8 +79,8 @@ export const fetchSources = dispatch =>
             throw error;
         });
 
-export const fetchGroups = (dispatch, defaultVersion = false) => {
-    const url = `/api/groups/${defaultVersion ? '?&defaultVersion=true' : ''}`;
+export const fetchGroups = (dispatch, light = true) => {
+    const url = `/api/groups/${light ? '?light=true' : ''}`;
     return getRequest(url)
         .then(res => res.groups)
         .catch(error => {

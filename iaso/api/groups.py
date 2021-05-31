@@ -1,8 +1,6 @@
 from rest_framework import permissions, serializers
-from django.db.models import Count
-import typing
-
-from iaso.models import Group
+from django.db.models import Count, Q
+from iaso.models import Group, DataSource
 from .common import ModelViewSet, TimestampField, HasPermission
 
 
@@ -79,7 +77,15 @@ class GroupsViewSet(ModelViewSet):
             default_version = self.request.GET.get("defaultVersion", None)
             if default_version == "true":
                 queryset = queryset.filter(source_version=self.request.user.iaso_profile.account.default_version)
-
+            else:  # only get the default version of each data source if there is one set
+                data_sources = DataSource.objects.filter(projects__in=profile.account.project_set.all())
+                q = Q()
+                for data_source in data_sources:
+                    if data_source.default_version:
+                        q = q | Q(source_version=data_source.default_version)
+                    else:
+                        q = q | Q(source_version__data_source=data_source)
+                queryset = queryset.filter(q)
         search = self.request.query_params.get("search", None)
         if search:
             queryset = queryset.filter(name__icontains=search)

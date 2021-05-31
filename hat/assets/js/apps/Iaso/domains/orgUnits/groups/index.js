@@ -68,6 +68,7 @@ class Groups extends Component {
             fetchGroups,
             redirectTo,
         } = this.props;
+        params.light = false;
         return (
             <>
                 {fetching && <LoadingSpinner />}

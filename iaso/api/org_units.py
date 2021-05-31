@@ -23,6 +23,7 @@ from django.http import StreamingHttpResponse, HttpResponse
 from hat.api.export_utils import Echo, generate_xlsx, iter_items, timestamp_to_utc_datetime
 import json
 from django.db.models import Value, IntegerField
+from django.db import connection
 
 
 class HasOrgUnitPermission(permissions.BasePermission):
@@ -108,11 +109,14 @@ class OrgUnitViewSet(viewsets.ViewSet):
                 search_index += 1
         else:
             queryset = build_org_units_queryset(queryset, request.GET, profile, is_export, forms)
-
+        queryset.prefetch_related("source_version__data_source__external_credentials")
         queryset = queryset.order_by(*order)
 
         if not is_export:
             if limit and not as_location:
+                queryset = queryset.prefetch_related("version__data_source__credentials")
+                queryset = queryset.prefetch_related("parent__parent__parent")
+                queryset = queryset.prefetch_related("org_unit_type")
                 limit = int(limit)
                 page_offset = int(page_offset)
                 paginator = Paginator(queryset, limit)
@@ -121,6 +125,7 @@ class OrgUnitViewSet(viewsets.ViewSet):
                 if page_offset > paginator.num_pages:
                     page_offset = paginator.num_pages
                 page = paginator.page(page_offset)
+
                 if small_search:
                     res["orgunits"] = map(lambda x: x.as_small_dict(), page.object_list)
                 else:
@@ -133,7 +138,10 @@ class OrgUnitViewSet(viewsets.ViewSet):
                 res["limit"] = limit
 
                 res["orgunits"] = list(res["orgunits"])
-
+                print("connection.queries", connection.queries)
+                for q in connection.queries:
+                    print(q)
+                print(len(connection.queries))
                 return Response(res)
             elif with_shapes:
 
