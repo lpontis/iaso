@@ -15,7 +15,7 @@ from django.shortcuts import get_object_or_404
 
 from iaso.models.org_unit_search import build_org_units_queryset
 from iaso.utils import geojson_queryset
-from django.db.models import Q
+from django.db.models import Q, Count
 from copy import deepcopy
 from hat.audit import models as audit_models
 from time import gmtime, strftime
@@ -120,8 +120,17 @@ class OrgUnitViewSet(viewsets.ViewSet):
                 if page_offset > paginator.num_pages:
                     page_offset = paginator.num_pages
                 page = paginator.page(page_offset)
-
                 queryset = page.object_list
+
+                queryset = queryset.annotate(
+                    instances_count=Count(
+                        "instance",
+                        filter=(
+                            ~Q(instance__file="") & ~Q(instance__device__test_device=True) & ~Q(instance__deleted=True)
+                        ),
+                    )
+                )
+
                 queryset = queryset.prefetch_related("groups")
                 queryset = queryset.prefetch_related("groups__source_version")
                 queryset = queryset.prefetch_related("version")

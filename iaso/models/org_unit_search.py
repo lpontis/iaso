@@ -145,12 +145,12 @@ def build_org_units_queryset(queryset, params, profile, is_export, forms):  # TO
     if source_id:
         queryset = queryset.filter(sub_source=source_id)
 
-    queryset = queryset.annotate(
-        instances_count=Count(
-            "instance",
-            filter=(~Q(instance__file="") & ~Q(instance__device__test_device=True) & ~Q(instance__deleted=True)),
-        )
-    )
+    # queryset = queryset.annotate(
+    #     instances_count=Count(
+    #         "instance",
+    #         filter=(~Q(instance__file="") & ~Q(instance__device__test_device=True) & ~Q(instance__deleted=True)),
+    #     )
+    # )
 
     if is_export:
         annotations = {
