@@ -42,6 +42,7 @@ import { OrgUnitsLevels } from './Inputs/OrgUnitsSelect';
 import { useSaveCampaign } from '../hooks/useSaveCampaign';
 import { useEffect } from 'react';
 import { useRemoveCampaign } from '../hooks/useRemoveCampaign';
+import { MapComponent } from './MapComponent';
 
 const round_shape = yup.object().shape({
     started_at: yup.date().nullable(),
@@ -361,6 +362,9 @@ const RiskAssessmentForm = () => {
                             ? 0
                             : targetPopulationTotal}
                     </Typography>
+                </Grid>
+                <Grid xs={12} md={6} item>
+                    <MapComponent />
                 </Grid>
             </Grid>
         </>
@@ -743,9 +747,8 @@ const DeleteConfirmDialog = ({ isOpen, onClose, onConfirm }) => {
 
 export const Dashboard = () => {
     const [isCreateEditDialogOpen, setIsCreateEditDialogOpen] = useState(false);
-    const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(
-        false,
-    );
+    const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] =
+        useState(false);
     const [selectedCampaignId, setSelectedCampaignId] = useState();
 
     const classes = useStyles();
@@ -839,13 +842,8 @@ export const Dashboard = () => {
         [],
     );
 
-    const {
-        getTableProps,
-        getTableBodyProps,
-        headerGroups,
-        rows,
-        prepareRow,
-    } = useTable({ columns, data: tableData });
+    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
+        useTable({ columns, data: tableData });
 
     return (
         <>
