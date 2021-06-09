@@ -103,7 +103,7 @@ class OrgUnitViewSet(viewsets.ViewSet):
                     profile,
                     is_export,
                     forms,
-                    instance_count=annotate_instance_count,
+                    annotate_instance_count,
                 ).annotate(search_index=Value(search_index, IntegerField()))
                 if search_index == 0:
                     queryset = additional_queryset
