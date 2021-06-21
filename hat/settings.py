@@ -17,6 +17,7 @@ from datetime import timedelta
 
 TESTING = os.environ.get("TESTING", "").lower() == "true"
 PLUGIN_POLIO_ENABLED = os.environ.get("PLUGIN_POLIO_ENABLED", "").lower() == "true"
+MODULE_FEDERATION_ENABLED = os.environ.get("MODULE_FEDERATION_ENABLED", "").lower() == "true"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

@@ -96,7 +96,7 @@ This is not (yet) the complete Data Model, but here are the main concepts/model 
 * `audit.Modification` are used to keep a history of modification on some models (mainly orgunit). See [audit readme](hat/audit/README.md)
 * `Link` are used to match two OrgUnit (in different source or not) that should be the same in the real world, but we don't have an unique identifier for, they have a confidence score.
 They are usually generated via `AlgorithmRun`, or the matching is done in a Notebook and uploaded via the API.
-  
+
 
 Development environment
 =======================
@@ -262,7 +262,7 @@ APP_ENV=local%
 in your root .env set
 ```PLUGIN_POLIO_ENABLED=true```
 
- 
+
 Run commands inside the docker
 -------------------------------
 
@@ -309,7 +309,7 @@ All the container definitions for development can be found in the
 Run launch a new docker container, Exec launch a command it the existing container.
 
 So `run` will ensure the dependencies like the database are up before executing. `exec` main advantage is that it is faster
-but the containers must already be running (launched manually) 
+but the containers must already be running (launched manually)
 
 `run` will launch the entrypoint.sh script but exec will take a bash command to run which is why if you want
 to run the django manage.py you will need to use `run iaso manage` but `exec iaso ./manage.py`
@@ -393,7 +393,7 @@ Code reloading
 --------------
 
 In development the servers will reload when it detects a file
-change, either in Python or Javascript. 
+change, either in Python or Javascript.
 
 Troubleshooting
 ---------------

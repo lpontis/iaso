@@ -146,7 +146,7 @@ const menuItems = [
     },
 ];
 
-if (PLUGIN_POLIO_ENABLED === 'True') {
+if (PLUGIN_POLIO_ENABLED === 'True' && MODULE_FEDERATION_ENABLED === 'False') {
     menuItems.push({
         label: MESSAGES.polio,
         key: 'polio',

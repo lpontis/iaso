@@ -29,6 +29,7 @@ global.navigator = {
 };
 global.STATIC_URL = '';
 global.PLUGIN_POLIO_ENABLED = false;
+global.MODULE_FEDERATION_ENABLED = false;
 global.L = require('leaflet');
 
 copyProps(window, global);

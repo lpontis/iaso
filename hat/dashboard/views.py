@@ -103,5 +103,6 @@ def iaso(request: HttpRequest) -> HttpResponse:
         {
             "STATIC_URL": settings.STATIC_URL,
             "PLUGIN_POLIO_ENABLED": settings.PLUGIN_POLIO_ENABLED,
+            "MODULE_FEDERATION_ENABLED": settings.MODULE_FEDERATION_ENABLED,
         },
     )
