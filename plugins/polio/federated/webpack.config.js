@@ -3,6 +3,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
 
 module.exports = {
+    entry: './index',
+    mode: 'development',
     output: {
         path: path.join(__dirname, '/dist'),
         filename: 'index.bundle.js',
@@ -106,7 +108,7 @@ module.exports = {
             name: 'polio',
             filename: 'remoteEntry.js',
             exposes: {
-                './config': '../js/src/config',
+                './config': '../js/src/config.js',
             },
             shared: [],
         }),
