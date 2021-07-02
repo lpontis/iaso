@@ -535,13 +535,19 @@ class MappingVersion(models.Model):
         }
 
 
+DHIS2_SYNC_CHOICES = [("no", "Not synced"), ("daily", "Daily"), ("weekly", "Weekly")]
+
+
 class ExternalCredentials(models.Model):
+    """This model represent a DHIS2 server linked via some credentials"""
+
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="credentials")
 
     name = models.TextField()
     login = models.TextField()
     password = models.TextField()
     url = models.TextField()
+    sync = models.TextField(choices=DHIS2_SYNC_CHOICES, default="no")
 
     def __str__(self):
         return "%s - %s - %s (%s)" % (self.name, self.login, self.url, self.account)
@@ -552,6 +558,7 @@ class ExternalCredentials(models.Model):
             "name": self.name,
             "login": self.login,
             "url": self.url,
+            "sync": self.sync,
         }
 
 
