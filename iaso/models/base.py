@@ -561,6 +561,10 @@ class ExternalCredentials(models.Model):
     url = models.TextField()
     sync = models.TextField(choices=DHIS2_SYNC_CHOICES, default="no")
 
+    @property
+    def is_valid(self) -> bool:
+        return bool(self.url and self.password and self.login)
+
     def __str__(self):
         return "%s - %s - %s (%s)" % (self.name, self.login, self.url, self.account)
 
@@ -571,6 +575,7 @@ class ExternalCredentials(models.Model):
             "login": self.login,
             "url": self.url,
             "sync": self.sync,
+            "is_valid": self.is_valid,
         }
 
 
