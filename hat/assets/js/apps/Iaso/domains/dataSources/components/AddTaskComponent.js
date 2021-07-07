@@ -225,12 +225,19 @@ const AddTask = ({
         </ConfirmCancelDialogComponent>
     );
 };
+
+const Message = {
+    id: PropTypes.string,
+    defaultMessage: PropTypes.string,
+    values: PropTypes.object || null,
+};
+
 AddTask.defaultProps = {
     sourceCredentials: {},
 };
 AddTask.propTypes = {
     renderTrigger: PropTypes.func.isRequired,
-    titleMessage: PropTypes.object.isRequired,
+    titleMessage: PropTypes.exact(Message).isRequired,
     sourceId: PropTypes.number.isRequired,
     sourceVersion: PropTypes.number.isRequired,
     sourceCredentials: PropTypes.object,
