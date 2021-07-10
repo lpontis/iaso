@@ -15,6 +15,8 @@ import csv
 from django.http import HttpResponse
 from django.http import JsonResponse
 import json
+import datetime
+from collections import defaultdict
 
 
 class CustomFilterBackend(filters.BaseFilterBackend):
@@ -167,6 +169,127 @@ class IMViewSet(viewsets.ViewSet):
             return response
 
 
+def get_campaigns_per_country(country_name):
+    country = OrgUnit.objects.get(org_unit_type__category="COUNTRY", name__iexact=country_name)
+    res = []
+    # definitely probably doable with something more efficient, sql-wise, but this works.
+    for c in list(Campaign.objects.all().select_related("initial_org_unit__parent__parent")):
+        parent = c.initial_org_unit
+        while parent:
+            if parent.id == country.id:
+                res.append(c)
+            parent = parent.parent
+    return res
+
+
+class LQASViewSet(viewsets.ViewSet):
+    """
+           Endpoint used to transform IM (independent monitoring) data from existing ODK forms stored in ONA. Very custom to the polio project.
+
+    sample Config:
+
+    configs = [
+           {
+               "url": 'https://brol.com/api/v1/data/5888',
+               "login": "qmsdkljf",
+               "password": "qmsdlfj"
+               "country": "Liberia",
+               "district_column": "health_district",
+               "region_column": "county"
+           },
+           {
+               "url":  'https://brol.com/api/v1/data/5887',
+               "login": "qmsldkjf",
+               "password": "qsdfmlkj"
+               "country": "Sierra Leone",
+               "district_column": "district",
+               "region_column": "chiefdom"
+           }
+       ]
+    """
+
+    def list(self, request):
+        slug = request.GET.get("country", None)
+        as_csv = request.GET.get("format", None) == "csv"
+        configs = get_object_or_404(Config, slug="lqas")
+        country_summary = {}
+        for config in configs.content:
+            print(config)
+            country = config["country"]
+            print("----------------", country)
+            campaigns = get_campaigns_per_country(country)
+            print("get_campaigns_per_country get", get_campaigns_per_country(country))
+            response = requests.get(config["url"], auth=(config["login"], config["password"]))
+            forms = response.json()
+
+            district_column = config["district_column"]
+            region_column = config["region_column"]
+
+            d_ = lambda: defaultdict(dict)
+            d__ = lambda: defaultdict(d_)
+            d___ = lambda: defaultdict(d__)
+            summary_lqas = defaultdict(d___)
+            count_absent_district = 0
+            for form in forms:
+                form["lqas_country"] = country
+                region = form.get(region_column, None)
+                district = form.get(district_column, None)
+
+                if region and district:
+                    for i in range(1, 11):
+                        key = "FM_Child%d" % i
+                        fm = form.get(key, None)
+                        today_string = form.get("today", None)
+                        today = datetime.datetime.strptime(today_string, "%Y-%m-%d").date()
+                        # print(today)
+                        round = ""
+                        campaign = ""
+                        for c in campaigns:
+                            if (
+                                c.round_two
+                                and c.round_two.started_at
+                                and c.round_two.ended_at
+                                and today >= c.round_two.started_at
+                                and today <= c.round_two.ended_at + datetime.timedelta(days=30)
+                            ):
+                                round = 2
+                                campaign = c.obr_name
+                                break
+                            if (
+                                c.round_one
+                                and c.round_one.started_at
+                                and c.round_one.ended_at
+                                and today >= c.round_one.started_at
+                                and today <= c.round_one.ended_at + datetime.timedelta(days=30)
+                            ):
+                                round = 1
+                                campaign = c.obr_name
+                        # print(key, fm)
+                        if round and campaign:
+                            # print("campaign", campaign, round)
+                            if not summary_lqas[campaign][round][region][district]:
+                                summary_lqas[campaign][round][region][district] = {"fm": 0, "children": 0}
+                            if fm is None:
+                                pass  # print("no fm for key", key, form)
+                            else:
+                                summary_lqas[campaign][round][region][district]["children"] = (
+                                    summary_lqas[campaign][round][region][district]["children"] + 1
+                                )
+                            if fm == "Y":
+                                summary_lqas[campaign][round][region][district]["fm"] = (
+                                    summary_lqas[campaign][round][region][district]["fm"] + 1
+                                )
+                else:
+                    # print("------------------- no region or district", form)
+                    count_absent_district += 1
+            print(len(forms))
+            print(json.dumps(summary_lqas, indent=2))
+            country_summary[country] = summary_lqas
+
+        return JsonResponse(country_summary, safe=False)
+
+
 router = routers.SimpleRouter()
 router.register(r"polio/campaigns", CampaignViewSet, basename="Campaign")
 router.register(r"polio/im", IMViewSet, basename="IM")
+router.register(r"polio/lqas", LQASViewSet, basename="LQAS")
