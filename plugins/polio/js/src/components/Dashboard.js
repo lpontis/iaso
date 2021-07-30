@@ -7,7 +7,6 @@ import {
     LoadingSpinner,
 } from 'bluesquare-components';
 import 'react-table/react-table.css';
-
 import {
     Box,
     Button,
@@ -16,6 +15,9 @@ import {
     DialogContent,
     DialogTitle,
     FormControl,
+    FormControlLabel,
+    FormGroup,
+    Switch,
     Grid,
     InputAdornment,
     InputLabel,
@@ -27,7 +29,6 @@ import {
 import merge from 'lodash.merge';
 import AddIcon from '@material-ui/icons/Add';
 import DownloadIcon from '@material-ui/icons/GetApp';
-import { MapContainer } from './MapComponent';
 
 import {
     DateInput,
@@ -35,8 +36,10 @@ import {
     PaymentField,
     Select,
     StatusField,
+    RABudgetStatusField,
     TextInput,
 } from './Inputs';
+import { MapComponent } from './MapComponent/MapComponent';
 
 import { Page } from './Page';
 import { Field, FormikProvider, useFormik, useFormikContext } from 'formik';
@@ -52,31 +55,32 @@ import { useGetRegionGeoJson } from '../hooks/useGetRegionGeoJson';
 import MESSAGES from '../constants/messages';
 import SearchIcon from '@material-ui/icons/Search';
 import { useDebounce } from 'use-debounce';
+import { convertEmptyStringToNull } from '../utils/convertEmptyStringToNull';
 
 const round_shape = yup.object().shape({
     started_at: yup.date().nullable(),
     ended_at: yup
         .date()
         .nullable()
-        .min(yup.ref('started_at'), "end date can't be before start date"),
+        .min(yup.ref('started_at'), 'end date can\'t be before start date'),
     mop_up_started_at: yup.date().nullable(),
     mop_up_ended_at: yup
         .date()
         .nullable()
         .min(
             yup.ref('mop_up_started_at'),
-            "end date can't be before start date",
+            'end date can\'t be before start date',
         ),
     im_started_at: yup.date().nullable(),
     im_ended_at: yup
         .date()
         .nullable()
-        .min(yup.ref('im_started_at'), "end date can't be before start date"),
+        .min(yup.ref('im_started_at'), 'end date can\'t be before start date'),
     lqas_started_at: yup.date().nullable(),
     lqas_ended_at: yup
         .date()
         .nullable()
-        .min(yup.ref('lqas_started_at'), "end date can't be before start date"),
+        .min(yup.ref('lqas_started_at'), 'end date can\'t be before start date'),
     target_population: yup.number().nullable().min(0).integer(),
     cost: yup.number().nullable().min(0).integer(),
 });
@@ -190,6 +194,12 @@ const BaseInfoForm = () => {
                     />
                     <Field
                         className={classes.input}
+                        label="GPEI Email"
+                        name={'gpei_email'}
+                        component={TextInput}
+                    />
+                    <Field
+                        className={classes.input}
                         name={'initial_org_unit'}
                         component={OrgUnitsLevels}
                     />
@@ -278,23 +288,11 @@ const DetectionForm = () => {
 
 const selectedPathOptions = { color: 'lime' };
 const unselectedPathOptions = { color: 'gray' };
+const initialDistrict = { color: '#FF695C' };
 
 const RiskAssessmentForm = () => {
     const classes = useStyles();
-    const { values } = useFormikContext();
-
-    const wastageRate = 0.26;
-
-    const round1Doses = parseInt(
-        defaultToZero(values?.round_one?.target_population ?? 0),
-    );
-    const round2Doses = parseInt(
-        defaultToZero(values?.round_two?.target_population ?? 0),
-    );
-
-    const vialsRequested = Math.ceil(
-        ((round1Doses + round2Doses) / 20) * (1 / (1 - wastageRate)),
-    );
+    useFormikContext();
 
     return (
         <>
@@ -303,7 +301,7 @@ const RiskAssessmentForm = () => {
                     <Grid xs={12} md={6} item>
                         <Field
                             name={'risk_assessment_status'}
-                            component={StatusField}
+                            component={RABudgetStatusField}
                         />
                     </Grid>
                     <Grid xs={12} md={6} item>
@@ -370,71 +368,126 @@ const RiskAssessmentForm = () => {
                         component={TextInput}
                         className={classes.input}
                     />
-                    <Typography>
-                        Vials Requested{' '}
-                        {Number.isNaN(vialsRequested) ? 0 : vialsRequested}
-                    </Typography>
+                    <Field
+                        label="Vials Requested (both rounds)"
+                        name={'vials_requested'}
+                        component={TextInput}
+                        className={classes.input}
+                    />
                 </Grid>
             </Grid>
         </>
     );
 };
 
-const ScopeForm = () => {
-    const { values, setFieldValue } = useFormikContext();
+const separate = (array, referenceArray) => {
+    const result = {
+        selected: [],
+        unselected: [],
+    };
+    array.forEach(item => {
+        if (referenceArray.includes(item)) {
+            result.selected.push(item);
+        } else {
+            result.unselected.push(item);
+        }
+    });
+    return result;
+};
 
+const ScopeForm = () => {
+    const [selectRegion, setSelectRegion] = useState(false);
+    const { values, setFieldValue } = useFormikContext();
+    // Group contains selected orgunits
     const { group = {} } = values;
 
-    const { data = [], isFetching } = useGetRegionGeoJson(
+    const { data: shapes, isFetching } = useGetRegionGeoJson(
         values.org_unit?.country_parent?.id ||
-            values.org_unit?.root?.id ||
-            values.org_unit?.id,
+        values.org_unit?.root?.id ||
+        values.org_unit?.id,
     );
 
-    const shapes = useMemo(() => {
-        return data.map(shape => ({
-            ...shape,
-            pathOptions: group.org_units.find(org_unit => shape.id === org_unit)
+    const toggleRegionSelect = () => {
+        setSelectRegion(!selectRegion);
+    };
+
+
+    const getShapeStyle = useCallback((shape) => {
+            return group.org_units.includes(shape.id)
                 ? selectedPathOptions
-                : unselectedPathOptions,
-        }));
-    }, [data, group]);
+                : values.org_unit?.id === shape.id
+                    ? initialDistrict
+                    : unselectedPathOptions;
+        },
+        [group, values.org_unit?.id],
+    );
 
     const onSelectOrgUnit = useCallback(
         shape => {
-            var { org_units } = group;
-            const hasFound = org_units.find(org_unit => shape.id === org_unit);
-
-            if (hasFound) {
-                org_units = org_units.filter(orgUnit => orgUnit !== shape.id);
+            const { org_units } = group;
+            let newOrgUnits;
+            if (selectRegion) {
+                const regionShapes = shapes.filter(s => s.parent_id === shape.parent_id).map(s => s.id);
+                const {
+                    selected,
+                    unselected,
+                } = separate(regionShapes, org_units);
+                const isRegionSelected = selected.length === regionShapes.length;
+                if (isRegionSelected) {
+                    newOrgUnits = org_units.filter(orgUnit => !regionShapes.includes(orgUnit));
+                } else {
+                    newOrgUnits = [...org_units, ...unselected];
+                }
             } else {
-                org_units.push(shape.id);
+                if (org_units.find(org_unit => shape.id === org_unit)) {
+                    newOrgUnits = org_units.filter(orgUnit => orgUnit !== shape.id);
+                } else {
+                    newOrgUnits = [...org_units, shape.id];
+                }
             }
 
             setFieldValue('group', {
                 ...group,
-                org_units,
+                org_units: newOrgUnits,
             });
         },
-        [group, setFieldValue],
+        [group, setFieldValue, selectRegion, shapes],
     );
 
-    return (
-        <>
-            <Grid container spacing={2}>
-                <Grid xs={12} item>
-                    {isFetching ? (
-                        <LoadingSpinner />
-                    ) : (
-                        <MapContainer
-                            shapes={shapes}
-                            onSelectShape={onSelectOrgUnit}
-                        />
-                    )}
-                </Grid>
+    return <Grid container spacing={2}>
+        <Grid xs={12} item>
+            {isFetching && !shapes && <LoadingSpinner />}
+            {!isFetching && !shapes &&
+            // FIXME should not be needed
+            <Typography>Please save the Campaign before selecting
+                scope.</Typography>
+            }
+            <MapComponent
+                shapes={shapes}
+                onSelectShape={onSelectOrgUnit}
+                getShapeStyle={getShapeStyle}
+            />
+        </Grid>
+        <Grid container>
+            <Grid xs={8} item>
+                <FormGroup>
+                    <FormControlLabel
+                        style={{ width: 'max-content' }}
+                        control={<Switch size="medium" checked={selectRegion}
+                                         onChange={toggleRegionSelect}
+                                         color="primary" />}
+                        label="Select region"
+                    />
+                </FormGroup>
+
             </Grid>
-        </>
-    );
+            <Grid xs={4} item>
+                {shapes && isFetching &&
+                <Typography align="right">Refreshing ...</Typography>
+                }
+            </Grid>
+        </Grid>
+    </Grid>;
 };
 
 const BudgetForm = () => {
@@ -477,7 +530,10 @@ const BudgetForm = () => {
             <Grid container spacing={2}>
                 <Grid container direction="row" item spacing={2}>
                     <Grid xs={12} md={6} item>
-                        <Field name={'budget_status'} component={StatusField} />
+                        <Field
+                            name={'budget_status'}
+                            component={RABudgetStatusField}
+                        />
                     </Grid>
                     <Grid xs={12} md={6} item>
                         <Field
@@ -670,7 +726,7 @@ const Round1Form = () => {
                     className={classes.input}
                 />
                 <Field
-                    label="Main awareness problem"
+                    label="Main reason for non-vaccination"
                     name={'round_one.main_awareness_problem'}
                     component={TextInput}
                     className={classes.input}
@@ -687,6 +743,14 @@ const Round1Form = () => {
                     label="% children missed OUT OF household"
                     name={
                         'round_one.im_percentage_children_missed_out_household'
+                    }
+                    component={TextInput}
+                    className={classes.input}
+                />
+                <Field
+                    label="% children missed IN+OUT OF household"
+                    name={
+                        'round_one.im_percentage_children_missed_in_plus_out_household'
                     }
                     component={TextInput}
                     className={classes.input}
@@ -773,7 +837,7 @@ const Round2Form = () => {
                     className={classes.input}
                 />
                 <Field
-                    label="Main awareness problem"
+                    label="Main reason for non-vaccination"
                     name={'round_two.main_awareness_problem'}
                     component={TextInput}
                     className={classes.input}
@@ -790,6 +854,14 @@ const Round2Form = () => {
                     label="% children missed OUT OF household"
                     name={
                         'round_two.im_percentage_children_missed_out_household'
+                    }
+                    component={TextInput}
+                    className={classes.input}
+                />
+                <Field
+                    label="% children missed IN+OUT OF household"
+                    name={
+                        'round_two.im_percentage_children_missed_in_plus_out_household'
                     }
                     component={TextInput}
                     className={classes.input}
@@ -826,7 +898,7 @@ const CreateEditDialog = ({ isOpen, onClose, onConfirm, selectedCampaign }) => {
     const classes = useStyles();
 
     const handleSubmit = (values, helpers) =>
-        saveCampaign(values, {
+        saveCampaign(convertEmptyStringToNull(values), {
             onSuccess: () => {
                 helpers.resetForm();
                 onClose();
@@ -1098,7 +1170,7 @@ export const Dashboard = () => {
 
     const columns = useMemo(
         () => [
-          {
+            {
                 Header: 'Country',
                 accessor: 'top_level_org_unit_name',
                 sortable: false,
@@ -1131,7 +1203,8 @@ export const Dashboard = () => {
                 accessor: 'round_one__started_at',
                 Cell: settings => {
                     return (
-                        <ColumnText text={settings.original?.round_one?.started_at} />
+                        <ColumnText
+                            text={settings.original?.round_one?.started_at ?? textPlaceholder} />
                     );
                 },
             },
@@ -1140,7 +1213,8 @@ export const Dashboard = () => {
                 accessor: 'round_two__started_at',
                 Cell: settings => {
                     return (
-                        <ColumnText text={settings.original?.round_two?.started_at} />
+                        <ColumnText
+                            text={settings.original?.round_two?.started_at ?? textPlaceholder} />
                     );
                 },
             },

@@ -1,7 +1,10 @@
+from uuid import uuid4
+
 from django.db import models
 from django.utils.translation import gettext as _
-from uuid import uuid4
-from iaso.models import Group
+
+from iaso.models import Group, OrgUnit
+from django.core.mail import send_mail
 
 VIRUSES = [
     ("PV1", _("PV1")),
@@ -29,6 +32,13 @@ STATUS = [
     ("PENDING", _("Pending")),
     ("ONGOING", _("Ongoing")),
     ("FINISHED", _("Finished")),
+]
+
+RA_BUDGET_STATUSES = [
+    ("APPROVED", _("Approved")),
+    ("TO_SUBMIT", _("To Submit")),
+    ("SUBMITTED", _("Submitted")),
+    ("REVIEWED", _("Reviewed by RRT")),
 ]
 
 PREPAREDNESS_SYNC_STATUS = [
@@ -61,6 +71,9 @@ class Round(models.Model):
     im_percentage_children_missed_out_household = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0, null=True, blank=True
     )
+    im_percentage_children_missed_in_plus_out_household = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.0, null=True, blank=True
+    )
     awareness_of_campaign_planning = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.0, null=True, blank=True
     )
@@ -74,6 +87,7 @@ class Campaign(models.Model):
     epid = models.CharField(default=None, max_length=255, null=True, blank=True)
     obr_name = models.CharField(max_length=255)
     gpei_coordinator = models.CharField(max_length=255, null=True, blank=True)
+    gpei_email = models.EmailField(max_length=254, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
 
     initial_org_unit = models.ForeignKey(
@@ -143,7 +157,7 @@ class Campaign(models.Model):
     )
 
     # Risk Assessment
-    risk_assessment_status = models.CharField(max_length=10, choices=STATUS, null=True, blank=True)
+    risk_assessment_status = models.CharField(max_length=10, choices=RA_BUDGET_STATUSES, null=True, blank=True)
     risk_assessment_responsible = models.CharField(max_length=10, choices=RESPONSIBLES, null=True, blank=True)
     investigation_at = models.DateField(
         null=True,
@@ -171,6 +185,7 @@ class Campaign(models.Model):
         verbose_name=_("DG Authorization"),
     )
     verification_score = models.IntegerField(null=True, blank=True)
+    vials_requested = models.IntegerField(null=True, blank=True)
     # Preparedness
     preperadness_spreadsheet_url = models.URLField(null=True, blank=True)
     preperadness_sync_status = models.CharField(max_length=10, default="FINISHED", choices=PREPAREDNESS_SYNC_STATUS)
@@ -178,7 +193,7 @@ class Campaign(models.Model):
     surge_spreadsheet_url = models.URLField(null=True, blank=True)
     country_name_in_surge_spreadsheet = models.CharField(null=True, blank=True, max_length=256)
     # Budget
-    budget_status = models.CharField(max_length=10, choices=STATUS, null=True, blank=True)
+    budget_status = models.CharField(max_length=10, choices=RA_BUDGET_STATUSES, null=True, blank=True)
     budget_responsible = models.CharField(max_length=10, choices=RESPONSIBLES, null=True, blank=True)
 
     who_disbursed_to_co_at = models.DateField(
@@ -235,11 +250,39 @@ class Campaign(models.Model):
     def __str__(self):
         return f"{self.epid} {self.obr_name}"
 
+    def country(self):
+        if self.initial_org_unit is not None:
+            countries = self.initial_org_unit.country_ancestors()
+            if countries is not None and len(countries) > 0:
+                return countries[0]
+
+    def get_districts(self):
+        if self.group is None:
+            return OrgUnit.objects.none()
+        return self.group.org_units.all()
+
+    def get_regions(self):
+        return OrgUnit.objects.filter(id__in=self.get_districts().values_list("parent_id", flat=True).distinct())
+
     def last_preparedness(self):
         return self.preparedness_set.order_by("-created_at").first()
 
     def last_surge(self):
         return self.surge_set.order_by("-created_at").first()
+
+    def save(self, *args, **kwargs):
+        if not self.created_at and self.gpei_email:
+            from django.conf import settings
+
+            domain = settings.DNS_DOMAIN
+            send_mail(
+                "New Campaign",
+                "A new campaign %s has been added to %s, and your email is registered as contact. Please connect to view the information. "
+                % (self.obr_name, domain),
+                "no-reply@%s" % domain,
+                [self.gpei_email],
+            )
+        super(Campaign, self).save(*args, **kwargs)
 
 
 class Preparedness(models.Model):
