@@ -141,8 +141,11 @@ const MESSAGES = defineMessages({
     dhisSyncLabel: {
        id: 'iaso.datasources.dhisSyncLabel',
         defaultMessage: 'Automatic import OrgUnit from DHIS',
-    }
-
+    },
+    versions: {
+        id: 'iaso.datasources.version',
+        defaultMessage: 'Versions',
+    },
 });
 
 export default MESSAGES;
