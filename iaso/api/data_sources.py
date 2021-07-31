@@ -83,7 +83,8 @@ class DataSourceSerializer(serializers.ModelSerializer):
                 new_credentials.account = account
             new_credentials.name = credentials["dhis_name"]
             new_credentials.login = credentials["dhis_login"]
-            new_credentials.password = credentials["dhis_password"]
+            if credentials["dhis_password"]:
+                new_credentials.password = credentials["dhis_password"]
             new_credentials.url = credentials["dhis_url"]
             new_credentials.sync = credentials["dhis_sync"]
             new_credentials.save()
