@@ -90,6 +90,9 @@ module.exports = {
         }),
         // XLSX
         new webpack.IgnorePlugin(/cptable/),
+        new webpack.WatchIgnorePlugin({
+            paths: [/cptable/, /\.js$/, /\.d\.ts$/],
+        }),
     ],
 
     module: {
@@ -104,7 +107,7 @@ module.exports = {
                 exclude: /node_modules/,
                 use: {
                     loader: 'ts-loader',
-                    options: { context: __dirname },
+                    options: { context: __dirname, logInfoToStdOut: true },
                 },
             },
             {

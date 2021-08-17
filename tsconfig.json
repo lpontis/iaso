@@ -7,10 +7,12 @@
         "strictNullChecks": true,   // enable strict null checks as a best practice
         "module": "commonJS",            // specify module code generation
         "jsx": "react",             // use typescript to transpile jsx to js
-        "target": "es2015",            // specify ECMAScript target version
+        "target": "es2020",            // specify ECMAScript target version
         "allowJs": true,             // allow a partial TypeScript and JavaScript codebase
-        "checkJs": false
+        "checkJs": false,
+        "esModuleInterop": true
 
     },
-    "files":["hat/assets/js/apps/Iaso/index.tsx","hat/assets/js/apps/Iaso/utils/index.tsx"]
+    "exclude":["node_modules"],
+    "include":["assets/js/apps/Iaso/**/*","assets/js/apps/Iaso/*"],
 }
