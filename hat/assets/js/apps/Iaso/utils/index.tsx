@@ -1,5 +1,5 @@
-import pluginsConfigs from '../../../../../../plugins';
 import { createContext } from 'react';
+import pluginsConfigs from '../../../../../../plugins';
 
 export const capitalize = (text, keepEndCase = false) =>
     text
@@ -21,7 +21,7 @@ export const formatThousand = number => {
 export const getYears = (yearsCount, offset = 0, reverse = false) => {
     const currentYear = new Date().getFullYear() + offset;
     const years = Array(yearsCount)
-        .fill()
+        .fill(null)
         .map((y, i) => currentYear - i);
     if (reverse) {
         return years.reverse();
@@ -30,7 +30,7 @@ export const getYears = (yearsCount, offset = 0, reverse = false) => {
 };
 
 export const addPositionIndex = array => {
-    const tempArray = [];
+    const tempArray:any[] = [];
     if (array) {
         array.forEach((e, index) => {
             tempArray.push({
@@ -43,10 +43,10 @@ export const addPositionIndex = array => {
 };
 
 export const removePositionIndex = array => {
-    const tempArray = [];
+    const tempArray :any[] = [];
     if (array) {
-        array.forEach(e => {
-            tempArray.push(e.value);
+        array.forEach((e:any) => {
+            tempArray.push(e.value)
         });
     }
     return tempArray;
@@ -82,12 +82,12 @@ export const userHasPermission = (
 
 export const getIntegerArray = size =>
     Array(size)
-        .fill()
+        .fill(null)
         .map((y, i) => size - i)
         .reverse();
 
-export const getPlugins = pluginsKeys => {
-    const plugins = [];
+export const getPlugins = (pluginsKeys : any[]):any[] =>  {
+    const plugins :any[] = [];
     pluginsKeys.forEach(plugin => {
         const pluginConfig = pluginsConfigs[plugin];
         if (pluginConfig) {
@@ -96,5 +96,5 @@ export const getPlugins = pluginsKeys => {
     });
     return plugins;
 };
-
-export const PluginsContext = createContext({ plugins: [] });
+const emptyArray :any[] = [];
+export const PluginsContext = createContext({ plugins: emptyArray });

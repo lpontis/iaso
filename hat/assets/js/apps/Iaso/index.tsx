@@ -15,7 +15,7 @@ import { getPlugins, PluginsContext } from './utils';
 const queryClient = new QueryClient();
 
 export default function iasoApp(element, enabledPluginsName) {
-    const plugins = getPlugins(enabledPluginsName);
+    const plugins:any[] = getPlugins(enabledPluginsName);
     const allRoutesConfigs = [
         ...routeConfigs,
         ...plugins.map(plugin => plugin.routes).flat(),
@@ -38,7 +38,7 @@ export default function iasoApp(element, enabledPluginsName) {
 
     ReactDOM.render(
         <QueryClientProvider client={queryClient}>
-            <PluginsContext.Provider value={{ plugins }}>
+            <PluginsContext.Provider value={{ plugins:plugins }}>
                 <MuiThemeProvider theme={theme}>
                     <CssBaseline />
                     <App store={store} routes={routes} history={history} />
@@ -52,4 +52,8 @@ export default function iasoApp(element, enabledPluginsName) {
 // Before we were exporting the function and using the iaso as a proper lib
 // but it was proken by webbpack-dev-server injecting his code so this a replacement
 // solution
+
+declare global {
+    interface Window { iasoApp: any; }
+}
 window.iasoApp = iasoApp;
