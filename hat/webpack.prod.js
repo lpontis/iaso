@@ -20,8 +20,6 @@ module.exports = {
     },
 
     output: {
-        library: ['HAT', '[name]'],
-        libraryTarget: 'var',
         path: path.resolve(__dirname, './assets/webpack'),
         filename: '[name]-[chunkhash].js',
         publicPath: '',
@@ -74,12 +72,10 @@ module.exports = {
 
     module: {
         rules: [
-            // we pass the output from babel loader to react-hot loader
             {
                 test: /\.js?$/,
                 exclude: /node_modules/,
                 use: [
-                    { loader: 'react-hot-loader/webpack' },
                     {
                         loader: 'babel-loader',
                         options: {
@@ -90,7 +86,7 @@ module.exports = {
                             plugins: [
                                 ['@babel/transform-runtime'],
                                 [
-                                    'react-intl',
+                                    'formatjs',
                                     {
                                         messagesDir: path.join(
                                             __dirname,

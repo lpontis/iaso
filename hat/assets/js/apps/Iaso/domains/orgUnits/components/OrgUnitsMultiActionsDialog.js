@@ -141,7 +141,11 @@ const OrgUnitsMultiActionsDialog = ({
                 classes={{
                     paper: classes.paper,
                 }}
-                onBackdropClick={closeAndReset}
+                onClose={(event, reason) => {
+                    if (reason === 'backdropClick') {
+                        closeAndReset();
+                    }
+                }}
                 scroll="body"
             >
                 <DialogTitle className={classes.title}>
@@ -188,7 +192,6 @@ const OrgUnitsMultiActionsDialog = ({
                                         value: g.id,
                                     }))}
                                     label={MESSAGES.addToGroups}
-                                    isSearchable
                                 />
                                 <InputComponent
                                     multi
@@ -210,7 +213,6 @@ const OrgUnitsMultiActionsDialog = ({
                                         value: g.id,
                                     }))}
                                     label={MESSAGES.removeFromGroups}
-                                    isSearchable
                                 />
                             </>
                         )}

@@ -5,7 +5,6 @@ import { withStyles, Tabs, Grid, Tab, Box } from '@material-ui/core';
 
 import PropTypes from 'prop-types';
 import isEqual from 'lodash/isEqual';
-import moment from 'moment';
 
 import {
     getTableUrl,
@@ -24,12 +23,6 @@ import {
     setCurrentForm,
     fetchFormDetail as fetchFormDetailAction,
 } from '../forms/actions';
-import { setOrgUnitTypes } from '../orgUnits/actions';
-import {
-    setDevicesList,
-    setDevicesOwnershipList,
-} from '../../redux/devicesReducer';
-import { setPeriods } from '../periods/actions';
 import {
     redirectTo as redirectToAction,
     redirectToReplace as redirectToReplaceAction,
@@ -38,10 +31,6 @@ import {
 import {
     fetchInstancesAsDict,
     fetchInstancesAsSmallDict,
-    fetchOrgUnitsTypes,
-    fetchDevices,
-    fetchDevicesOwnerships,
-    fetchPeriods,
 } from '../../utils/requests';
 
 import {
@@ -52,6 +41,7 @@ import {
     getSelectionActions,
 } from './utils';
 import { fetchLatestOrgUnitLevelId } from '../orgUnits/utils';
+import { getFromDateString, getToDateString } from '../../utils/dates';
 
 import TopBar from '../../components/nav/TopBarComponent';
 import DownloadButtonsComponent from '../../components/buttons/DownloadButtonsComponent';
@@ -113,24 +103,11 @@ class Instances extends Component {
     // eslint-disable-next-line camelcase
     UNSAFE_componentWillMount() {
         const {
-            dispatch,
-            params: { formId, columns },
+            params: { columns },
             params,
             redirectToReplace,
         } = this.props;
         this.props.resetInstances();
-        fetchOrgUnitsTypes(dispatch).then(orgUnitTypes =>
-            this.props.setOrgUnitTypes(orgUnitTypes),
-        );
-        fetchDevices(dispatch).then(devices =>
-            this.props.setDevicesList(devices),
-        );
-        fetchDevicesOwnerships(dispatch).then(devicesOwnershipsList =>
-            this.props.setDevicesOwnershipList(devicesOwnershipsList),
-        );
-        fetchPeriods(dispatch, formId).then(periods =>
-            this.props.setPeriods(periods),
-        );
         if (!columns) {
             const newParams = {
                 ...params,
@@ -237,16 +214,8 @@ class Instances extends Component {
             deviceOwnershipId: params.deviceOwnershipId,
             search: params.search,
             orgUnitParentId: fetchLatestOrgUnitLevelId(params.levels),
-            dateFrom: params.dateFrom
-                ? moment(params.dateFrom, 'DD-MM-YYYY')
-                      .startOf('day')
-                      .format('YYYY-MM-DD HH:MM')
-                : null,
-            dateTo: params.dateTo
-                ? moment(params.dateTo, 'DD-MM-YYYY')
-                      .endOf('day')
-                      .format('YYYY-MM-DD HH:MM')
-                : null,
+            dateFrom: getFromDateString(params.dateFrom),
+            dateTo: getToDateString(params.dateTo),
             showDeleted: params.showDeleted,
         };
         const filters = {};
@@ -430,7 +399,7 @@ class Instances extends Component {
                             item
                             container
                             alignItems="center"
-                            justify="flex-end"
+                            justifyContent="flex-end"
                             className={classes.selectColmunsContainer}
                         >
                             <ColumnsSelectDrawer
@@ -565,15 +534,11 @@ Instances.propTypes = {
     redirectTo: PropTypes.func.isRequired,
     fetching: PropTypes.bool.isRequired,
     dispatch: PropTypes.func.isRequired,
-    setOrgUnitTypes: PropTypes.func.isRequired,
     setInstancesFetching: PropTypes.func.isRequired,
-    setDevicesList: PropTypes.func.isRequired,
     resetInstances: PropTypes.func.isRequired,
-    setDevicesOwnershipList: PropTypes.func.isRequired,
     router: PropTypes.object.isRequired,
     redirectToReplace: PropTypes.func.isRequired,
     prevPathname: PropTypes.any,
-    setPeriods: PropTypes.func.isRequired,
     fetchFormDetail: PropTypes.func.isRequired,
     createInstance: PropTypes.func.isRequired,
 };
@@ -596,11 +561,6 @@ const MapDispatchToProps = dispatch => ({
         dispatch(setInstancesSmallDict(instances)),
     setInstancesFetching: isFetching =>
         dispatch(setInstancesFetching(isFetching)),
-    setOrgUnitTypes: orgUnitTypes => dispatch(setOrgUnitTypes(orgUnitTypes)),
-    setDevicesList: devices => dispatch(setDevicesList(devices)),
-    setDevicesOwnershipList: devicesOwnershipsList =>
-        dispatch(setDevicesOwnershipList(devicesOwnershipsList)),
-    setPeriods: periods => dispatch(setPeriods(periods)),
     createInstance: (currentForm, payload) =>
         dispatch(createInstance(currentForm, payload)),
     ...bindActionCreators(

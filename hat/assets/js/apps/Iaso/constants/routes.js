@@ -21,6 +21,9 @@ import PageError from '../components/errors/PageError';
 import { baseUrls } from './urls';
 import { capitalize } from '../utils/index';
 import { orgUnitFiltersWithPrefix, linksFiltersWithPrefix } from './filters';
+import Pages from '../domains/pages';
+
+import { SHOW_PAGES } from '../utils/featureFlags';
 
 const paginationPathParams = [
     {
@@ -73,15 +76,12 @@ export const formsPath = {
     isRootUrl: true,
 };
 
-export const polioPath = {
-    baseUrl: baseUrls.polio,
-    permission: 'iaso_forms',
+export const pagesPath = {
+    baseUrl: baseUrls.pages,
+    permission: 'iaso_pages',
+    featureFlag: SHOW_PAGES,
     params: [],
-    component: props => {
-        window.location = '/dashboard/polio/list'
-
-        return <></>;
-    },
+    component: props => <Pages {...props} />,
 };
 
 export const archivedPath = {
@@ -516,7 +516,7 @@ export const routeConfigs = [
     devicesPath,
     groupsPath,
     orgUnitTypesPath,
-    polioPath,
+    pagesPath,
     page401,
     page404,
     page500,

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     Table,
     textPlaceholder,
@@ -7,7 +7,6 @@ import {
     LoadingSpinner,
 } from 'bluesquare-components';
 import 'react-table/react-table.css';
-
 import {
     Box,
     Button,
@@ -16,6 +15,9 @@ import {
     DialogContent,
     DialogTitle,
     FormControl,
+    FormControlLabel,
+    FormGroup,
+    Switch,
     Grid,
     InputAdornment,
     InputLabel,
@@ -23,24 +25,34 @@ import {
     Tab,
     Tabs,
     Typography,
+    TableContainer,
+    Table as MuiTable,
+    TableHead,
+    TableBody,
+    TableRow,
+    TableCell, 
+    TablePagination,
 } from '@material-ui/core';
-import merge from 'lodash.merge';
+import { merge } from 'lodash';
 import AddIcon from '@material-ui/icons/Add';
 import DownloadIcon from '@material-ui/icons/GetApp';
-import { MapContainer } from './MapComponent';
+import Clear from '@material-ui/icons/Clear';
 
+import { Field, FormikProvider, useFormik, useFormikContext } from 'formik';
+import * as yup from 'yup';
+import SearchIcon from '@material-ui/icons/Search';
+import { useDebounce } from 'use-debounce';
 import {
     DateInput,
     ResponsibleField,
     PaymentField,
     Select,
     StatusField,
+    RABudgetStatusField,
     TextInput,
 } from './Inputs';
+import { MapComponent } from './MapComponent/MapComponent';
 
-import { Page } from './Page';
-import { Field, FormikProvider, useFormik, useFormikContext } from 'formik';
-import * as yup from 'yup';
 import { polioVacines, polioViruses } from '../constants/virus';
 import { useGetCampaigns } from '../hooks/useGetCampaigns';
 import { OrgUnitsLevels } from './Inputs/OrgUnitsSelect';
@@ -50,8 +62,9 @@ import { useStyles } from '../styles/theme';
 import { PreparednessForm } from '../forms/PreparednessForm';
 import { useGetRegionGeoJson } from '../hooks/useGetRegionGeoJson';
 import MESSAGES from '../constants/messages';
-import SearchIcon from '@material-ui/icons/Search';
-import { useDebounce } from 'use-debounce';
+import { convertEmptyStringToNull } from '../utils/convertEmptyStringToNull';
+
+import TopBar from '../../../../../hat/assets/js/apps/Iaso/components/nav/TopBarComponent';
 
 const round_shape = yup.object().shape({
     started_at: yup.date().nullable(),
@@ -147,14 +160,14 @@ const BaseInfoForm = () => {
                     <Grid xs={12} md={6} item>
                         <Field
                             label="EPID"
-                            name={'epid'}
+                            name="epid"
                             component={TextInput}
                             className={classes.input}
                         />
 
                         <Field
                             label="OBR Name"
-                            name={'obr_name'}
+                            name="obr_name"
                             component={TextInput}
                             className={classes.input}
                         />
@@ -179,18 +192,24 @@ const BaseInfoForm = () => {
                     <Field
                         className={classes.input}
                         label="Description"
-                        name={'description'}
+                        name="description"
                         component={TextInput}
                     />
                     <Field
                         className={classes.input}
                         label="GPEI Coordinator"
-                        name={'gpei_coordinator'}
+                        name="gpei_coordinator"
                         component={TextInput}
                     />
                     <Field
                         className={classes.input}
-                        name={'initial_org_unit'}
+                        label="GPEI Email"
+                        name="gpei_email"
+                        component={TextInput}
+                    />
+                    <Field
+                        className={classes.input}
+                        name="initial_org_unit"
                         component={OrgUnitsLevels}
                     />
                 </Grid>
@@ -198,32 +217,32 @@ const BaseInfoForm = () => {
                     <Grid item xs={12} md={6}>
                         <Field
                             className={classes.input}
-                            label={'Date of onset'}
+                            label="Date of onset"
                             fullWidth
-                            name={'onset_at'}
+                            name="onset_at"
                             component={DateInput}
                         />
                         <Field
                             className={classes.input}
-                            label={'cVDPV Notifiation'}
+                            label="cVDPV Notifiation"
                             fullWidth
-                            name={'cvdpv_notified_at'}
+                            name="cvdpv_notified_at"
                             component={DateInput}
                         />
                     </Grid>
                     <Grid item xs={12} md={6}>
                         <Field
                             className={classes.input}
-                            label={'PV Notification'}
+                            label="PV Notification"
                             fullWidth
-                            name={'pv_notified_at'}
+                            name="pv_notified_at"
                             component={DateInput}
                         />
                         <Field
                             className={classes.input}
-                            label={'3 level call'}
+                            label="3 level call"
                             fullWidth
-                            name={'three_level_call_at'}
+                            name="three_level_call_at"
                             component={DateInput}
                         />
                     </Grid>
@@ -239,35 +258,35 @@ const DetectionForm = () => {
                 <Grid container direction="row" item spacing={2}>
                     <Grid xs={12} md={6} item>
                         <Field
-                            name={'detection_status'}
+                            name="detection_status"
                             component={StatusField}
                         />
                     </Grid>
                     <Grid xs={12} md={6} item>
                         <Field
-                            name={'detection_responsible'}
+                            name="detection_responsible"
                             component={ResponsibleField}
                         />
                     </Grid>
                 </Grid>
                 <Grid item md={6}>
                     <Field
-                        label={'Date of onset'}
+                        label="Date of onset"
                         fullWidth
-                        name={'onset_at'}
+                        name="onset_at"
                         component={DateInput}
                     />
 
                     <Field
-                        label={'PV2 Notification'}
+                        label="PV2 Notification"
                         fullWidth
-                        name={'pv_notified_at'}
+                        name="pv_notified_at"
                         component={DateInput}
                     />
                     <Field
-                        label={'cVDPV2 Notification'}
+                        label="cVDPV2 Notification"
                         fullWidth
-                        name={'cvdpv_notified_at'}
+                        name="cvdpv_notified_at"
                         component={DateInput}
                     />
                 </Grid>
@@ -278,59 +297,11 @@ const DetectionForm = () => {
 
 const selectedPathOptions = { color: 'lime' };
 const unselectedPathOptions = { color: 'gray' };
+const initialDistrict = { color: '#FF695C' };
 
 const RiskAssessmentForm = () => {
     const classes = useStyles();
-    const { values, setFieldValue } = useFormikContext();
-
-    const { group = {} } = values;
-
-    const { data = [] } = useGetRegionGeoJson(
-        values.org_unit?.country_parent?.id ||
-            values.org_unit?.root?.id ||
-            values.org_unit?.id,
-    );
-
-    const shapes = useMemo(() => {
-        return data.map(shape => ({
-            ...shape,
-            pathOptions: group.org_units.find(org_unit => shape.id === org_unit)
-                ? selectedPathOptions
-                : unselectedPathOptions,
-        }));
-    }, [data, group]);
-
-    const onSelectOrgUnit = useCallback(
-        shape => {
-            var { org_units } = group;
-            const hasFound = org_units.find(org_unit => shape.id === org_unit);
-
-            if (hasFound) {
-                org_units = org_units.filter(orgUnit => orgUnit !== shape.id);
-            } else {
-                org_units.push(shape.id);
-            }
-
-            setFieldValue('group', {
-                ...group,
-                org_units,
-            });
-        },
-        [group, setFieldValue],
-    );
-
-    const wastageRate = 0.26;
-
-    const round1Doses = parseInt(
-        defaultToZero(values?.round_one?.target_population ?? 0),
-    );
-    const round2Doses = parseInt(
-        defaultToZero(values?.round_two?.target_population ?? 0),
-    );
-
-    const vialsRequested = Math.ceil(
-        ((round1Doses + round2Doses) / 20) * (1 / (1 - wastageRate)),
-    );
+    useFormikContext();
 
     return (
         <>
@@ -338,20 +309,20 @@ const RiskAssessmentForm = () => {
                 <Grid container direction="row" item spacing={2}>
                     <Grid xs={12} md={6} item>
                         <Field
-                            name={'risk_assessment_status'}
-                            component={StatusField}
+                            name="risk_assessment_status"
+                            component={RABudgetStatusField}
                         />
                     </Grid>
                     <Grid xs={12} md={6} item>
                         <Field
-                            name={'risk_assessment_responsible'}
+                            name="risk_assessment_responsible"
                             component={ResponsibleField}
                         />
                     </Grid>
                     <Grid xs={12} md={6} item>
                         <Field
                             label="Verification Score (/20)"
-                            name={'verification_score'}
+                            name="verification_score"
                             component={TextInput}
                             className={classes.input}
                         />
@@ -359,66 +330,256 @@ const RiskAssessmentForm = () => {
                 </Grid>
                 <Grid item md={6}>
                     <Field
-                        label={'Field Investigation Date'}
-                        name={'investigation_at'}
+                        label="Field Investigation Date"
+                        name="investigation_at"
                         component={DateInput}
                         fullWidth
                     />
                     <Field
-                        label={'3 level call'}
-                        name={'three_level_call_at'}
+                        label="3 level call"
+                        name="three_level_call_at"
                         component={DateInput}
                         fullWidth
                     />
                     <Field
-                        label={'1st Draft Submission'}
-                        name={'risk_assessment_first_draft_submitted_at'}
+                        label="1st Draft Submission"
+                        name="risk_assessment_first_draft_submitted_at"
                         component={DateInput}
                         fullWidth
                     />
                     <Field
-                        label={'RRT/OPRTT Approval'}
-                        name={'risk_assessment_rrt_oprtt_approval_at'}
+                        label="RRT/OPRTT Approval"
+                        name="risk_assessment_rrt_oprtt_approval_at"
                         component={DateInput}
                         fullWidth
                     />
                     <Field
-                        label={'AG/nOPV Group'}
-                        name={'ag_nopv_group_met_at'}
+                        label="AG/nOPV Group"
+                        name="ag_nopv_group_met_at"
                         component={DateInput}
                         fullWidth
                     />
                     <Field
-                        label={'DG Authorization'}
-                        name={'dg_authorized_at'}
+                        label="DG Authorization"
+                        name="dg_authorized_at"
                         component={DateInput}
                         fullWidth
                     />
                     <Field
                         label="Target population Round 1"
-                        name={'round_one.target_population'}
+                        name="round_one.target_population"
                         component={TextInput}
                         className={classes.input}
                     />
                     <Field
                         label="Target population Round 2"
-                        name={'round_two.target_population'}
+                        name="round_two.target_population"
                         component={TextInput}
                         className={classes.input}
                     />
-                    <Typography>
-                        Vials Requested{' '}
-                        {Number.isNaN(vialsRequested) ? 0 : vialsRequested}
-                    </Typography>
-                </Grid>
-                <Grid xs={12} md={6} item>
-                    <MapContainer
-                        shapes={shapes}
-                        onSelectShape={onSelectOrgUnit}
+                    <Field
+                        label="Doses Requested (both rounds)"
+                        name="doses_requested"
+                        component={TextInput}
+                        className={classes.input}
                     />
                 </Grid>
             </Grid>
         </>
+    );
+};
+
+const separate = (array, referenceArray) => {
+    const result = {
+        selected: [],
+        unselected: [],
+    };
+    array.forEach(item => {
+        if (referenceArray.includes(item)) {
+            result.selected.push(item);
+        } else {
+            result.unselected.push(item);
+        }
+    });
+    return result;
+};
+
+const ScopeForm = () => {
+    const classes = useStyles();
+    const [selectRegion, setSelectRegion] = useState(false);
+    const { values, setFieldValue } = useFormikContext();
+    // Group contains selected orgunits
+    const { group = { org_units: [] } } = values;
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [sortBy, setSortBy] = useState("asc");
+
+    const { data: shapes, isFetching } = useGetRegionGeoJson(
+        values.org_unit?.country_parent?.id ||
+            values.org_unit?.root?.id ||
+            values.org_unit?.id,
+    );
+
+    const toggleRegionSelect = () => {
+        setSelectRegion(!selectRegion);
+    };
+
+    const getShapeStyle = useCallback(
+        shape => {
+            return group.org_units.includes(shape.id)
+                ? selectedPathOptions
+                : values.org_unit?.id === shape.id
+                ? initialDistrict
+                : unselectedPathOptions;
+        },
+        [group, values.org_unit?.id],
+    );
+
+    const onSelectOrgUnit = useCallback(
+        shape => {
+            const { org_units } = group;
+            let newOrgUnits;
+            if (selectRegion) {
+                const regionShapes = shapes
+                    .filter(s => s.parent_id === shape.parent_id)
+                    .map(s => s.id);
+                const { selected, unselected } = separate(
+                    regionShapes,
+                    org_units,
+                );
+                const isRegionSelected =
+                    selected.length === regionShapes.length;
+                if (isRegionSelected) {
+                    newOrgUnits = org_units.filter(
+                        orgUnit => !regionShapes.includes(orgUnit),
+                    );
+                } else {
+                    newOrgUnits = [...org_units, ...unselected];
+                }
+            } else if (org_units.find(org_unit => shape.id === org_unit)) {
+                newOrgUnits = org_units.filter(orgUnit => orgUnit !== shape.id);
+            } else {
+                if (org_units.find(org_unit => shape.id === org_unit)) {
+                    newOrgUnits = org_units.filter(
+                        orgUnit => orgUnit !== shape.id,
+                    );
+                } else {
+                    newOrgUnits = [...org_units, shape.id];
+                }
+
+            }
+
+            setFieldValue('group', {
+                ...group,
+                org_units: newOrgUnits,
+            });
+        },
+        [group, setFieldValue, selectRegion, shapes],
+    );
+
+    const handleSort = useCallback(()=>{
+        if(sortBy==="asc"){
+            setSortBy("desc");
+        } else {
+            setSortBy("asc");
+        }
+    },[sortBy])
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+      };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+    const selectedShapes = sortBy==="asc"?
+        shapes?.filter(shape => group.org_units.includes(shape.id)):
+        shapes?.filter(shape => group.org_units.includes(shape.id)).reverse();
+    return (
+        <Grid container spacing={4}>
+            <Grid xs={9} item>
+
+                {isFetching && !shapes && <LoadingSpinner />}
+                {!isFetching && !shapes && (
+                    // FIXME should not be needed
+                    <Typography>
+                        Please save the Campaign before selecting scope.
+                    </Typography>
+                )}
+                <MapComponent
+                    shapes={shapes}
+                    onSelectShape={onSelectOrgUnit}
+                    getShapeStyle={getShapeStyle}
+                />
+            </Grid>
+
+            <Grid xs={3} item >
+                <TableContainer className={classes.districtList}>
+                    <MuiTable stickyHeader size='small'>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell onClick={handleSort} variant="head">
+                                    <Typography>District</Typography>
+                                </TableCell>
+                                <TableCell variant="head">
+                                    Remove
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {selectedShapes?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                            .map((shape,i) => {
+                                        return (<TableRow key={shape.id} className={i%2>0?classes.districtListRow:''}>
+                                            <TableCell>{shape.name}</TableCell>
+                                            <TableCell> 
+                                                <Clear
+                                                onClick={() =>
+                                                    onSelectOrgUnit(shape)
+                                                }
+                                            /></TableCell>
+                                        </TableRow>)
+                                    })}
+                        </TableBody>
+                    </MuiTable>
+                </TableContainer>
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={selectedShapes?.length??0}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    labelRowsPerPage="Rows"
+                    onChangePage={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    onChangeRowsPerPage={handleChangeRowsPerPage}>
+                </TablePagination>
+            </Grid>
+            <Grid container>
+                <Grid xs={8} item>
+                    <FormGroup>
+                        <FormControlLabel
+                            style={{ width: 'max-content' }}
+                            control={
+                                <Switch
+                                    size="medium"
+                                    checked={selectRegion}
+                                    onChange={toggleRegionSelect}
+                                    color="primary"
+                                />
+                            }
+                            label="Select region"
+                        />
+                    </FormGroup>
+                </Grid>
+                <Grid xs={4} item>
+                    {shapes && isFetching && (
+                        <Typography align="right">Refreshing ...</Typography>
+                    )}
+                </Grid>
+            </Grid>
+        </Grid>
     );
 };
 
@@ -427,14 +588,22 @@ const BudgetForm = () => {
 
     const { values } = useFormikContext();
 
-    const round1Cost = parseInt(defaultToZero(values?.round_one?.cost ?? 0));
-    const round2Cost = parseInt(defaultToZero(values?.round_two?.cost ?? 0));
+    const round1Cost = parseInt(
+        defaultToZero(values?.round_one?.cost ?? 0),
+        10,
+    );
+    const round2Cost = parseInt(
+        defaultToZero(values?.round_two?.cost ?? 0),
+        10,
+    );
 
     const round1Population = parseInt(
         defaultToZero(values?.round_one?.target_population ?? 0),
+        10,
     );
     const round2Population = parseInt(
         defaultToZero(values?.round_two?.target_population ?? 0),
+        10,
     );
 
     const calculateRound1 = round1Cost > 0 && round1Population > 0;
@@ -462,11 +631,14 @@ const BudgetForm = () => {
             <Grid container spacing={2}>
                 <Grid container direction="row" item spacing={2}>
                     <Grid xs={12} md={6} item>
-                        <Field name={'budget_status'} component={StatusField} />
+                        <Field
+                            name="budget_status"
+                            component={RABudgetStatusField}
+                        />
                     </Grid>
                     <Grid xs={12} md={6} item>
                         <Field
-                            name={'budget_responsible'}
+                            name="budget_responsible"
                             component={ResponsibleField}
                         />
                     </Grid>
@@ -475,32 +647,32 @@ const BudgetForm = () => {
                 <Grid xs={12} md={6} item>
                     <Box mb={2}>
                         <Field
-                            name={'payment_mode'}
+                            name="payment_mode"
                             component={PaymentField}
                             fullWidth
                         />
                     </Box>
                     <Field
-                        label={'Disbursed to CO (WHO)'}
-                        name={'who_disbursed_to_co_at'}
+                        label="Disbursed to CO (WHO)"
+                        name="who_disbursed_to_co_at"
                         component={DateInput}
                         fullWidth
                     />
                     <Field
-                        label={'Disbursed to MOH (WHO)'}
-                        name={'who_disbursed_to_moh_at'}
+                        label="Disbursed to MOH (WHO)"
+                        name="who_disbursed_to_moh_at"
                         component={DateInput}
                         fullWidth
                     />
                     <Field
-                        label={'Disbursed to CO (UNICEF)'}
-                        name={'unicef_disbursed_to_co_at'}
+                        label="Disbursed to CO (UNICEF)"
+                        name="unicef_disbursed_to_co_at"
                         component={DateInput}
                         fullWidth
                     />
                     <Field
-                        label={'Disbursed to MOH (UNICEF)'}
-                        name={'unicef_disbursed_to_moh_at'}
+                        label="Disbursed to MOH (UNICEF)"
+                        name="unicef_disbursed_to_moh_at"
                         component={DateInput}
                         fullWidth
                     />
@@ -508,56 +680,56 @@ const BudgetForm = () => {
 
                 <Grid item md={6}>
                     <Field
-                        label={'1st Draft Submission'}
-                        name={'risk_assessment_first_draft_submitted_at'}
+                        label="1st Draft Submission"
+                        name="budget_first_draft_submitted_at"
                         component={DateInput}
                         fullWidth
                     />
                     <Field
-                        label={'RRT/OPRTT Approval'}
-                        name={'risk_assessment_rrt_oprtt_approval_at'}
-                        component={DateInput}
-                        fullWidth
-                    />
-
-                    <Field
-                        label={'EOMG Group'}
-                        name={'eomg'}
+                        label="RRT/OPRTT Approval"
+                        name="budget_rrt_oprtt_approval_at"
                         component={DateInput}
                         fullWidth
                     />
 
                     <Field
-                        label={'Budget Submitted At'}
-                        name={'budget_submitted_at'}
+                        label="EOMG Group"
+                        name="eomg"
+                        component={DateInput}
+                        fullWidth
+                    />
+
+                    <Field
+                        label="Budget Submitted At"
+                        name="budget_submitted_at"
                         component={DateInput}
                         fullWidth
                     />
 
                     <Field
                         label="District Count"
-                        name={'district_count'}
+                        name="district_count"
                         component={TextInput}
                         className={classes.input}
                     />
 
                     <Field
                         label="No Regret Fund"
-                        name={'no_regret_fund_amount'}
+                        name="no_regret_fund_amount"
                         component={TextInput}
                         className={classes.input}
                     />
 
                     <Field
                         label="Cost Round 1"
-                        name={'round_one.cost'}
+                        name="round_one.cost"
                         component={TextInput}
                         className={classes.input}
                     />
 
                     <Field
                         label="Cost Round 2"
-                        name={'round_two.cost'}
+                        name="round_two.cost"
                         component={TextInput}
                         className={classes.input}
                     />
@@ -589,94 +761,100 @@ const Round1Form = () => {
         <Grid container spacing={2}>
             <Grid xs={12} md={6} item>
                 <Field
-                    label={'Round 1 Start'}
-                    name={'round_one.started_at'}
+                    label="Round 1 Start"
+                    name="round_one.started_at"
                     component={DateInput}
                     fullWidth
                 />
 
                 <Field
-                    label={'Round 1 End'}
-                    name={'round_one.ended_at'}
+                    label="Round 1 End"
+                    name="round_one.ended_at"
                     component={DateInput}
                     fullWidth
                 />
                 <Field
-                    label={'Mop Up Start'}
-                    name={'round_one.mop_up_started_at'}
+                    label="Mop Up Start"
+                    name="round_one.mop_up_started_at"
                     component={DateInput}
                     fullWidth
                 />
                 <Field
-                    label={'Mop Up End'}
-                    name={'round_one.mop_up_ended_at'}
-                    component={DateInput}
-                    fullWidth
-                />
-
-                <Field
-                    label={'IM Start'}
-                    name={'round_one.im_started_at'}
+                    label="Mop Up End"
+                    name="round_one.mop_up_ended_at"
                     component={DateInput}
                     fullWidth
                 />
 
                 <Field
-                    label={'IM End'}
-                    name={'round_one.im_ended_at'}
+                    label="IM Start"
+                    name="round_one.im_started_at"
+                    component={DateInput}
+                    fullWidth
+                />
+
+                <Field
+                    label="IM End"
+                    name="round_one.im_ended_at"
                     component={DateInput}
                     fullWidth
                 />
             </Grid>
             <Grid xs={12} md={6} item>
                 <Field
-                    label={'LQAS Start'}
-                    name={'round_one.lqas_started_at'}
+                    label="LQAS Start"
+                    name="round_one.lqas_started_at"
                     component={DateInput}
                     fullWidth
                 />
 
                 <Field
-                    label={'LQAS End'}
-                    name={'round_one.lqas_ended_at'}
+                    label="LQAS End"
+                    name="round_one.lqas_ended_at"
                     component={DateInput}
                     fullWidth
                 />
                 <Field
-                        label="Districts passing LQAS"
-                        name={'round_one.lqas_district_passing'}
-                        component={TextInput}
-                        className={classes.input}
+                    label="Districts passing LQAS"
+                    name="round_one.lqas_district_passing"
+                    component={TextInput}
+                    className={classes.input}
                 />
                 <Field
-                        label="Districts failing LQAS"
-                        name={'round_one.lqas_district_failing'}
-                        component={TextInput}
-                        className={classes.input}
+                    label="Districts failing LQAS"
+                    name="round_one.lqas_district_failing"
+                    component={TextInput}
+                    className={classes.input}
                 />
                 <Field
-                        label="Main awareness problem"
-                        name={'round_one.main_awareness_problem'}
-                        component={TextInput}
-                        className={classes.input}
+                    label="Main reason for non-vaccination"
+                    name="round_one.main_awareness_problem"
+                    component={TextInput}
+                    className={classes.input}
                 />
                 <Field
-                        label="% children missed IN household"
-                        name={'round_one.im_percentage_children_missed_in_household'}
-                        component={TextInput}
-                        className={classes.input}
+                    label="% children missed IN household"
+                    name="round_one.im_percentage_children_missed_in_household"
+                    component={TextInput}
+                    className={classes.input}
                 />
                 <Field
-                        label="% children missed OUT OF household"
-                        name={'round_one.im_percentage_children_missed_out_household'}
-                        component={TextInput}
-                        className={classes.input}
+                    label="% children missed OUT OF household"
+                    name="round_one.im_percentage_children_missed_out_household"
+                    component={TextInput}
+                    className={classes.input}
                 />
                 <Field
-                        label="Awareness of campaign planning (%)"
-                        name={'round_one.awareness_of_campaign_planning'}
-                        component={TextInput}
-                        className={classes.input}
+                    label="% children missed IN+OUT OF household"
+                    name="round_one.im_percentage_children_missed_in_plus_out_household"
+                    component={TextInput}
+                    className={classes.input}
+                />
+                <Field
+                    label="Awareness of campaign planning (%)"
+                    name="round_one.awareness_of_campaign_planning"
+                    component={TextInput}
+                    className={classes.input}
                 />
             </Grid>
         </Grid>
@@ -689,93 +867,99 @@ const Round2Form = () => {
         <Grid container spacing={2}>
             <Grid xs={12} md={6} item>
                 <Field
-                    label={'Round 2 Start'}
-                    name={'round_two.started_at'}
+                    label="Round 2 Start"
+                    name="round_two.started_at"
                     component={DateInput}
                     fullWidth
                 />
 
                 <Field
-                    label={'Round 2 End'}
-                    name={'round_two.ended_at'}
+                    label="Round 2 End"
+                    name="round_two.ended_at"
                     component={DateInput}
                     fullWidth
                 />
                 <Field
-                    label={'Mop Up Start'}
-                    name={'round_two.mop_up_started_at'}
+                    label="Mop Up Start"
+                    name="round_two.mop_up_started_at"
                     component={DateInput}
                     fullWidth
                 />
                 <Field
-                    label={'Mop Up End'}
-                    name={'round_two.mop_up_ended_at'}
+                    label="Mop Up End"
+                    name="round_two.mop_up_ended_at"
                     component={DateInput}
                     fullWidth
                 />
                 <Field
-                    label={'IM Start'}
-                    name={'round_two.im_started_at'}
+                    label="IM Start"
+                    name="round_two.im_started_at"
                     component={DateInput}
                     fullWidth
                 />
 
                 <Field
-                    label={'IM End'}
-                    name={'round_two.im_ended_at'}
+                    label="IM End"
+                    name="round_two.im_ended_at"
                     component={DateInput}
                     fullWidth
                 />
             </Grid>
             <Grid xs={12} md={6} item>
                 <Field
-                    label={'LQAS Start'}
-                    name={'round_two.lqas_started_at'}
+                    label="LQAS Start"
+                    name="round_two.lqas_started_at"
                     component={DateInput}
                     fullWidth
                 />
 
                 <Field
-                    label={'LQAS End'}
-                    name={'round_two.lqas_ended_at'}
+                    label="LQAS End"
+                    name="round_two.lqas_ended_at"
                     component={DateInput}
                     fullWidth
                 />
                 <Field
-                        label="Districts passing LQAS"
-                        name={'round_two.lqas_district_passing'}
-                        component={TextInput}
-                        className={classes.input}
+                    label="Districts passing LQAS"
+                    name="round_two.lqas_district_passing"
+                    component={TextInput}
+                    className={classes.input}
                 />
                 <Field
-                        label="Districts failing LQAS"
-                        name={'round_two.lqas_district_failing'}
-                        component={TextInput}
-                        className={classes.input}
+                    label="Districts failing LQAS"
+                    name="round_two.lqas_district_failing"
+                    component={TextInput}
+                    className={classes.input}
                 />
                 <Field
-                        label="Main awareness problem"
-                        name={'round_two.main_awareness_problem'}
-                        component={TextInput}
-                        className={classes.input}
+                    label="Main reason for non-vaccination"
+                    name="round_two.main_awareness_problem"
+                    component={TextInput}
+                    className={classes.input}
                 />
                 <Field
-                        label="% children missed IN household"
-                        name={'round_two.im_percentage_children_missed_in_household'}
-                        component={TextInput}
-                        className={classes.input}
+                    label="% children missed IN household"
+                    name="round_two.im_percentage_children_missed_in_household"
+                    component={TextInput}
+                    className={classes.input}
                 />
                 <Field
-                        label="% children missed OUT OF household"
-                        name={'round_two.im_percentage_children_missed_out_household'}
-                        component={TextInput}
-                        className={classes.input}
+                    label="% children missed OUT OF household"
+                    name="round_two.im_percentage_children_missed_out_household"
+                    component={TextInput}
+                    className={classes.input}
                 />
                 <Field
-                        label="Awareness of campaign planning (%)"
-                        name={'round_two.awareness_of_campaign_planning'}
-                        component={TextInput}
-                        className={classes.input}
+                    label="% children missed IN+OUT OF household"
+                    name="round_two.im_percentage_children_missed_in_plus_out_household"
+                    component={TextInput}
+                    className={classes.input}
+                />
+                <Field
+                    label="Awareness of campaign planning (%)"
+                    name="round_two.awareness_of_campaign_planning"
+                    component={TextInput}
+                    className={classes.input}
                 />
             </Grid>
         </Grid>
@@ -797,13 +981,13 @@ const Form = ({ children }) => {
     );
 };
 
-const CreateEditDialog = ({ isOpen, onClose, onConfirm, selectedCampaign }) => {
+const CreateEditDialog = ({ isOpen, onClose, selectedCampaign }) => {
     const { mutate: saveCampaign } = useSaveCampaign();
 
     const classes = useStyles();
 
     const handleSubmit = (values, helpers) =>
-        saveCampaign(values, {
+        saveCampaign(convertEmptyStringToNull(values), {
             onSuccess: () => {
                 helpers.resetForm();
                 onClose();
@@ -843,6 +1027,10 @@ const CreateEditDialog = ({ isOpen, onClose, onConfirm, selectedCampaign }) => {
             form: RiskAssessmentForm,
         },
         {
+            title: 'Scope',
+            form: ScopeForm,
+        },
+        {
             title: 'Budget',
             form: BudgetForm,
         },
@@ -872,21 +1060,27 @@ const CreateEditDialog = ({ isOpen, onClose, onConfirm, selectedCampaign }) => {
     useEffect(() => {
         setSelectedTab(0);
     }, [isOpen]);
-
     return (
         <Dialog
             fullWidth
-            maxWidth={'lg'}
+            maxWidth="lg"
             open={isOpen}
-            onBackdropClick={onClose}
+            onClose={(event, reason) => {
+                if (reason === 'backdropClick') {
+                    onClose();
+                }
+            }}
             scroll="body"
+            className={classes.mainModal}
         >
-            <DialogTitle className={classes.title}>Create campaign</DialogTitle>
+            <DialogTitle className={classes.title}>
+                {selectedCampaign?.id ? 'Edit' : 'Create'} campaign
+            </DialogTitle>
             <DialogContent className={classes.content}>
                 <Tabs
                     value={selectedTab}
                     className={classes.tabs}
-                    textColor={'primary'}
+                    textColor="primary"
                     onChange={handleChange}
                     aria-label="disabled tabs example"
                 >
@@ -911,7 +1105,7 @@ const CreateEditDialog = ({ isOpen, onClose, onConfirm, selectedCampaign }) => {
                 <Button
                     onClick={formik.handleSubmit}
                     color="primary"
-                    variant={'contained'}
+                    variant="contained"
                     autoFocus
                     disabled={!formik.isValid || formik.isSubmitting}
                 >
@@ -950,7 +1144,7 @@ const PageActions = ({ onSearch, children }) => {
             container
             className={classes.pageActions}
             spacing={4}
-            justify="flex-end"
+            justifyContent="flex-end"
             alignItems="center"
         >
             {onSearch && (
@@ -958,7 +1152,13 @@ const PageActions = ({ onSearch, children }) => {
                     <SearchInput onChange={onSearch} />
                 </Grid>
             )}
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
+            <Grid
+                item
+                xs={4}
+                container
+                justifyContent="flex-end"
+                alignItems="center"
+            >
                 {children}
             </Grid>
         </Grid>
@@ -969,7 +1169,15 @@ const DeleteConfirmDialog = ({ isOpen, onClose, onConfirm }) => {
     const classes = useStyles();
 
     return (
-        <Dialog fullWidth open={isOpen} onBackdropClick={onClose}>
+        <Dialog
+            fullWidth
+            open={isOpen}
+            onClose={(event, reason) => {
+                if (reason === 'backdropClick') {
+                    onClose();
+                }
+            }}
+        >
             <DialogTitle className={classes.title}>
                 Are you sure you want to delete this campaign?
             </DialogTitle>
@@ -988,9 +1196,9 @@ const DeleteConfirmDialog = ({ isOpen, onClose, onConfirm }) => {
     );
 };
 
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 40;
 const DEFAULT_PAGE = 1;
-const DEFAULT_ORDER = 'obr_name';
+const DEFAULT_ORDER = '-cvdpv2_notified_at';
 
 export const Dashboard = () => {
     const [isCreateEditDialogOpen, setIsCreateEditDialogOpen] = useState(false);
@@ -1014,6 +1222,10 @@ export const Dashboard = () => {
     const { data: campaigns = [], status } = query;
 
     const { mutate: removeCampaign } = useRemoveCampaign();
+
+    const selectedCampaign = campaigns?.campaigns?.find(
+        campaign => campaign.id === selectedCampaignId,
+    );
 
     const openCreateEditDialog = useCallback(() => {
         setIsCreateEditDialogOpen(true);
@@ -1065,12 +1277,19 @@ export const Dashboard = () => {
         setSearchQuery(event.target.value);
     }, []);
 
-    const selectedCampaign = campaigns?.campaigns?.find(
-        campaign => campaign.id === selectedCampaignId,
-    );
-
     const columns = useMemo(
         () => [
+            {
+                Header: 'Country',
+                accessor: 'top_level_org_unit_name',
+                sortable: false,
+                Cell: settings => {
+                    const text =
+                        settings?.original?.top_level_org_unit_name ??
+                        textPlaceholder;
+                    return <span>{text}</span>;
+                },
+            },
             {
                 Header: 'Name',
                 accessor: 'obr_name',
@@ -1089,16 +1308,46 @@ export const Dashboard = () => {
                 },
             },
             {
-                Header: 'Status',
-                accessor: 'detection_status',
+                Header: 'Round 1',
+                accessor: 'round_one__started_at',
                 Cell: settings => {
                     return (
-                        <ColumnText text={settings.original.detection_status} />
+                        <ColumnText
+                            text={
+                                settings.original?.round_one?.started_at ??
+                                textPlaceholder
+                            }
+                        />
+                    );
+                },
+            },
+            {
+                Header: 'Round 2',
+                accessor: 'round_two__started_at',
+                Cell: settings => {
+                    return (
+                        <ColumnText
+                            text={
+                                settings.original?.round_two?.started_at ??
+                                textPlaceholder
+                            }
+                        />
+                    );
+                },
+            },
+            {
+                Header: 'Status',
+                sortable: false,
+                accessor: 'general_status',
+                Cell: settings => {
+                    return (
+                        <ColumnText text={settings.original.general_status} />
                     );
                 },
             },
             {
                 Header: 'Actions',
+                sortable: false,
                 Cell: settings => {
                     return (
                         <>
@@ -1149,6 +1398,7 @@ export const Dashboard = () => {
     }, [pageSize, page, order]);
     return (
         <>
+            <TopBar title="Dashboard" displayBackButton={false} />
             <CreateEditDialog
                 selectedCampaign={selectedCampaign}
                 isOpen={isCreateEditDialogOpen}
@@ -1159,34 +1409,32 @@ export const Dashboard = () => {
                 onClose={closeDeleteConfirmDialog}
                 onConfirm={handleDeleteConfirmDialogConfirm}
             />
-            <Page title={'Campaigns'}>
-                <Box className={classes.containerFullHeightNoTabPadded}>
-                    {status === 'loading' && <LoadingSpinner />}
-                    <PageActions onSearch={handleSearch}>
-                        <PageAction
-                            icon={AddIcon}
-                            onClick={handleClickCreateButton}
-                        >
-                            Create
-                        </PageAction>
-                        <PageAction icon={DownloadIcon} onClick={exportToCSV}>
-                            CSV
-                        </PageAction>
-                    </PageActions>
-                    {status === 'success' && (
-                        <Table
-                            params={tableParams}
-                            count={campaigns.count}
-                            pages={Math.ceil(campaigns.count / pageSize)}
-                            baseUrl={'/polio'}
-                            redirectTo={onTableParamsChange}
-                            columns={columns}
-                            data={campaigns.campaigns}
-                            watchToRender={tableParams}
-                        />
-                    )}
-                </Box>
-            </Page>
+            <Box className={classes.containerFullHeightNoTabPadded}>
+                {status === 'loading' && <LoadingSpinner />}
+                <PageActions onSearch={handleSearch}>
+                    <PageAction
+                        icon={AddIcon}
+                        onClick={handleClickCreateButton}
+                    >
+                        Create
+                    </PageAction>
+                    <PageAction icon={DownloadIcon} onClick={exportToCSV}>
+                        CSV
+                    </PageAction>
+                </PageActions>
+                {status === 'success' && (
+                    <Table
+                        params={tableParams}
+                        count={campaigns.count}
+                        pages={Math.ceil(campaigns.count / pageSize)}
+                        baseUrl="/polio"
+                        redirectTo={onTableParamsChange}
+                        columns={columns}
+                        data={campaigns.campaigns}
+                        watchToRender={tableParams}
+                    />
+                )}
+            </Box>
         </>
     );
 };

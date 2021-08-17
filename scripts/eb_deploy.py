@@ -5,6 +5,7 @@ import sys
 
 def eb_deploy(env_name):
     return os.system(f"eb deploy {env_name}")
+
     # for Action debugging: print(f"eb deploy {env_name}")
 
 
@@ -33,5 +34,7 @@ if __name__ == "__main__":
         print("No target env found for", sys.argv[1])
     else:
         for e in target_envs:
-            print("Deploying to", e)
-            eb_deploy(e)
+            print("Deploying to", e, flush=True)
+            r = eb_deploy(e)
+            if r != 0:
+                sys.exit(r)

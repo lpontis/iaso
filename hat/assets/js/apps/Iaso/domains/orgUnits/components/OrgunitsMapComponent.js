@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import { Map, TileLayer, GeoJSON, ScaleControl, Tooltip } from 'react-leaflet';
+import { connect } from 'react-redux';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import camelCase from 'lodash/camelCase';
 import isEqual from 'lodash/isEqual';
@@ -13,10 +13,10 @@ import InnerDrawer from '../../../components/nav/InnerDrawerComponent';
 import { locationsLimit } from '../../../constants/filters';
 
 import {
+    ZoomControl,
     getLatLngBounds,
     getShapesBounds,
     colorClusterCustomMarker,
-    customZoomBar,
     circleColorMarkerOptions,
 } from '../../../utils/mapUtils';
 
@@ -84,27 +84,12 @@ class OrgunitsMap extends Component {
         super(props);
         this.state = {
             fittedToBounds: false,
-            // comments: [],
         };
     }
 
     componentDidMount() {
-        const {
-            orgUnitTypes,
-            intl: { formatMessage },
-        } = this.props;
-        const zoomBar = customZoomBar(formatMessage, () => this.fitToBounds());
-        zoomBar.addTo(this.map.leafletElement);
-        if (orgUnitTypes.length === 0) {
-            this.map.leafletElement.createPane('custom-shape-pane');
-        } else {
-            orgUnitTypes.forEach(ot => {
-                const otName = camelCase(ot.name);
-                this.map.leafletElement.createPane(
-                    `custom-shape-pane-${otName}`,
-                );
-            });
-        }
+        const { orgUnitTypes } = this.props;
+        this.makePanes(orgUnitTypes);
         this.props.setCurrentSubOrgUnit(null);
     }
 
@@ -115,8 +100,15 @@ class OrgunitsMap extends Component {
         );
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps) {
         const { orgUnits } = this.props;
+        const { orgUnitTypes } = this.props;
+        const oldOrgUnitTypes = prevProps.orgUnitTypes;
+        // creating panes if navigating using deep linking or reloading, as orgUnitTypes
+        // are not available to componentDidMount in those cases
+        if (!isEqual(oldOrgUnitTypes, orgUnitTypes)) {
+            this.makePanes(orgUnitTypes);
+        }
         const { fittedToBounds } = this.state;
         if (
             !fittedToBounds &&
@@ -153,6 +145,19 @@ class OrgunitsMap extends Component {
         return currentColor;
     }
 
+    makePanes(orgUnitTypes) {
+        if (orgUnitTypes.length === 0) {
+            this.map.leafletElement.createPane('custom-shape-pane');
+        } else {
+            orgUnitTypes.forEach(ot => {
+                const otName = camelCase(ot.name);
+                this.map.leafletElement.createPane(
+                    `custom-shape-pane-${otName}`,
+                );
+            });
+        }
+    }
+
     fetchDetail(orgUnit) {
         const { dispatch } = this.props;
         // Removed this as it seems useless and create UI bugs
@@ -169,7 +174,11 @@ class OrgunitsMap extends Component {
         const { orgUnits } = this.props;
         const bounds = getOrgUnitsBounds(orgUnits);
         if (bounds) {
-            this.map.leafletElement.fitBounds(bounds, boundsOptions);
+            try {
+                this.map.leafletElement.fitBounds(bounds, boundsOptions);
+            } catch (e) {
+                console.warn(e);
+            }
         }
     }
 
@@ -248,6 +257,11 @@ class OrgunitsMap extends Component {
                         keyboard={false}
                     >
                         <ScaleControl imperial={false} />
+                        <ZoomControl
+                            fitToBounds={() => {
+                                return this.fitToBounds();
+                            }}
+                        />
                         <TileLayer
                             attribution={
                                 currentTile.attribution

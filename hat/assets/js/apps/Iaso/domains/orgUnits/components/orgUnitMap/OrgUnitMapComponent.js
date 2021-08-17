@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Map, TileLayer, GeoJSON, ScaleControl } from 'react-leaflet';
 import isEqual from 'lodash/isEqual';
@@ -13,8 +13,8 @@ import { injectIntl } from 'bluesquare-components';
 import {
     mapOrgUnitByLocation,
     colorClusterCustomMarker,
-    customZoomBar,
     getleafletGeoJson,
+    ZoomControl,
 } from '../../../../utils/mapUtils';
 import { getMarkerList } from '../../utils';
 
@@ -42,16 +42,17 @@ import MESSAGES from '../../messages';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import InstancePopupComponent from '../../../instances/components/InstancePopupComponent';
 
-import EditableGroup from './EditableGoup';
+import EditableGroup from './EditableGroup';
 import fitToBounds from './fitToBounds';
+
+import {
+    hasFeatureFlag,
+    EDIT_GEO_JSON_RIGHT,
+    EDIT_CATCHMENT_RIGHT,
+} from '../../../../utils/featureFlags';
 
 export const zoom = 5;
 export const padding = [75, 75];
-const EDIT_GEO_JSON_RIGHT = 'ALLOW_SHAPE_EDITION';
-const EDIT_CATCHMENT_RIGHT = 'ALLOW_CATCHMENT_EDITION';
-
-const hasFeatureFlag = (currentUser, featureKey) =>
-    Boolean(currentUser?.account?.feature_flags?.includes(featureKey));
 
 const buttonsInitialState = {
     location: {
@@ -100,8 +101,6 @@ class OrgUnitMapComponent extends Component {
             onChangeLocation,
         } = this.props;
         const { locationGroup, catchmentGroup } = this.state;
-        const zoomBar = customZoomBar(formatMessage, () => this.fitToBounds());
-        zoomBar.addTo(this.map.leafletElement);
         const map = this.map.leafletElement;
         setDrawMessages(formatMessage);
         locationGroup.initialize({
@@ -410,6 +409,7 @@ class OrgUnitMapComponent extends Component {
                         zoomControl={false}
                         keyboard={false}
                     >
+                        <ZoomControl fitToBounds={() => this.fitToBounds()} />
                         <ScaleControl imperial={false} />
                         <TileLayer
                             attribution={

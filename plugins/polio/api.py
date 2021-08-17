@@ -1,17 +1,21 @@
-from iaso.models.org_unit import OrgUnitType
-from django.db.models import Q
-from django_filters.rest_framework import DjangoFilterBackend
-from plugins.polio.serializers import SurgePreviewSerializer
-from iaso.models import OrgUnit
-from plugins.polio.serializers import CampaignSerializer, PreparednessPreviewSerializer
-from django.shortcuts import get_object_or_404
-from rest_framework import routers, filters, viewsets
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from .models import Campaign, Config
-from iaso.api.common import ModelViewSet
+import csv
+
 import requests
+from django.db.models import Q
+from django.http import HttpResponse
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import routers, filters, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from iaso.api.common import ModelViewSet
+from iaso.models import OrgUnit
+from iaso.models.org_unit import OrgUnitType
+from plugins.polio.serializers import CampaignSerializer, PreparednessPreviewSerializer
+from plugins.polio.serializers import SurgePreviewSerializer, CampaignPreparednessSpreadsheetSerializer
+from .models import Campaign, Config
 
 
 class CustomFilterBackend(filters.BaseFilterBackend):
@@ -40,7 +44,13 @@ class CampaignViewSet(ModelViewSet):
     remove_results_key_if_paginated = True
     filters.OrderingFilter.ordering_param = "order"
     filter_backends = [filters.OrderingFilter, DjangoFilterBackend, CustomFilterBackend]
-    ordering_fields = ["obr_name", "cvdpv2_notified_at", "detection_status"]
+    ordering_fields = [
+        "obr_name",
+        "cvdpv2_notified_at",
+        "detection_status",
+        "round_one__started_at",
+        "round_two__started_at",
+    ]
 
     def get_queryset(self):
         user = self.request.user
@@ -56,6 +66,13 @@ class CampaignViewSet(ModelViewSet):
     def preview_preparedness(self, request, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        return Response(serializer.data)
+
+    @action(methods=["POST"], detail=True, serializer_class=CampaignPreparednessSpreadsheetSerializer)
+    def create_preparedness_sheet(self, request, pk=None, **kwargs):
+        serializer = self.get_serializer(data={"campaign": pk})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data)
 
     @action(methods=["POST"], detail=False, serializer_class=SurgePreviewSerializer)
@@ -74,13 +91,8 @@ class IMViewSet(viewsets.ViewSet):
     configs = [
            {
                "keys": {"roundNumber": "roundNumber",
-                       "District": "District",
-                       "Region": "Region",
                        "Response": "Response",
-                       "NumberofSiteVisited": "visited",
-                       "Child_Checked": "children",
-                       "Child_FMD": "fm",
-                       "today": "today"},
+                },
                "prefix": "OHH",
                "url": 'https://brol.com/api/v1/data/5888',
                "login": "qmsdkljf",
@@ -88,13 +100,8 @@ class IMViewSet(viewsets.ViewSet):
            },
            {
                "keys": {'roundNumber': "roundNumber",
-                       "District": "District",
-                       "Region": "Region",
                        "Response": "Response",
-                       "HH_count": "visited",
-                       "Total_U5_Present": "children",
-                       "TotalFM": "fm",
-                       "today": "today"},
+                },
                "prefix": "HH",
                "url":  'https://brol.com/api/v1/data/5887',
                "login": "qmsldkjf",
@@ -106,38 +113,66 @@ class IMViewSet(viewsets.ViewSet):
     def list(self, request):
 
         slug = request.GET.get("country", None)
+        as_csv = request.GET.get("format", None) == "csv"
         config = get_object_or_404(Config, slug=slug)
         res = []
         failure_count = 0
+        all_keys = set()
         for config in config.content:
             keys = config["keys"]
+            all_keys = all_keys.union(keys.keys())
             prefix = config["prefix"]
             response = requests.get(config["url"], auth=(config["login"], config["password"]))
             forms = response.json()
-
+            form_count = 0
             for form in forms:
                 try:
-                    reduced_form = {}
+                    copy_form = form.copy()
+                    del copy_form[prefix]
+                    all_keys = all_keys.union(copy_form.keys())
                     for key in keys.keys():
                         value = form.get(key, None)
                         if value is None:
-                            value = 0
-                            for item in form[prefix]:
-                                try:
-                                    value += int(item["%s/%s" % (prefix, key)])
-                                except:
-                                    value = item["%s/%s" % (prefix, key)]
-                        reduced_form[keys[key]] = value
-                    reduced_form["visited"] = len(form[prefix])
-                    reduced_form["type"] = prefix
-
-                    res.append(reduced_form)
+                            value = form[prefix][0]["%s/%s" % (prefix, key)]
+                        copy_form[keys[key]] = value
+                    count = 1
+                    for sub_part in form[prefix]:
+                        for k in sub_part.keys():
+                            new_key = "%s[%d]/%s" % (prefix, count, k[len(prefix) + 1 :])
+                            all_keys.add(new_key)
+                            copy_form[new_key] = sub_part[k]
+                        count += 1
+                    copy_form["type"] = prefix
+                    res.append(copy_form)
                 except Exception as e:
                     print("failed on ", e, form, prefix)
                     failure_count += 1
-        print("parsed:", len(res), "failed:", failure_count)
+                form_count += 1
 
-        return JsonResponse(res, safe=False)
+        print("parsed:", len(res), "failed:", failure_count)
+        print("all_keys", all_keys)
+
+        all_keys = sorted(list(all_keys))
+        all_keys.insert(0, "type")
+        if not as_csv:
+            for item in res:
+                for k in all_keys:
+                    if k not in item:
+                        item[k] = None
+            return JsonResponse(res, safe=False)
+        else:
+            response = HttpResponse(content_type="text/csv")
+
+            writer = csv.writer(response)
+            writer.writerow(all_keys)
+            i = 1
+            for item in res:
+                ar = [item.get(key, None) for key in all_keys]
+                writer.writerow(ar)
+                i += 1
+                if i % 100 == 0:
+                    print(i)
+            return response
 
 
 router = routers.SimpleRouter()

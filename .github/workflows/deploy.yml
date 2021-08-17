@@ -49,10 +49,10 @@ jobs:
           python-version: 3.6
 
       - name: Setup beanstalk
+        # the specification of botocore is due to a deployment problem with 1.21 to remove later
         run: |
            cp .elasticbeanstalk/config.github.yml .elasticbeanstalk/config.yml
-           pip install awsebcli --upgrade
-           pip install boto3 --upgrade
+           pip install --upgrade boto3  awsebcli  botocore==1.20.110
 
       - name: Environment info
         run: |
@@ -75,9 +75,9 @@ jobs:
           echo committing---------
           git add hat/assets/webpack/
 
-          PUBLIC_URL=https://iaso-campaigns.s3.amazonaws.com/iasostatics/ SKIP_PREFLIGHT_CHECK=true PLUGIN_POLIO_ENABLED='true' bash ./scripts/enable_plugins.sh
-          git add --force plugins/polio/static/
-          git add --force plugins/polio/templates/polio/index.html
+          # add version in python
+          scripts/set_version.sh
+          git add hat/__version__.py
 
           git diff-index --quiet HEAD || (git checkout -b github/assets-${GITHUB_RUN_NUMBER} && git commit -m "Build assets github action ${GITHUB_RUN_NUMBER}" && git push -u origin) || true
         env:
@@ -86,14 +86,6 @@ jobs:
           GIT_COMMITTER_NAME: Github Bot
           EMAIL: edarchis@bluesquarehub.com
 
-#      - name: slack notification
-#        uses: rtCamp/action-slack-notify@v2.0.2
-#        env:
-#          SLACK_USERNAME: github-actions-DEPLOY
-#          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-#          SLACK_CHANNEL: ${{ github.event.inputs.slack_channel }}
-#          SLACK_TITLE: Iaso deploying on ${{ github.event.inputs.environment }}...
-#
       - name: deploy to beanstalk
         run: python scripts/eb_deploy.py ${{ github.event.inputs.environment }}
         env:

@@ -81,7 +81,7 @@ db.sqlite3
 media
 
 ### Translations ###
-locale/
+*.mo
 
 # Deployment
 build_scripts/Dockerrun.aws.json
@@ -128,3 +128,6 @@ lintErrors.html
 # gpkg tempory files
 *.gpkg-shm
 *.gpkg-wal
+
+# translations scan temporary files
+/hat/assets/js/apps/Iaso/domains/app/translations/extracted/

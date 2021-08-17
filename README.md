@@ -239,7 +239,7 @@ By running the command
 
 
 ``` {.sourceCode .bash}
-docker-compose run --rm iaso manage.py seed_test_data --mode=seed --dhis2version=2.35.3
+docker-compose run --rm iaso manage seed_test_data --mode=seed --dhis2version=2.35.3
 ```
 
 The hierarchy of OrgUnit, group of OrgUnit, Forms, and their Submissions will be imported. Type of OrgUnit are not
@@ -261,7 +261,7 @@ APP_ENV=local%
 ```
 
 in your root .env set
-```PLUGIN_POLIO_ENABLED=true```
+```PLUGINS=polio```
 
  
 Run commands inside the docker
@@ -354,7 +354,7 @@ The dumpfile will be created on your host. The `-Fc` meant it will use an optimi
 To restore a dump file that you made or that somebody sent you:
 ```
 docker-compose exec db psql -U postgres -c "create database iaso5"
- cat iaso.dump | docker-compose exec -T db pg_restore -U postgres -d iaso5 /dev/stdin
+cat iaso.dump | docker-compose exec -T db pg_restore -U postgres -d iaso5 -Fc --no-owner /dev/stdin
 ```
 
 This will put the data in a database called iaso5. You can choose in your .env file which database is used by editing
@@ -388,6 +388,27 @@ For python, we use django builtin test framework. Tests can be executed with
 ``` {.sourceCode .bash}
 docker-compose exec iaso ./manage.py test
 ```
+
+Translations
+------------
+
+The few translation for the Django side (login and reset password email etc..)
+are separated from the test. We only translate the tempalte for now
+not the python code (string on model or admin).
+
+When modifying or adding new strings to translate, use the following command to
+regenerate the translations:
+
+```manage.py makemessages --locale=fr --extension txt --extension html```
+
+This will update `hat/locale/fr/LC_MESSAGES/django.po` with the new strings to
+translate.
+
+After updating it with the translation you need to following command to have
+them reflected in the interface:
+
+```manage.py compilemessages```
+
 
 Code reloading
 --------------

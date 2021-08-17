@@ -28,18 +28,6 @@ const requests = [
         },
     },
     {
-        url: `/api/periods/?form_id=${formId}`,
-        body: {
-            devicesownership: [],
-        },
-    },
-    {
-        url: `/api/orgunits/?&rootsForUser=true&defaultVersion=true&validation_status=all`,
-        body: {
-            orgunits: [],
-        },
-    },
-    {
         url: `/api/forms/${formId}/`,
         body: {},
     },

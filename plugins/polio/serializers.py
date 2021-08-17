@@ -1,8 +1,13 @@
-from plugins.polio.preparedness.calculator import get_preparedness_score
-from django.db.models import fields
+from datetime import datetime, timezone
+
 from django.db.transaction import atomic
+from django.utils.translation import gettext_lazy as _
+from gspread.exceptions import APIError
+from rest_framework import exceptions
 from rest_framework import serializers
-from iaso.models import Group, OrgUnit, org_unit
+
+from iaso.models import Group, OrgUnit
+from plugins.polio.preparedness.calculator import get_preparedness_score
 from .models import Preparedness, Round, Campaign, Surge
 from .preparedness.parser import (
     open_sheet_by_url,
@@ -11,11 +16,13 @@ from .preparedness.parser import (
     InvalidFormatError,
     parse_value,
 )
-from gspread.exceptions import APIError
+from .preparedness.spreadsheet_manager import *
 
 
 class GroupSerializer(serializers.ModelSerializer):
-    org_units = serializers.PrimaryKeyRelatedField(many=True, allow_empty=True, queryset=OrgUnit.objects.all())
+    org_units = serializers.PrimaryKeyRelatedField(
+        many=True, allow_empty=True, queryset=OrgUnit.objects.all(), style={"base_template": "input.html"}
+    )
 
     class Meta:
         model = Group
@@ -132,16 +139,71 @@ class OrgUnitSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "root", "country_parent"]
 
 
+class CampaignPreparednessSpreadsheetSerializer(serializers.Serializer):
+    campaign = serializers.PrimaryKeyRelatedField(queryset=Campaign.objects.all(), write_only=True)
+    url = serializers.URLField(read_only=True)
+
+    def validate(self, attrs):
+        if not PREPAREDNESS_TEMPLATE_ID:
+            raise exceptions.ValidationError({"message": _("Preparedness template not configured")})
+        return attrs
+
+    def create(self, validated_data):
+        campaign = validated_data.get("campaign")
+        spreadsheet = create_spreadsheet(campaign.obr_name)
+
+        update_national_worksheet(
+            spreadsheet.worksheet("National"),
+            vacine=campaign.vacine,
+            payment_mode=campaign.payment_mode,
+            country=campaign.country(),
+        )
+
+        regional_template_worksheet = spreadsheet.worksheet("Regional")
+
+        districts = campaign.get_districts()
+        regions = campaign.get_regions()
+        current_index = 2
+        for index, region in enumerate(regions):
+            regional_worksheet = regional_template_worksheet.duplicate(current_index, None, region.name)
+            region_districts = districts.filter(parent=region)
+            update_regional_worksheet(regional_worksheet, region.name, region_districts)
+            current_index += 1
+
+        spreadsheet.del_worksheet(regional_template_worksheet)
+
+        return {"url": spreadsheet.url}
+
+
 class CampaignSerializer(serializers.ModelSerializer):
     round_one = RoundSerializer()
     round_two = RoundSerializer()
     org_unit = OrgUnitSerializer(source="initial_org_unit", read_only=True)
     top_level_org_unit_name = serializers.SerializerMethodField()
+    general_status = serializers.SerializerMethodField()
 
     def get_top_level_org_unit_name(self, campaign):
         if campaign.initial_org_unit:
-            return campaign.initial_org_unit.name
+            parent = campaign.initial_org_unit
+            while parent.parent:
+                parent = parent.parent
+            return parent.name
         return ""
+
+    def get_general_status(self, campaign):
+        now_utc = datetime.now(timezone.utc).date()
+        if campaign.round_two:
+            if campaign.round_two.ended_at and now_utc > campaign.round_two.ended_at:
+                return _("Round 2 completed")
+            if campaign.round_two.started_at and now_utc >= campaign.round_two.started_at:
+                return _("Round 2 started")
+        if campaign.round_one:
+            if campaign.round_one.ended_at and now_utc > campaign.round_one.ended_at:
+                return _("Round 1 completed")
+            if campaign.round_one.started_at and now_utc >= campaign.round_one.started_at:
+                return _("Round 1 started")
+
+        return _("Preparing")
 
     group = GroupSerializer(required=False, allow_null=True)
 

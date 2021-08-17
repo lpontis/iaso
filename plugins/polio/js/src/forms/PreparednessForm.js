@@ -1,12 +1,13 @@
 import { Button, CircularProgress, Grid, Typography } from '@material-ui/core';
 import { Field, useFormikContext } from 'formik';
+import React, { useMemo, useState } from 'react';
 import { TextInput } from '../components/Inputs';
 import { useStyles } from '../styles/theme';
 import {
+    useGeneratePreparednessSheet,
     useGetPreparednessData,
     useSurgeData,
 } from '../hooks/useGetPreparednessData';
-import { useMemo, useState } from 'react';
 
 export const PreparednessForm = () => {
     const classes = useStyles();
@@ -24,9 +25,15 @@ export const PreparednessForm = () => {
         [surgeDataTotals, lastSurge],
     );
     const { mutate, isLoading, isError, error } = useGetPreparednessData();
+    const {
+        mutate: generateSpreadsheetMutation,
+        isLoading: isGeneratingSpreadsheet,
+    } = useGeneratePreparednessSheet(values.id);
+
+    const { preperadness_spreadsheet_url = '' } = values;
 
     const refreshData = () => {
-        mutate(values.preperadness_spreadsheet_url, {
+        mutate(preperadness_spreadsheet_url, {
             onSuccess: data => {
                 const { totals, ...payload } = data;
 
@@ -34,7 +41,7 @@ export const PreparednessForm = () => {
                 const { national_score, regional_score, district_score } =
                     totals;
                 setFieldValue('preparedness_data', {
-                    spreadsheet_url: values.preperadness_spreadsheet_url,
+                    spreadsheet_url: preperadness_spreadsheet_url,
                     national_score,
                     district_score,
                     regional_score,
@@ -85,41 +92,84 @@ export const PreparednessForm = () => {
             },
         );
     };
+
+    const generateSpreadsheet = () => {
+        generateSpreadsheetMutation(null, {
+            onSuccess: data => {
+                setFieldValue('preperadness_spreadsheet_url', data.url);
+            },
+        });
+    };
+
     return (
         <>
             <Grid container spacing={2}>
                 <Grid container direction="row" item spacing={2}>
                     <Grid xs={12} md={8} item>
                         <Field
+                            placeholder={
+                                values.id
+                                    ? 'Enter Google Sheet url or use the button to generate a new one'
+                                    : 'Enter Google Sheet url'
+                            }
                             label="Preparedness Google Sheet URL"
-                            name={'preperadness_spreadsheet_url'}
+                            name="preperadness_spreadsheet_url"
                             component={TextInput}
-                            disabled={isLoading}
+                            disabled={isLoading || isGeneratingSpreadsheet}
                             className={classes.input}
                         />
                     </Grid>
-                    <Grid xs={6} md={2} item>
-                        <Button
-                            target="_blank"
-                            href={values.preperadness_spreadsheet_url}
-                            color="primary"
+                    {preperadness_spreadsheet_url?.trim().length > 0 && (
+                        <Grid
+                            xs={12}
+                            md={4}
+                            item
+                            container
+                            direction="column"
+                            alignContent="space-between"
                         >
-                            Access data
-                        </Button>
-                    </Grid>
-                    <Grid xs={6} md={2} item>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            disabled={isLoading || isProcessingData}
-                            onClick={refreshData}
+                            <Button
+                                md={6}
+                                target="_blank"
+                                href={preperadness_spreadsheet_url}
+                                color="primary"
+                            >
+                                Access data
+                            </Button>
+                            <Button
+                                md={6}
+                                variant="contained"
+                                color="primary"
+                                disabled={isLoading || isProcessingData}
+                                onClick={refreshData}
+                            >
+                                Refresh Preparedness data
+                            </Button>
+                        </Grid>
+                    )}
+                    {values.id && !preperadness_spreadsheet_url?.trim().length && (
+                        <Grid
+                            xs={12}
+                            md={4}
+                            item
+                            direction="column"
+                            container
+                            alignContent="space-between"
                         >
-                            Refresh Preparedness data
-                        </Button>
-                    </Grid>
-
-                    <Grid xd={12} item>
-                        {isLoading ? (
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                                disabled={isGeneratingSpreadsheet}
+                                onClick={generateSpreadsheet}
+                            >
+                                Generate a spreadsheet
+                            </Button>
+                        </Grid>
+                    )}
+                    {/* the padding bottom is a horrible quick fix to remove */}
+                    <Grid xd={12} item style={{ paddingBottom: 20 }}>
+                        {isLoading || isGeneratingSpreadsheet ? (
                             <CircularProgress />
                         ) : (
                             <>
@@ -162,14 +212,14 @@ export const PreparednessForm = () => {
                     <Grid xs={12} md={8} item>
                         <Field
                             label="Recruitment Surge Google Sheet URL"
-                            name={'surge_spreadsheet_url'}
+                            name="surge_spreadsheet_url"
                             component={TextInput}
                             disabled={isLoading}
                             className={classes.input}
                         />
                         <Field
                             label="Country Name in sheet"
-                            name={'country_name_in_surge_spreadsheet'}
+                            name="country_name_in_surge_spreadsheet"
                             component={TextInput}
                             disabled={isLoading}
                             className={classes.input}

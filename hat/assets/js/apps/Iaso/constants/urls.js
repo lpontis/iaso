@@ -19,6 +19,7 @@ export const baseUrls = {
     tasks: 'settings/tasks',
     devices: 'settings/devices',
     polio: 'polio/list',
+    pages: 'pages',
     error401: '401',
     error404: '404',
     error500: '500',
