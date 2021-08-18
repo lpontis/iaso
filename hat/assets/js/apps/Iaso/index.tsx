@@ -14,7 +14,7 @@ import { getPlugins, PluginsContext } from './utils';
 
 const queryClient = new QueryClient();
 
-export default function iasoApp(element, enabledPluginsName) {
+function iasoApp(element, enabledPluginsName) {
     const plugins:any[] = getPlugins(enabledPluginsName);
     const allRoutesConfigs = [
         ...routeConfigs,
@@ -57,3 +57,5 @@ declare global {
     interface Window { iasoApp: any; }
 }
 window.iasoApp = iasoApp;
+
+export { iasoApp }
