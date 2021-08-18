@@ -15,8 +15,7 @@ import { getPlugins, PluginsContext } from './utils';
 const queryClient = new QueryClient();
 
 function iasoApp(element, enabledPluginsName) {
-    console.log("starting iasoApp");
-    const plugins:any[] = getPlugins(enabledPluginsName);
+    const plugins: any[] = getPlugins(enabledPluginsName);
     const allRoutesConfigs = [
         ...routeConfigs,
         ...plugins.map(plugin => plugin.routes).flat(),
@@ -39,7 +38,7 @@ function iasoApp(element, enabledPluginsName) {
 
     ReactDOM.render(
         <QueryClientProvider client={queryClient}>
-            <PluginsContext.Provider value={{ plugins:plugins }}>
+            <PluginsContext.Provider value={{ plugins }}>
                 <MuiThemeProvider theme={theme}>
                     <CssBaseline />
                     <App store={store} routes={routes} history={history} />
@@ -55,8 +54,10 @@ function iasoApp(element, enabledPluginsName) {
 // solution
 
 declare global {
-    interface Window { iasoApp: any; }
+    interface Window {
+        iasoApp: any;
+    }
 }
 window.iasoApp = iasoApp;
 
-export { iasoApp }
+export { iasoApp };
