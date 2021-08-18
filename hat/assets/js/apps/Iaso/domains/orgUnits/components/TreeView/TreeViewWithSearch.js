@@ -34,6 +34,8 @@ const TreeViewWithSearch = ({
     preexpanded, // TODO rename
     selectedData,
 }) => {
+    console.log("preexpanded TVWS",preexpanded, typeof preexpanded.keys()[1]);
+    
     const [data, setData] = useState(
         Array.isArray(selectedData) ? selectedData : selectedData,
     );

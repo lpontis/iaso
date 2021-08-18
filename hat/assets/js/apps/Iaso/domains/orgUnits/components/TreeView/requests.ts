@@ -1,13 +1,36 @@
 import { iasoGetRequest } from '../../../../utils/requests';
 
-const getChildrenData = async id => {
-    const response = await iasoGetRequest({
+export type TreeViewData<T> = {
+    id: string;
+    name: string;
+    hasChildren: boolean;
+    data: T;
+};
+
+export interface OrgUnit {
+    id: string;
+    name: string;
+    // eslint-disable-next-line camelcase
+    has_children: boolean;
+    parent: OrgUnit | null;
+}
+
+export interface OrgUnits {
+    orgunits: OrgUnit[];
+}
+
+console.log("test");
+
+const getChildrenData = async (
+    id: string,
+): Promise<TreeViewData<OrgUnit>[]> => {
+    const response: OrgUnits = await iasoGetRequest({
         disableSuccessSnackBar: true,
         requestParams: {
             url: `/api/orgunits/?&parent_id=${id}&validation_status=all&treeSearch=true&ignoreEmptyNames=true`,
         },
     });
-    const usableData = response.orgunits.map(orgUnit => {
+    const usableData :TreeViewData<OrgUnit>[] = response.orgunits.map((orgUnit: OrgUnit) => {
         return {
             id: orgUnit.id,
             name: orgUnit.name,

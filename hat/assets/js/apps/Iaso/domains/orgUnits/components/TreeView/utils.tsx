@@ -7,8 +7,8 @@ const formatInitialSelectedIds = orgUnits => {
     if (!Array.isArray(orgUnits)) return orgUnits.id.toString();
     return orgUnits.map(orgUnit => orgUnit.id.toString());
 };
-const formatInitialSelectedParents = orgUnits => {
-    const parents = new Map();
+const formatInitialSelectedParents = (orgUnits) :Map<string,Map<string,string>> => {
+    const parents:Map<string,Map<string,string>> = new Map();
     if (!orgUnits) return parents;
     if (!Array.isArray(orgUnits)) {
         parents.set(orgUnits.id.toString(), getOrgUnitAncestors(orgUnits));
@@ -27,10 +27,10 @@ const tooltip = (orgUnit, icon) => (
     </OrgUnitTooltip>
 );
 
-const adaptMap = value => {
+const adaptMap = (value:Map<string,Map<string,string>>) :string[]|null => {
     if (!value) return null;
     return Array.from(value.entries()) // original map in array form [[key1, entry1],[key2, entry2]]
-        .map(entry => Array.from(entry[1].keys())) // 2D array containing the keys of each entry from comment above: [[entry1Key1, entry1Key2],[entry2Key1,entry2Key2]]
+        .map((entry:[string,Map<string,string>]) => Array.from(entry[1].keys())) // 2D array containing the keys of each entry from comment above: [[entry1Key1, entry1Key2],[entry2Key1,entry2Key2]]
         .map(
             keys =>
                 keys

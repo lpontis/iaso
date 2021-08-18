@@ -303,7 +303,7 @@ export const saveOrgUnit = (dispatch, orgUnit) =>
             return savedOrgUnit;
         })
         .catch(error => {
-            dispatch(enqueueSnackbar(errorSnackBar(null, null, error)));
+            dispatch(enqueueSnackbar(errorSnackBar(undefined, null, error)));
             console.error('Error while saving org unit detail:', error);
             throw error;
         });
@@ -506,7 +506,9 @@ export const fetchFormVersions = (dispatch, formId) => {
         dispatch(
             enqueueSnackbar(
                 errorSnackBar(
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
+                    // eslint-disable-next-line no-undef
                     isUpdate ? 'updateFormError' : 'createFormError',
                     null,
                     error,
@@ -677,13 +679,23 @@ export const iasoRestoreRequest = requestHandler(storeDispatch)(restoreRequest);
 
 const defaultHookParams = { preventTrigger: false, additionalDependencies: [] };
 
-export const useAPI = (request, requestArgs, params = defaultHookParams) => {
-    const [data, setData] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isError, setIsError] = useState(false);
+export type ApiResponse<T> = {
+    isLoading: boolean;
+    isError: boolean;
+    data: T | null;
+};
+
+export const useAPI = <T extends unknown>(
+    request: any,
+    requestArgs: any,
+    params = defaultHookParams,
+): ApiResponse<T> => {
+    const [data, setData] = useState<T | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isError, setIsError] = useState<boolean>(false);
     // useRef to avoid memory leak if user navigates away while async action not completed
     // credit: https://medium.com/wesionary-team/how-to-fix-memory-leak-issue-in-react-js-using-hook-a5ecbf9becf8
-    const mountedRef = React.useRef();
+    const mountedRef = React.useRef<any>();
 
     useEffect(() => {
         mountedRef.current = true;
@@ -710,14 +722,14 @@ export const useAPI = (request, requestArgs, params = defaultHookParams) => {
             mountedRef.current = false;
         };
     }, [
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         ...(params.additionalDependencies ?? []),
         request,
         params.preventTrigger,
-        params.trigger,
         requestArgs,
     ]);
 
-    const result = { data, isLoading, isError };
+    const result: ApiResponse<T> = { data, isLoading, isError };
     return result;
 };
 
@@ -742,6 +754,7 @@ export const useGetComments = ({
     );
     const result = useAPI(request, null, {
         preventTrigger: Boolean(!orgUnitId),
+        additionalDependencies: [],
     });
     return result;
 };
