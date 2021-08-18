@@ -92,25 +92,21 @@ module.exports = {
         // XLSX
         new webpack.IgnorePlugin(/cptable/),
         new webpack.WatchIgnorePlugin({
-            paths: [/cptable/, /\.js$/, /\.d\.ts$/],
+            paths: [/cptable/, /\.d\.ts$/],
         }),
     ],
 
     module: {
         rules: [
             {
-                test: /\.(js|tsx)$/,
+                test: /\.(js|ts|tsx)$/,
                 enforce: 'pre',
                 use: ['source-map-loader'],
                 exclude: /node_modules/,
             },
             {
-                test: /\.tsx?$/,
+                test: /\.(ts|tsx)?$/,
                 exclude: /node_modules/,
-                // use: {
-                //     loader: 'ts-loader',
-                //     options: { context: __dirname, logInfoToStdOut: true },
-                // },
                 use: [
                     {
                         loader: 'babel-loader',
@@ -234,6 +230,6 @@ module.exports = {
             fs: false,
         },
         modules: ['node_modules'],
-        extensions: ['.js', '.tsx'],
+        extensions: ['.js', '.tsx', '.ts'],
     },
 };
