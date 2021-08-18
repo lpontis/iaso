@@ -70,6 +70,7 @@ module.exports = {
             chunkModules: false,
         },
     },
+    devtool: 'source-map',
 
     plugins: [
         new webpack.NormalModuleReplacementPlugin(
@@ -98,17 +99,38 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.(t|j)s$/,
+                test: /\.(js|tsx)$/,
                 enforce: 'pre',
                 use: ['source-map-loader'],
+                exclude: /node_modules/,
             },
             {
                 test: /\.tsx?$/,
                 exclude: /node_modules/,
-                use: {
-                    loader: 'ts-loader',
-                    options: { context: __dirname, logInfoToStdOut: true },
-                },
+                // use: {
+                //     loader: 'ts-loader',
+                //     options: { context: __dirname, logInfoToStdOut: true },
+                // },
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            cacheDirectory: true,
+                            presets: [
+                                [
+                                    '@babel/preset-env',
+                                    { targets: { node: '14' } },
+                                ],
+                                [
+                                    '@babel/preset-typescript',
+                                    { isTSX: true, allExtensions: true },
+                                ],
+                                '@babel/preset-react',
+                            ],
+                            plugins: ['@babel/transform-runtime', 'formatjs'],
+                        },
+                    },
+                ],
             },
             {
                 test: /\.js?$/,
@@ -203,6 +225,7 @@ module.exports = {
                 },
             },
         ],
+        noParse: [require.resolve('typescript/lib/typescript.js')], // remove warning: https://github.com/microsoft/TypeScript/issues/39436
     },
     externals: [{ './cptable': 'var cptable' }],
 

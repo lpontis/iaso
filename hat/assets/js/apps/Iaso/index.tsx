@@ -15,6 +15,7 @@ import { getPlugins, PluginsContext } from './utils';
 const queryClient = new QueryClient();
 
 function iasoApp(element, enabledPluginsName) {
+    console.log("starting iasoApp");
     const plugins:any[] = getPlugins(enabledPluginsName);
     const allRoutesConfigs = [
         ...routeConfigs,

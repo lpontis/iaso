@@ -30,7 +30,7 @@ export const getYears = (yearsCount, offset = 0, reverse = false) => {
 };
 
 export const addPositionIndex = array => {
-    const tempArray:any[] = [];
+    const tempArray = [];
     if (array) {
         array.forEach((e, index) => {
             tempArray.push({
@@ -43,10 +43,10 @@ export const addPositionIndex = array => {
 };
 
 export const removePositionIndex = array => {
-    const tempArray :any[] = [];
+    const tempArray = [];
     if (array) {
-        array.forEach((e:any) => {
-            tempArray.push(e.value)
+        array.forEach(e => {
+            tempArray.push(e.value);
         });
     }
     return tempArray;
@@ -86,8 +86,8 @@ export const getIntegerArray = size =>
         .map((y, i) => size - i)
         .reverse();
 
-export const getPlugins = (pluginsKeys : any[]):any[] =>  {
-    const plugins :any[] = [];
+export const getPlugins = pluginsKeys => {
+    const plugins = [];
     pluginsKeys.forEach(plugin => {
         const pluginConfig = pluginsConfigs[plugin];
         if (pluginConfig) {
@@ -96,5 +96,5 @@ export const getPlugins = (pluginsKeys : any[]):any[] =>  {
     });
     return plugins;
 };
-const emptyArray :any[] = [];
-export const PluginsContext = createContext({ plugins: emptyArray });
+// const emptyArray :any[] = [];
+export const PluginsContext = createContext({});
