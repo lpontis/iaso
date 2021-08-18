@@ -63,7 +63,7 @@
         "react/jsx-one-expression-per-line": "off",
         "react/jsx-curly-newline":"off",
         "react/jsx-props-no-spreading":"warn",
-        "react/prop-types":"warn",
+        "react/prop-types":"off",
         "linebreak-style": "off",
         "max-len": [
           "warn",
@@ -85,8 +85,10 @@
         "no-unused-vars": ["error",{"ignoreRestSiblings":true}],
         "react/button-has-type": "off",
         "react/destructuring-assignment": "off",
+        "import/extensions":"off",
+        "import/no-unresolved":["error", { "ignores": ["modules"] }],
         "react/forbid-prop-types": [
-          0
+          1
         ],
         "react/jsx-filename-extension": [
           1,
