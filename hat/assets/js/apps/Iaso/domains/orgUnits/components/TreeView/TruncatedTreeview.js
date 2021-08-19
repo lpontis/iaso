@@ -67,7 +67,7 @@ const TruncatedTreeview = ({ onClick, selectedItems }) => {
                 }
                 expandIcon={<ArrowRightIcon style={{ fontSize: 'large' }} />}
                 label={item[1]}
-                nodeId={item[0].toString()}
+                nodeId={item[0]}
             >
                 {items.size >= 1
                     ? makeTreeItems(nextItems, initialItems)

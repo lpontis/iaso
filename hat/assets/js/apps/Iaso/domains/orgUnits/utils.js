@@ -184,7 +184,7 @@ export const getOrgUnitAncestorsIds = orgUnit => {
 export const getOrgUnitAncestors = orgUnit => {
     const result = new Map(
         getOrgUnitsParentsUntilRoot(orgUnit)
-            .map(parent => [parent.id, parent.name])
+            .map(parent => [parent.id.toString(), parent.name])
             .reverse(),
     );
     return result;

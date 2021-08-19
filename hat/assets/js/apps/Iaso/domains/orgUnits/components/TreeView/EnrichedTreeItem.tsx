@@ -69,7 +69,6 @@ const EnrichedTreeItem: FunctionComponent<Props> = ({
     parentsTicked = [],
     scrollIntoView = null,
 }) => {
-    console.log("parentTicked TreeItem", parentsTicked)
     const classes = useStyles();
     const isExpanded: boolean = expanded.includes(id);
     const isTicked: boolean = ticked.includes(id);

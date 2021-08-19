@@ -1,58 +1,73 @@
 import React, { useState, useCallback } from 'react';
-import {
-    string,
-    bool,
-    func,
-    object,
-    number,
-    oneOfType,
-    array,
-    any,
-} from 'prop-types';
 import { DynamicSelect } from './DynamicSelect';
 import { MESSAGES } from './messages';
 import { IasoTreeView } from './IasoTreeView';
 import { adaptMap } from './utils';
+import { FunctionComponent } from 'react';
+import { string } from 'prop-types';
 
-const TreeViewWithSearch = ({
-    labelField, // name
-    nodeField, // id
-    getChildrenData,
-    getRootData,
+type Props = {
+    labelField:string, //name
+    nodeField:string, //id
+    getChildrenData: (...args:any[])=>any,
+    getRootData: (...args:any[])=>any,
+    toggleOnLabelClick?: boolean,
+    onSelect: (...args:any[])=>any,
+    minResultCount: number,
+    inputLabelObject: Record<string,unknown>,
+    withSearchButton: boolean,
+    request: (...args:any[])=>any,
+    makeDropDownText: (...args:any[])=>any,
+    toolTip: (...args:any[])=>any, // actually a component
+    parseNodeIds: (...args:any[])=>any,
+    onUpdate: (...args:any[])=>any,
+    multiselect: boolean,
+    preselected: string|string[]|null,
+    preexpanded: Map<any,any>|null,
+    // TODO type selectedData: orgUnit (full)
+    selectedData: Record<string,unknown>|Record<string,unknown>[],
+}
+
+
+const TreeViewWithSearch:FunctionComponent<Props> = ({
+    labelField, 
+    nodeField,
+    getChildrenData=()=>null,
+    getRootData=()=>null,
     toggleOnLabelClick,
-    onSelect,
-    minResultCount,
-    inputLabelObject,
-    withSearchButton,
-    request,
+    onSelect=()=>null,
+    minResultCount=50,
+    inputLabelObject=MESSAGES.selectSingle,
+    withSearchButton=false,
+    request=()=>null,
     makeDropDownText,
-    toolTip,
+    toolTip = ()=>null,
     parseNodeIds,
-    onUpdate,
-    multiselect,
-    preselected, // TODO rename
-    preexpanded, // TODO rename
-    selectedData,
+    onUpdate=()=>null,
+    multiselect=false,
+    preselected=null, // TODO rename
+    preexpanded=null, // TODO rename
+    selectedData=[],
 }) => {
-    console.log("preexpanded TVWS",preexpanded, typeof preexpanded.keys()[1]);
+    console.log("selectedData", selectedData);
     
-    const [data, setData] = useState(
-        Array.isArray(selectedData) ? selectedData : selectedData,
+    const [data, setData] = useState<Record<string,unknown>[]>(
+        Array.isArray(selectedData) ? selectedData : [selectedData],
     );
-    const [selected, setSelected] = useState(
+    const [selected, setSelected] = useState<string|string[]>(
         preselected || (multiselect ? [] : ''),
     );
     const [expanded, setExpanded] = useState(adaptMap(preexpanded) ?? []);
-    const [ticked, setTicked] = useState(preselected ?? []);
-    const [parentsTicked, setParentsTicked] = useState(
+    const [ticked, setTicked] = useState<string|string[]>(preselected ?? []);
+    const [parentsTicked, setParentsTicked] = useState<Map<string,Map<string,string>>>(
         preexpanded ?? new Map(),
     );
-    const [scrollIntoView, setScrollIntoView] = useState(
+    const [scrollIntoView, setScrollIntoView] = useState<string|null>(
         !Array.isArray(preselected) ? preselected : null,
     );
 
     const onNodeSelect = useCallback(
-        selection => {
+        (selection:string|string[]):void => {
             setSelected(selection);
             if (multiselect) {
                 // disabling when multiselect to avoid allowing user to confirm data while boxes are unticked
@@ -64,24 +79,25 @@ const TreeViewWithSearch = ({
 
     // Tick and untick checkbox
     const onLabelClick = useCallback(
-        (id, itemData) => {
-            let newTicked;
-            let updatedParents;
-            let updatedSelectedData;
+        (id:string, itemData:Record<string,unknown>) => {
+            let newTicked :string[]=[];
+            let updatedParents = new Map<any,any>() ;
+            let updatedSelectedData:Record<string,unknown>[]=[];
             if (multiselect) {
                 newTicked = ticked.includes(id)
-                    ? ticked.filter(tickedId => tickedId !== id)
+                    ? (ticked as string[]).filter(tickedId => tickedId !== id)
                     : [...ticked, id];
                 updatedParents = new Map(parentsTicked);
             } else {
                 newTicked = [id];
-                updatedParents = new Map();
             }
             setTicked(newTicked);
             if (parentsTicked.has(id)) {
                 updatedParents.delete(id);
                 updatedSelectedData = data.filter(d => d.id !== id);
             } else {
+                // FIXME parseNodeIds and itemData are going to be tricky to type without tying the typing to OrgUnits
+                // Generics needed here
                 updatedParents.set(id, parseNodeIds(itemData));
                 if (multiselect) {
                     updatedSelectedData = [...data, itemData];
@@ -99,7 +115,10 @@ const TreeViewWithSearch = ({
     const onSearchSelect = useCallback(
         // this is an org unit so you can access the parents here
         searchSelection => {
+            console.log("searchSelection", searchSelection);
+            // TODO add parseNodeIds return type
             const ancestors = parseNodeIds(searchSelection);
+            console.log("ancestors", ancestors);
             const idsToExpand = Array.from(ancestors.keys()).map(id =>
                 id.toString(),
             );
@@ -155,44 +174,6 @@ const TreeViewWithSearch = ({
             />
         </>
     );
-};
-
-TreeViewWithSearch.propTypes = {
-    getChildrenData: func,
-    getRootData: func,
-    labelField: string.isRequired,
-    nodeField: string.isRequired,
-    toggleOnLabelClick: bool,
-    onSelect: func,
-    minResultCount: number,
-    inputLabelObject: object,
-    withSearchButton: bool,
-    request: func.isRequired,
-    makeDropDownText: func.isRequired,
-    toolTip: func,
-    parseNodeIds: func.isRequired,
-    onUpdate: func,
-    multiselect: bool,
-    preselected: oneOfType([string, array]),
-    // preexpanded is a Map
-    preexpanded: any,
-    selectedData: oneOfType([object, array]),
-};
-
-TreeViewWithSearch.defaultProps = {
-    getChildrenData: () => {},
-    getRootData: () => {},
-    toggleOnLabelClick: true,
-    onSelect: () => {},
-    minResultCount: 50,
-    inputLabelObject: MESSAGES.search,
-    withSearchButton: false,
-    toolTip: null,
-    onUpdate: () => {},
-    multiselect: false,
-    preselected: null,
-    preexpanded: null,
-    selectedData: [],
 };
 
 export { TreeViewWithSearch };
