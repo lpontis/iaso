@@ -29,15 +29,17 @@ export default function iasoApp(element, enabledPluginsName) {
     const baseRoutes = allRoutesConfigs.map(routeConfig => (
         <Route
             path={getPath(routeConfig)}
-            component={props => (
-                <ProtectedRoute
-                    {...props}
-                    featureFlag={routeConfig.featureFlag}
-                    permission={routeConfig.permission}
-                    component={routeConfig.component(props)}
-                    isRootUrl={routeConfig.isRootUrl}
-                />
-            )}
+            component={props => {
+                return (
+                    <ProtectedRoute
+                        {...props}
+                        featureFlag={routeConfig.featureFlag}
+                        permission={routeConfig.permission}
+                        component={routeConfig.component(props)}
+                        isRootUrl={routeConfig.isRootUrl}
+                    />
+                );
+            }}
         />
     ));
     const routes = addRoutes(baseRoutes);

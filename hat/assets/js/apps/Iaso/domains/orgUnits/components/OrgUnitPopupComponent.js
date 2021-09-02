@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 
 import { Popup } from 'react-leaflet';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 
 import {
@@ -28,7 +28,6 @@ import PopupItemComponent from '../../../components/maps/popups/PopupItemCompone
 import ConfirmDialog from '../../../components/dialogs/ConfirmDialogComponent';
 
 import { baseUrls } from '../../../constants/urls';
-import { getDisplayedDateHourFormat } from '../../../utils/dates';
 
 import MESSAGES from '../messages';
 

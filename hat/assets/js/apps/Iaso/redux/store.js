@@ -1,7 +1,6 @@
-import { useRouterHistory } from 'react-router';
 import { syncHistoryWithStore, routerMiddleware } from 'react-router-redux';
 import thunk from 'redux-thunk';
-import { createHistory } from 'history';
+import { createBrowserHistory } from 'history';
 
 import createStore from './createStore';
 
@@ -50,10 +49,7 @@ import {
     reducer as orgUnitsTypesReducer,
 } from '../domains/orgUnits/types/reducer';
 
-// TODO pass baseUrl without hardcoding it
-let storeHistory = useRouterHistory(createHistory)({
-    basename: '/dashboard',
-});
+let storeHistory = createBrowserHistory({ basename: 'dashboard' });
 // TODO: to check, this initial state argument is probably useless
 const store = createStore(
     {
