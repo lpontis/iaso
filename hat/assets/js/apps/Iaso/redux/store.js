@@ -1,4 +1,4 @@
-import { syncHistoryWithStore, routerMiddleware } from 'react-router-redux';
+import { connectRouter, routerMiddleware } from 'connected-react-router';
 import thunk from 'redux-thunk';
 import { createBrowserHistory } from 'history';
 
@@ -49,7 +49,7 @@ import {
     reducer as orgUnitsTypesReducer,
 } from '../domains/orgUnits/types/reducer';
 
-let storeHistory = createBrowserHistory({ basename: 'dashboard' });
+const storeHistory = createBrowserHistory({ basename: 'dashboard' });
 // TODO: to check, this initial state argument is probably useless
 const store = createStore(
     {
@@ -60,7 +60,7 @@ const store = createStore(
         snackBar: snackBarsInitialState,
         map: mapInitialState,
         devices: devicesInitialState,
-        routerCustom: routerInitialState,
+        // routerCustom: routerInitialState,
         links: linksInitialState,
         users: usersInitialState,
         periods: periodsInitialState,
@@ -79,7 +79,7 @@ const store = createStore(
         snackBar: snackBarsReducer,
         map: mapReducer,
         devices: devicesReducer,
-        routerCustom: routerReducer,
+        // routerCustom: routerInitialState,
         links: linksReducer,
         users: usersReducer,
         periods: periodsReducer,
@@ -88,11 +88,10 @@ const store = createStore(
         mappings: mappingReducer,
         groups: groupsReducer,
         orgUnitsTypes: orgUnitsTypesReducer,
+        router: connectRouter(storeHistory),
     },
     [routerMiddleware(storeHistory), thunk],
 );
-// TODO: see if mutation necessary. If not don't reassign history and initialize history const here
-storeHistory = syncHistoryWithStore(storeHistory, store);
 
 const history = storeHistory;
 const { dispatch } = store;

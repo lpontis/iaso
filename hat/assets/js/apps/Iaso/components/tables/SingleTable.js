@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router';
+import { withRouter } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import { Box } from '@material-ui/core';
 import { useDispatch } from 'react-redux';
 
 import {
-    getTableUrl,
+    // getTableUrl,
     Table,
     getParamsKey,
     getTableParams,
@@ -25,6 +25,48 @@ const useStyles = makeStyles(theme => ({
     ...commonStyles(theme),
 }));
 
+const getTableUrl = (
+    urlKey,
+    params,
+    toExport = false,
+    exportType = 'csv',
+    asLocation = false,
+    asSmallDict = false,
+) => {
+    // console.log('params', params);
+    let url = `/api/${urlKey}/?`;
+    const clonedParams = { ...params };
+
+    if (toExport) {
+        clonedParams[exportType] = true;
+    }
+
+    if (asLocation) {
+        clonedParams.asLocation = true;
+        clonedParams.limit = clonedParams.locationLimit;
+        delete clonedParams.page;
+    }
+
+    if (asSmallDict) {
+        clonedParams.limit = clonedParams.locationLimit;
+        delete clonedParams.page;
+    }
+
+    delete clonedParams.locationLimit;
+
+    const usedParams = [];
+    Object.keys(clonedParams).forEach(key => {
+        const value = clonedParams[key];
+        // console.log(key, value);
+        if (key && value && !usedParams.includes(key)) {
+            usedParams.push(key);
+            url += `&${key}=${value}`;
+        }
+    });
+
+    // console.log('url', url);
+    return url;
+};
 const SingleTable = ({
     filters,
     columns,
@@ -196,9 +238,10 @@ const SingleTable = ({
                     }
                     extraProps={extraProps}
                     baseUrl={baseUrl}
-                    redirectTo={(key, newParams) =>
-                        dispatch(redirectToReplace(key, newParams))
-                    }
+                    redirectTo={(key, newParams) => {
+                        // console.log('redirectTo', key, newParams);
+                        dispatch(redirectToReplace(key, newParams));
+                    }}
                     marginTop={Boolean(
                         filters.length > 0 ||
                             (count > 0 && exportButtons) ||

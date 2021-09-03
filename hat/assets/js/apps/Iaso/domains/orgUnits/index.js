@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { push } from 'react-router-redux';
+import { push } from 'connected-react-router';
 import { withStyles, Box, Tabs, Tab, Grid } from '@material-ui/core';
 import PropTypes from 'prop-types';
 
@@ -592,7 +592,7 @@ const MapDispatchToProps = dispatch => ({
         dispatch(setOrgUnits(orgUnitsList, true, params, count, pages, counts)),
     resetOrgUnits: () => dispatch(resetOrgUnits()),
     redirectTo: (key, params) =>
-        dispatch(push(`${key}${createUrl(params, '')}`)),
+        dispatch(push(`/${key}${createUrl(params, '')}`)),
     setSources: sources => dispatch(setSources(sources)),
     setOrgUnitsListFetching: isFetching =>
         dispatch(setOrgUnitsListFetching(isFetching)),

@@ -50,9 +50,9 @@ export const getPath = path => {
     let url = `/${path.baseUrl}`;
     path.params.forEach(p => {
         if (p.isRequired) {
-            url += `/${p.key}/:${p.key}`;
+            url += `/(${p.key})/:${p.key}`;
         } else {
-            url += `(/${p.key}/:${p.key})`;
+            url += `/(${p.key})?/:${p.key}?`;
         }
     });
     return url;

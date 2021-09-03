@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
-import { replace } from 'react-router-redux';
+import { replace } from 'connected-react-router';
 import PropTypes from 'prop-types';
 
 import { createUrl } from 'bluesquare-components';
@@ -202,7 +202,7 @@ const MapStateToProps = () => ({});
 const MapDispatchToProps = dispatch => ({
     dispatch,
     redirectTo: (key, params) =>
-        dispatch(replace(`${key}${createUrl(params, '')}`)),
+        dispatch(replace(`/${key}${createUrl(params, '')}`)),
 });
 
 export default connect(MapStateToProps, MapDispatchToProps)(FiltersComponent);

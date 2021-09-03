@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import omit from 'lodash/omit';
 import { connect } from 'react-redux';
-import { push, replace } from 'react-router-redux';
+import { push, replace } from 'connected-react-router';
 import { bindActionCreators } from 'redux';
 
 import { withStyles, Box, Tabs, Tab, Grid } from '@material-ui/core';
@@ -783,9 +783,9 @@ const MapDispatchToProps = dispatch => ({
     setOrgUnitTypes: orgUnitTypes => dispatch(setOrgUnitTypes(orgUnitTypes)),
     setCurrentForms: currentForms => dispatch(setCurrentForms(currentForms)),
     redirectTo: (key, params) =>
-        dispatch(replace(`${key}${createUrl(params, '')}`)),
+        dispatch(replace(`/${key}${createUrl(params, '')}`)),
     redirectToPush: (key, params) =>
-        dispatch(push(`${key}${createUrl(params, '')}`)),
+        dispatch(push(`/${key}${createUrl(params, '')}`)),
     resetOrgUnits: () => dispatch(resetOrgUnits()),
     setSources: sources => dispatch(setSources(sources)),
     setGroups: groups => dispatch(setGroups(groups)),

@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Route } from 'react-router';
+import { Route } from 'react-router-dom';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { theme } from 'bluesquare-components';
@@ -26,22 +26,26 @@ export default function iasoApp(element, enabledPluginsName) {
         ...routeConfigs,
         ...plugins.map(plugin => plugin.routes).flat(),
     ];
-    const baseRoutes = allRoutesConfigs.map(routeConfig => (
-        <Route
-            path={getPath(routeConfig)}
-            component={props => {
-                return (
-                    <ProtectedRoute
-                        {...props}
-                        featureFlag={routeConfig.featureFlag}
-                        permission={routeConfig.permission}
-                        component={routeConfig.component(props)}
-                        isRootUrl={routeConfig.isRootUrl}
-                    />
-                );
-            }}
-        />
-    ));
+    const baseRoutes = allRoutesConfigs.map(routeConfig => {
+        console.log('getPath(routeConfig)', getPath(routeConfig));
+        return (
+            <Route
+                key={routeConfig.baseUrl}
+                path={getPath(routeConfig)}
+                render={props => {
+                    return (
+                        <ProtectedRoute
+                            {...props}
+                            featureFlag={routeConfig.featureFlag}
+                            permission={routeConfig.permission}
+                            component={routeConfig.component(props)}
+                            isRootUrl={routeConfig.isRootUrl}
+                        />
+                    );
+                }}
+            />
+        );
+    });
     const routes = addRoutes(baseRoutes);
 
     ReactDOM.render(

@@ -23,6 +23,8 @@ import CreateMappingVersionDialogComponent from './components/CreateMappingVersi
 import { baseUrls } from '../../constants/urls';
 
 import MESSAGES from './messages';
+import { injectParams } from '../../hooks/injectParams';
+import { mappingsPath } from '../../constants/routes';
 
 const baseUrl = baseUrls.mappings;
 
@@ -121,5 +123,8 @@ const MapDispatchToProps = dispatch => ({
 });
 
 export default withStyles(styles)(
-    connect(MapStateToProps, MapDispatchToProps)(injectIntl(Mappings)),
+    connect(
+        MapStateToProps,
+        MapDispatchToProps,
+    )(injectIntl(injectParams(Mappings, mappingsPath?.params, baseUrl))),
 );

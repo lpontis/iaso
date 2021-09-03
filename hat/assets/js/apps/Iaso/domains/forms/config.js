@@ -133,7 +133,8 @@ const formsTableColumns = (
                             <Grid item>
                                 <Link
                                     download
-                                    href={
+                                    target="_self"
+                                    to={
                                         settings.row.original
                                             .latest_form_version.xls_file
                                     }
@@ -145,7 +146,8 @@ const formsTableColumns = (
                         <Grid item>
                             <Link
                                 download
-                                href={
+                                target="_self"
+                                to={
                                     settings.row.original.latest_form_version
                                         .file
                                 }
