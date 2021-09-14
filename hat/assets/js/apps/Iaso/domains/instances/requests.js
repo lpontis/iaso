@@ -11,8 +11,6 @@ export const fetchFormDetailsForInstance = formId => {
         errorKeyMessage: 'Fetch form for Instance error',
         consoleError: 'fetchFormDetailsForInstance',
     }).then(response => {
-        // TODO remove this, use local state
-        // storeDispatch(setCurrentForm(response));
         return response;
     });
 };

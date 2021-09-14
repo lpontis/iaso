@@ -35,11 +35,9 @@ type Props = {
     label: string;
     id: string;
     hasChildren?: boolean;
-    fetchChildrenData?: // eslint-disable-next-line no-unused-vars
-    ((id: string) => SubTree) | (() => null); // fetchChildrenData(id)
+    fetchChildrenData?:((id: string) => SubTree) | (() => null); // fetchChildrenData(id)
     expanded?: string[];
     toggleOnLabelClick?: boolean;
-    // eslint-disable-next-line no-unused-vars
     onLabelClick?: ((id: string, data: any) => void) | (() => null);
     data?: any; // additional data that can be passed up to the parent (eg org unit details)
     withCheckbox?: boolean;

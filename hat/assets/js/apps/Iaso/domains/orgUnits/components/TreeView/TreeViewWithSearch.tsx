@@ -119,7 +119,7 @@ const TreeViewWithSearch:FunctionComponent<Props> = ({
             // TODO add parseNodeIds return type
             const ancestors = parseNodeIds(searchSelection);
             console.log("ancestors", ancestors);
-            const idsToExpand = Array.from(ancestors.keys()).map(id =>
+            const idsToExpand = Array.from(ancestors.keys()).map((id:number) =>
                 id.toString(),
             );
             const currentId = idsToExpand[idsToExpand.length - 1];
