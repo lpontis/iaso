@@ -10,6 +10,7 @@ import {
 import { enqueueSnackbar } from '../redux/snackBarsReducer';
 import { succesfullSnackBar, errorSnackBar } from '../constants/snackBars';
 import { dispatch as storeDispatch } from '../redux/store';
+import { FormVersionPostData, FormVersionPutData } from '../domains/forms/requests';
 
 export const fetchOrgUnits = (dispatch, params) =>
     getRequest(`/api/orgunits/?${params}`)
@@ -460,7 +461,7 @@ export const restoreForm = (dispatch, formId) =>
         throw error;
     });
 
-export const createFormVersion = formVersionData => {
+export const createFormVersion = (formVersionData :FormVersionPostData) :Promise<any> => {
     const { data } = formVersionData;
     const fileData = { xls_file: formVersionData.xls_file };
 
@@ -474,7 +475,7 @@ export const createFormVersion = formVersionData => {
     });
 };
 
-export const updateFormVersion = formVersion =>
+export const updateFormVersion = (formVersion :FormVersionPutData) =>
     putRequest(`/api/formversions/${formVersion.id}/`, formVersion).catch(
         error => {
             storeDispatch(

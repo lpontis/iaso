@@ -9,12 +9,12 @@ import FileInputComponent from '../../../components/forms/FileInputComponent';
 import PeriodPicker from '../../periods/components/PeriodPickerComponent';
 
 import MESSAGES from '../messages';
-import { createFormVersion, updateFormVersion } from '../../../utils/requests';
 import { useFormState } from '../../../hooks/form';
 import { errorTypes, getPeriodsErrors } from '../../periods/utils';
 
 import { enqueueSnackbar } from '../../../redux/snackBarsReducer';
 import { succesfullSnackBar } from '../../../constants/snackBars';
+import { FormVersionPutData, useCreateFormVersion,useUpdateFormVersion } from '../requests';
 
 const emptyVersion = (id = null) => ({
     id,
@@ -42,13 +42,16 @@ const FormVersionsDialogComponent = ({
             xls_file: formVersion.xls_file,
         });
 
-    const [periodsErrors, setPeriodsErrors] = useState(
+    const [periodsErrors, setPeriodsErrors] = useState<any>(
         getPeriodsErrors(
             formState.start_period.value,
             formState.end_period.value,
             periodType,
         ),
     );
+
+    const {mutate:createFormVersion}=useCreateFormVersion();
+    const {mutate:updateFormVersion}=useUpdateFormVersion(formId);
 
     useEffect(() => {
         setPeriodsErrors(
@@ -63,8 +66,20 @@ const FormVersionsDialogComponent = ({
     const onConfirm = useCallback(
         async closeDialog => {
             setIsLoading(true);
-            let savePromise;
-            const data = {
+
+            const onSuccess = ()=>{
+                closeDialog();
+                setFormState(emptyVersion(formVersion.id));
+                onConfirmed();
+                dispatch(enqueueSnackbar(succesfullSnackBar()));
+            }
+            const onError=error=>{
+                if (error.status === 400) {
+                    Object.entries(error.details).forEach(entry =>
+                    setFieldErrors(entry[0], entry[1]),)
+                }
+            }
+            const data :any = {
                 form_id: formId,
             };
             if (formState.start_period.value) {
@@ -73,27 +88,14 @@ const FormVersionsDialogComponent = ({
             if (formState.end_period.value) {
                 data.end_period = formState.end_period.value;
             }
-            if (!formVersion.id) {
-                savePromise = createFormVersion({
-                    xls_file: formState.xls_file.value,
-                    data,
-                });
-            } else {
+            if (formVersion.id) {
                 data.id = formVersion.id;
-                savePromise = updateFormVersion(data);
-            }
-            try {
-                await savePromise;
-                closeDialog();
-                setFormState(emptyVersion(formVersion.id));
-                onConfirmed();
-                dispatch(enqueueSnackbar(succesfullSnackBar()));
-            } catch (error) {
-                if (error.status === 400) {
-                    Object.entries(error.details).forEach(entry =>
-                        setFieldErrors(entry[0], entry[1]),
-                    );
-                }
+                updateFormVersion(data,{
+                    onSuccess,
+                    onError,
+                })
+            } else {
+                createFormVersion({xls_file: formState.xls_file.value,data,}, {onSuccess,onError})
             }
             setIsLoading(false);
         },
@@ -105,6 +107,8 @@ const FormVersionsDialogComponent = ({
             formVersion.id,
             onConfirmed,
             setFormState,
+            createFormVersion,
+            updateFormVersion
         ],
     );
 
@@ -125,12 +129,11 @@ const FormVersionsDialogComponent = ({
                     formState.id.value),
         );
     };
-    const startPeriodInvalid =
-        periodsErrors.start && periodsErrors.start.invalid;
-    const endPeriodInvalid = periodsErrors.end && periodsErrors.end.invalid;
+    const startPeriodInvalid = periodsErrors?.start?.invalid;
+    const endPeriodInvalid = periodsErrors?.end?.invalid;
     const chronologicalError =
-        (periodsErrors.start && periodsErrors.start.chronological) ||
-        (periodsErrors.end && periodsErrors.end.chronological);
+        (periodsErrors?.start?.chronological) ||
+        (periodsErrors?.end?.chronological);
     return (
         <>
             {isLoading && <LoadingSpinner />}
@@ -142,6 +145,10 @@ const FormVersionsDialogComponent = ({
                 onConfirm={onConfirm}
                 cancelMessage={MESSAGES.cancel}
                 confirmMessage={MESSAGES.save}
+                // somehow TS forced to add these props. Related to bad intercation withPropTypes I guess
+                additionalButton= {false}
+                additionalMessage= {null}
+                onAdditionalButtonClick= {null}
                 {...dialogProps}
             >
                 <Grid container spacing={4} justifyContent="flex-start">
@@ -175,7 +182,8 @@ const FormVersionsDialogComponent = ({
                                     id="start-invalid"
                                     variant="body1"
                                     color="error"
-                                    fontSize="small"
+                                    // TS Errors on this prop
+                                    // fontSize="small"
                                 >
                                     {intl.formatMessage(
                                         errorTypes.invalid.message,
@@ -202,7 +210,8 @@ const FormVersionsDialogComponent = ({
                                     id="end-invalid"
                                     variant="body1"
                                     color="error"
-                                    fontSize="small"
+                                    // fontSize="small"
+
                                 >
                                     {intl.formatMessage(
                                         errorTypes.invalid.message,
@@ -216,7 +225,8 @@ const FormVersionsDialogComponent = ({
                                     id="chronological-error"
                                     variant="body1"
                                     color="error"
-                                    fontSize="small"
+                                    // fontSize="small"
+
                                 >
                                     {intl.formatMessage(
                                         errorTypes.chronological.message,

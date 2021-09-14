@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, DefaultRootState } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { Box, makeStyles, Button } from '@material-ui/core';
 import mapValues from 'lodash/mapValues';
@@ -29,12 +29,19 @@ import FormForm from './components/FormFormComponent';
 
 import { enqueueSnackbar } from '../../redux/snackBarsReducer';
 import { succesfullSnackBar } from '../../constants/snackBars';
-import { fetchFormDetails } from './requests';
+import { fetchFormDetails, FormDetails, useFetchFormDetails } from './requests';
+import { ClassNameMap } from '@material-ui/styles';
+import { useQuery } from 'react-query';
 
 const useStyles = makeStyles(theme => ({
     ...commonStyles(theme),
 }));
-
+// TODO move somewhere more convenient
+export type Message = {
+    id: string,
+    defaultMessage: string,
+    values?: Record<string,any>,
+};
 const defaultForm = {
     id: null,
     name: '',
@@ -79,25 +86,21 @@ const formatFormData = value => {
         label_keys: form.label_keys ?? defaultForm.label_keys,
     };
 };
-
-const FormDetail = ({ router, params }) => {
-    const prevPathname = useSelector(state => state.routerCustom.prevPathname);
-    const allOrgUnitTypes = useSelector(state => state.orgUnitsTypes.allTypes);
-    const allProjects = useSelector(state => state.projects.allProjects);
-    const { data: form, isLoading: isFormLoading } = useAPI(
-        fetchFormDetails,
-        params.formId,
-        {
-            preventTrigger: !(params.formId && params.formId !== '0'),
-            additionalDependencies: [],
-        },
-    );
+type Props = {
+    router:any,
+    params:any,
+}
+const FormDetail:FunctionComponent<Props> = ({ router, params }) => {
+    const prevPathname = useSelector<any,any>(state => state.routerCustom.prevPathname);// using any to avoid redux headach, but we could create a custom type that extends DefaultRootState and have a view of all global state properties
+    const allOrgUnitTypes = useSelector<any,any>(state => state.orgUnitsTypes.allTypes);
+    const allProjects = useSelector<any,any>(state => state.projects.allProjects);
+    const { data: form, isLoading: isFormLoading } = useFetchFormDetails(params.formId,(params.formId && params.formId !== '0'))
     const [isLoading, setIsLoading] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
     const [forceRefreshVersions, setForceRefreshVersions] = useState(false);
     const dispatch = useDispatch();
     const intl = useSafeIntl();
-    const classes = useStyles();
+    const classes:ClassNameMap<any> = useStyles();
     const [currentForm, setFieldValue, setFieldErrors, setFormState] =
         useFormState(formatFormData(form));
 
@@ -197,7 +200,8 @@ const FormDetail = ({ router, params }) => {
             <Box className={classes.containerFullHeightNoTabPadded}>
                 <FormForm currentForm={currentForm} setFieldValue={onChange} />
                 <Box mt={2} justifyContent="flex-end" display="flex">
-                    {!currentForm.id.value !== '' && (
+                    {/* TODO check this in main codebase */}
+                    {currentForm.id.value !== '' && (
                         <Button
                             data-id="form-detail-cancel"
                             className={classes.marginLeft}
@@ -230,9 +234,9 @@ const FormDetail = ({ router, params }) => {
     );
 };
 
-FormDetail.propTypes = {
-    router: PropTypes.object.isRequired,
-    params: PropTypes.object.isRequired,
-};
+// FormDetail.propTypes = {
+//     router: PropTypes.object.isRequired,
+//     params: PropTypes.object.isRequired,
+// };
 
 export default FormDetail;

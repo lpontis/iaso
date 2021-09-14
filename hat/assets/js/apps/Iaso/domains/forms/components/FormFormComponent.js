@@ -219,7 +219,7 @@ const FormForm = ({ currentForm, setFieldValue }) => {
                                 );
                             }}
                             value={currentForm.label_keys.value}
-                            errors={currentForm.possible_fields.errors}
+                            errors={currentForm.label_keys.errors}
                             type="select"
                             options={currentForm.possible_fields.value
                                 .map(field => ({
