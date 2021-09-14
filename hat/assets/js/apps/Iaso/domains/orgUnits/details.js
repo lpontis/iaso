@@ -12,7 +12,6 @@ import {
     createUrl,
     injectIntl,
     commonStyles,
-    // TopBar,
     LoadingSpinner,
 } from 'bluesquare-components';
 import { alpha } from '@material-ui/core/styles/colorManipulator';
@@ -33,7 +32,6 @@ import { setAlgorithms, setAlgorithmRuns } from '../links/actions';
 
 import { setForms as setFormsAction } from '../forms/actions';
 import formsTableColumns from '../forms/config';
-import { resetOrgUnitsLevels } from '../../redux/orgUnitsLevelsReducer';
 
 import {
     fetchOrgUnitsTypes,
@@ -145,7 +143,6 @@ class OrgUnitDetail extends Component {
             fetchUsersProfiles,
             setSelectedSources,
         } = this.props;
-        this.props.resetOrgUnitsLevels();
         const promisesArray = [];
         if (this.props.orgUnitTypes.length === 0) {
             promisesArray.push(
@@ -355,7 +352,6 @@ class OrgUnitDetail extends Component {
     }
 
     async handleResetOrgUnit() {
-        this.props.resetOrgUnitsLevels();
         const { redirectTo, params, dispatch } = this.props;
         const newParams = {
             ...params,
@@ -513,7 +509,6 @@ class OrgUnitDetail extends Component {
                     displayBackButton
                     goBack={() => {
                         if (prevPathname) {
-                            this.props.resetOrgUnitsLevels();
                             setTimeout(() => {
                                 router.goBack();
                             }, 300);
@@ -618,6 +613,7 @@ class OrgUnitDetail extends Component {
                                 exportButton={false}
                                 baseUrl={baseUrl}
                                 endPointPath="forms"
+                                propsToWatch={params.tab}
                                 fetchItems={fetchForms}
                                 columns={this.state.tableColumns}
                                 results={reduxPage}
@@ -643,9 +639,10 @@ class OrgUnitDetail extends Component {
                                     ...onlyChildrenParams(
                                         'childrenParams',
                                         params,
-                                        currentOrgUnit,
+                                        params.orgUnitId,
                                     ),
                                 }}
+                                propsToWatch={params.tab}
                                 baseUrl={baseUrl}
                                 endPointPath="orgunits"
                                 fetchItems={fetchOrgUnitsList}
@@ -671,6 +668,7 @@ class OrgUnitDetail extends Component {
                                 apiParams={{
                                     orgUnitId: currentOrgUnit.id,
                                 }}
+                                propsToWatch={params.tab}
                                 filters={linksFiltersWithPrefix(
                                     'linksParams',
                                     algorithmRuns,
@@ -687,14 +685,8 @@ class OrgUnitDetail extends Component {
                                     { id: 'similarity_score', desc: false },
                                 ]}
                                 columns={handleFetch =>
-                                    linksTableColumns(
-                                        formatMessage,
-                                        link =>
-                                            this.validateLink(
-                                                link,
-                                                handleFetch,
-                                            ),
-                                        classes,
+                                    linksTableColumns(formatMessage, link =>
+                                        this.validateLink(link, handleFetch),
                                     )
                                 }
                                 subComponent={(link, handleFetch) =>
@@ -756,7 +748,6 @@ OrgUnitDetail.propTypes = {
     orgUnitTypes: PropTypes.array.isRequired,
     dispatch: PropTypes.func.isRequired,
     resetOrgUnits: PropTypes.func.isRequired,
-    resetOrgUnitsLevels: PropTypes.func.isRequired,
     setSources: PropTypes.func.isRequired,
     sources: PropTypes.array,
     prevPathname: PropTypes.any,
@@ -798,7 +789,6 @@ const MapDispatchToProps = dispatch => ({
     redirectToPush: (key, params) =>
         dispatch(push(`${key}${createUrl(params, '')}`)),
     resetOrgUnits: () => dispatch(resetOrgUnits()),
-    resetOrgUnitsLevels: () => dispatch(resetOrgUnitsLevels()),
     setSources: sources => dispatch(setSources(sources)),
     setGroups: groups => dispatch(setGroups(groups)),
     setAlgorithms: algoList => dispatch(setAlgorithms(algoList)),

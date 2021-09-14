@@ -11,8 +11,15 @@ import ProtectedRoute from './domains/users/components/ProtectedRoute';
 import { store, history } from './redux/store';
 import { addRoutes } from './routing/redirections';
 import { getPlugins, PluginsContext } from './utils';
+import { getOverriddenTheme } from './styles';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: false,
+        },
+    },
+});
 
 function iasoApp(element, enabledPluginsName) {
     const plugins: any[] = getPlugins(enabledPluginsName);
@@ -35,11 +42,10 @@ function iasoApp(element, enabledPluginsName) {
         />
     ));
     const routes = addRoutes(baseRoutes);
-
     ReactDOM.render(
         <QueryClientProvider client={queryClient}>
             <PluginsContext.Provider value={{ plugins }}>
-                <MuiThemeProvider theme={theme}>
+                <MuiThemeProvider theme={getOverriddenTheme(theme)}>
                     <CssBaseline />
                     <App store={store} routes={routes} history={history} />
                 </MuiThemeProvider>

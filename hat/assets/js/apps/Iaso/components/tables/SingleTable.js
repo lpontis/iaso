@@ -16,10 +16,9 @@ import {
     commonStyles,
 } from 'bluesquare-components';
 
-// import Table from './TableComponent';
 import Filters from './TableFilters';
 
-import DownloadButtonsComponent from '../buttons/DownloadButtonsComponent';
+import DownloadButtonsComponent from '../DownloadButtonsComponent';
 import { redirectToReplace } from '../../routing/actions';
 
 const useStyles = makeStyles(theme => ({
@@ -53,16 +52,14 @@ const SingleTable = ({
     setIsLoading,
     multiSelect,
     selectionActions,
-    watchToRender,
+    propsToWatch,
 }) => {
     const [loading, setLoading] = useState(false);
     const [selection, setSelection] = useState(selectionInitialState);
     const [didFetchData, setDidFetchData] = useState(false);
-    const [firstLoad, setfFrstLoad] = useState(true);
+    const [firstLoad, setFirstLoad] = useState(true);
     const [tableResults, setTableResults] = useState(tableInitialResult);
-    const [expanded, setExpanded] = useState({});
     const { list, pages, count } = tableResults;
-
     const dispatch = useDispatch();
     const classes = useStyles();
 
@@ -76,7 +73,7 @@ const SingleTable = ({
     );
 
     const handleFetch = () => {
-        if (results && results.list && firstLoad && !forceRefresh) {
+        if (results?.list && firstLoad && !forceRefresh) {
             setTableResults(results);
         } else {
             const url = getTableUrl(endPointPath, tableParams);
@@ -96,7 +93,7 @@ const SingleTable = ({
         }
 
         if (firstLoad) {
-            setfFrstLoad(false);
+            setFirstLoad(false);
         }
     };
 
@@ -107,7 +104,7 @@ const SingleTable = ({
         if (!firstLoad || (searchActive && firstLoad)) {
             handleFetch();
         } else if (!searchActive && firstLoad) {
-            setfFrstLoad(false);
+            setFirstLoad(false);
         }
     }, [
         params[getParamsKey(paramsPrefix, 'pageSize')],
@@ -130,17 +127,14 @@ const SingleTable = ({
     }, [forceRefresh]);
 
     const { limit } = tableParams;
-    let extraProps = {
+    const extraProps = {
         loading,
         defaultPageSize: defaultPageSize || limit,
+        propsToWatch, // IA-763: pass an extra props that will be watched in table component to force the render
     };
     if (subComponent) {
-        extraProps = {
-            ...extraProps,
-            SubComponent: ({ original }) => subComponent(original, handleFetch),
-            expanded,
-            onExpandedChange: newExpanded => setExpanded(newExpanded),
-        };
+        extraProps.SubComponent = original =>
+            subComponent(original, handleFetch);
     }
 
     const handleTableSelection = (
@@ -212,7 +206,6 @@ const SingleTable = ({
                             extraComponent,
                     )}
                     paramsPrefix={paramsPrefix}
-                    watchToRender={watchToRender}
                     params={params}
                 />
             )}
@@ -250,7 +243,7 @@ SingleTable.defaultProps = {
     setIsLoading: true,
     multiSelect: false,
     selectionActions: [],
-    watchToRender: null,
+    propsToWatch: null,
 };
 
 SingleTable.propTypes = {
@@ -280,7 +273,7 @@ SingleTable.propTypes = {
     setIsLoading: PropTypes.bool,
     multiSelect: PropTypes.bool,
     selectionActions: PropTypes.array,
-    watchToRender: PropTypes.any,
+    propsToWatch: PropTypes.any,
 };
 
 export default withRouter(SingleTable);

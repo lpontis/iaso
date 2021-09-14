@@ -1,5 +1,9 @@
+import logging
 from datetime import datetime, timezone
 
+import pandas as pd
+from django.contrib.auth.models import User
+from django.db import transaction
 from django.db.transaction import atomic
 from django.utils.translation import gettext_lazy as _
 from gspread.exceptions import APIError
@@ -8,7 +12,7 @@ from rest_framework import serializers
 
 from iaso.models import Group, OrgUnit
 from plugins.polio.preparedness.calculator import get_preparedness_score
-from .models import Preparedness, Round, Campaign, Surge
+from .models import Preparedness, Round, Campaign, Surge, CountryUsersGroup, LineListImport, VIRUSES
 from .preparedness.parser import (
     open_sheet_by_url,
     get_regional_level_preparedness,
@@ -17,6 +21,122 @@ from .preparedness.parser import (
     parse_value,
 )
 from .preparedness.spreadsheet_manager import *
+from logging import getLogger
+
+logger = getLogger(__name__)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name", "last_name", "email"]
+
+
+class CountryUsersGroupSerializer(serializers.ModelSerializer):
+    read_only_users_field = UserSerializer(source="users", many=True, read_only=True)
+    country_name = serializers.SlugRelatedField(source="country", slug_field="name", read_only=True)
+
+    class Meta:
+        model = CountryUsersGroup
+        read_only_fields = ["id", "country", "created_at", "updated_at", "read_only_users_field"]
+        fields = [
+            "id",
+            "country",
+            "language",
+            "created_at",
+            "updated_at",
+            "country_name",
+            "users",
+            "read_only_users_field",
+        ]
+
+
+def _error(message, exc=None):
+    errors = {"file": [message]}
+    if exc:
+        errors["debug"]: [str(exc)]
+    return errors
+
+
+@transaction.atomic
+def campaign_from_files(file):
+    try:
+        df = pd.read_excel(file)
+    except Exception as exc:
+        print(exc)
+        raise serializers.ValidationError(_error("Invalid Excel file", exc))
+    mapping = {"EPID Number": "epid", "VDPV Category": "virus", "Onset Date": "onset_at"}
+    for key in mapping.keys():
+        if key not in df.columns:
+            raise serializers.ValidationError(_error(f"Missing column {key}"))
+    known_viruses = [v[0] for v in VIRUSES]
+    created_campaigns = []
+    skipped_campaigns = []
+
+    for ind in df.index:
+        epid = df["EPID Number"][ind]
+        if not epid:
+            break
+        onset_date = df["Onset Date"][ind]
+        virus = df["VDPV Category"][ind]
+        print(epid, onset_date, type(onset_date), virus)
+        c, created = Campaign.objects.get_or_create(epid=epid)
+        if not created:
+            skipped_campaigns.append(epid)
+            print("Skipping existing campaign {c.epid}")
+            continue
+
+        c.obr_name = epid
+        if virus in known_viruses:
+            c.virus = virus
+        else:
+            raise serializers.ValidationError(_error(f"wrong format for virus on line {ind}"))
+        if isinstance(onset_date, datetime):
+            print(onset_date, type(onset_date))
+            c.onset_at = onset_date
+        else:
+            raise serializers.ValidationError(_error(f"wrong format for onset_date on line {ind}"))
+
+        created_campaigns.append({"id": str(c.id), "epid": c.epid})
+        c.save()
+
+    res = {"created": len(created_campaigns), "campaigns": created_campaigns, "skipped_campaigns": skipped_campaigns}
+    print(res)
+    return res
+
+
+class LineListImportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LineListImport
+        fields = ["file", "import_result", "created_by", "created_at"]
+        read_only_fields = ["import_result", "created_by", "created_at"]
+
+    def create(self, validated_data):
+        line_list_import = LineListImport(
+            file=validated_data.get("file"),
+            import_result="pending",
+            created_by=self.context["request"].user,
+        )
+
+        line_list_import.save()
+
+        # Tentatively created campaign, will transaction.abort in case of error
+        res = "importing"
+        try:
+            res = campaign_from_files(line_list_import.file)
+        except Exception as exc:
+            logging.exception(exc)
+            if isinstance(exc, serializers.ValidationError):
+                res = {"error": exc.get_full_details()}
+            else:
+                res = {"error": str(exc)}
+            line_list_import.import_result = res
+            line_list_import.save()
+            raise
+
+        line_list_import.import_result = res
+        line_list_import.save()
+        return line_list_import
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -150,7 +270,16 @@ class CampaignPreparednessSpreadsheetSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         campaign = validated_data.get("campaign")
-        spreadsheet = create_spreadsheet(campaign.obr_name)
+
+        lang = "EN"
+        try:
+            country = campaign.country()
+            cug = CountryUsersGroup.objects.get(country=country)
+            lang = cug.language
+        except Exception as e:
+            logger.exception(e)
+            logger.error(f"Could not find template language for {campaign}")
+        spreadsheet = create_spreadsheet(campaign.obr_name, lang)
 
         update_national_worksheet(
             spreadsheet.worksheet("National"),

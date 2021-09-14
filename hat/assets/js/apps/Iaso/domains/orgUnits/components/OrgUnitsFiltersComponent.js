@@ -12,6 +12,8 @@ import Add from '@material-ui/icons/Add';
 import Search from '@material-ui/icons/Search';
 import classNames from 'classnames';
 import { commonStyles, useSafeIntl } from 'bluesquare-components';
+
+import FiltersComponent from '../../../components/filters/FiltersComponent';
 import { redirectTo } from '../../../routing/actions';
 import { getChipColors, chipColors } from '../../../constants/chipColors';
 
@@ -31,7 +33,6 @@ import {
     setFetchingOrgUnitTypes,
 } from '../actions';
 
-import FiltersComponent from '../../../components/filters/FiltersComponent';
 import DatesRange from '../../../components/filters/DatesRange';
 
 import { decodeSearch, encodeUriSearches } from '../utils';
@@ -66,10 +67,6 @@ const extendFilter = (searchParams, filter, onChange, searchIndex) => ({
     value: searchParams[filter.urlKey],
     callback: (value, urlKey) => onChange(value, urlKey),
 });
-const extractIdFromParams = params => {
-    if (!params) return null;
-    return JSON.parse(params?.searches)[0]?.levels;
-};
 
 const useInitialOrgUnit = orgUnitId => {
     const request = useCallback(async () => {
@@ -94,8 +91,10 @@ const OrgUnitsFiltersComponent = ({
     searchIndex,
     onSearch,
 }) => {
+    const initalSearches = [...decodeSearch(params.searches)];
+    const searchParams = initalSearches[searchIndex];
     const [initialOrgUnitId, setInitialOrgUnitId] = useState(
-        extractIdFromParams(params),
+        searchParams?.levels,
     );
     const { data: initialOrgUnit } = useInitialOrgUnit(initialOrgUnitId);
     const intl = useSafeIntl();
@@ -181,8 +180,7 @@ const OrgUnitsFiltersComponent = ({
         }
         onSearch();
     };
-    const searches = [...decodeSearch(params.searches)];
-    const searchParams = searches[searchIndex];
+
     const currentColor = searchParams.color
         ? `#${searchParams.color}`
         : getChipColors(0);
@@ -306,7 +304,7 @@ const OrgUnitsFiltersComponent = ({
                                 />
                                 <OrgUnitTreeviewModal
                                     toggleOnLabelClick={false}
-                                    titleMessage={MESSAGES.search}
+                                    titleMessage={MESSAGES.parent}
                                     onConfirm={orgUnit => {
                                         // TODO rename levels in to parent
                                         onChange(orgUnit?.id, 'levels');
