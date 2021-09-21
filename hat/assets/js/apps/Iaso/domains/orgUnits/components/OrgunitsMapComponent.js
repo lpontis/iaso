@@ -36,6 +36,7 @@ import { getColorsFromParams, decodeSearch } from '../utils';
 import MESSAGES from '../messages';
 import { OrgUnitsMapComments } from './orgUnitMap/OrgUnitsMapComments';
 import { innerDrawerStyles } from '../../../components/nav/InnerDrawer/styles';
+import { waitFor } from '../../../utils';
 
 const boundsOptions = {
     padding: [50, 50],
@@ -89,8 +90,9 @@ class OrgunitsMap extends Component {
         };
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         const { orgUnitTypes, orgUnits } = this.props;
+        await waitFor(200);
         this.makePanes(orgUnitTypes);
         this.checkFitToBounds(orgUnits);
         this.props.setCurrentSubOrgUnit(null);
@@ -199,6 +201,7 @@ class OrgunitsMap extends Component {
             classes,
             setFiltersUpdated,
         } = this.props;
+        console.log('map render', baseUrl, params);
         const bounds = getOrgUnitsBounds(orgUnits);
         const orgUnitsTotal = getFullOrgUnits(orgUnits.locations);
         if (!bounds && orgUnitsTotal.length > 0) {

@@ -51,6 +51,7 @@ class InputComponent extends Component {
             getOptionLabel,
             renderOption,
             className,
+            debounce,
         } = this.props;
         const { isFocused, displayPassword } = this.state;
         const labelText =
@@ -160,6 +161,7 @@ class InputComponent extends Component {
                         isFocused={isFocused}
                         onChange={newValue => onChange(keyValue, newValue)}
                         value={value}
+                        debounce={debounce}
                     />
                 );
             case 'checkbox':
@@ -216,6 +218,7 @@ InputComponent.defaultProps = {
     getOptionSelected: null,
     renderOption: null,
     className: '',
+    debounce: 0,
 };
 InputComponent.propTypes = {
     type: PropTypes.string,
@@ -240,6 +243,7 @@ InputComponent.propTypes = {
     getOptionSelected: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
     renderOption: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
     className: PropTypes.string,
+    debounce: PropTypes.number,
 };
 
 const translated = injectIntl(InputComponent);

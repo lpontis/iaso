@@ -70,6 +70,7 @@ class FiltersComponent extends React.Component {
         if (!filters) {
             return null;
         }
+        console.log('state', this.state);
         return (
             <section>
                 {filters.map(filter => {
@@ -147,6 +148,7 @@ class FiltersComponent extends React.Component {
                                         type="search"
                                         label={filter.label}
                                         onEnterPressed={onEnterPressed}
+                                        debounce={0}
                                     />
                                 )}
 
