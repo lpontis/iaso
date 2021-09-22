@@ -36,6 +36,7 @@ import { getColorsFromParams, decodeSearch } from '../utils';
 import MESSAGES from '../messages';
 import { OrgUnitsMapComments } from './orgUnitMap/OrgUnitsMapComments';
 import { innerDrawerStyles } from '../../../components/nav/InnerDrawer/styles';
+import { waitFor } from '../../../utils';
 
 const boundsOptions = {
     padding: [50, 50],
@@ -89,7 +90,8 @@ class OrgunitsMap extends Component {
         };
     }
 
-    componentDidMount() {
+    async componentDidMount() {
+        await waitFor(200);
         const { orgUnitTypes, orgUnits } = this.props;
         this.makePanes(orgUnitTypes);
         this.checkFitToBounds(orgUnits);
@@ -236,8 +238,12 @@ class OrgunitsMap extends Component {
                                 <FiltersComponent
                                     params={params}
                                     baseUrl={baseUrl}
-                                    onFilterChanged={() => setFiltersUpdated()}
+                                    onFilterChanged={() => {
+                                        setFiltersUpdated();
+                                    }}
                                     filters={[locationsLimit()]}
+                                    changeOnEnterOnly
+                                    // TODO use onEnterPressed to actuallyapply filter on Enter. Requires some redux dabbling
                                 />
                             </Box>
                             <Divider />

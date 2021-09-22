@@ -112,6 +112,7 @@ class InputComponent extends Component {
                         onChange={input => {
                             onChange(keyValue, input);
                         }}
+                        onEnterPressed={onEnterPressed}
                     />
                 );
             case 'select':

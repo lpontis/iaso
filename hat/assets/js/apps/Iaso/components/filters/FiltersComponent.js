@@ -2,7 +2,6 @@ import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 import { replace } from 'react-router-redux';
 import PropTypes from 'prop-types';
-
 import { createUrl } from 'bluesquare-components';
 
 import InputComponent from '../forms/InputComponent';
@@ -32,6 +31,13 @@ class FiltersComponent extends React.Component {
                 this.onSearch(newState);
             }
         }
+    }
+
+    onNumberConfirm(urlKey, value, callback) {
+        if (this.props.changeOnEnterOnly && value) {
+            this.onChange(urlKey, value, callback);
+        }
+        this.props.onEnterPressed();
     }
 
     onSearch(state = this.state) {
@@ -91,16 +97,27 @@ class FiltersComponent extends React.Component {
                                 {filter.type === 'number' && (
                                     <InputComponent
                                         keyValue={filter.urlKey}
-                                        onChange={(key, value) =>
-                                            this.onChange(
-                                                filter.urlKey,
-                                                value,
-                                                filter.callback,
-                                            )
-                                        }
+                                        onChange={(key, value) => {
+                                            if (!this.props.changeOnEnterOnly)
+                                                this.onChange(
+                                                    filter.urlKey,
+                                                    value,
+                                                    filter.callback,
+                                                );
+                                            this.setState({
+                                                [filter.urlKey]: value,
+                                            });
+                                        }}
                                         value={filterValue}
                                         type="number"
                                         label={filter.label}
+                                        onEnterPressed={() =>
+                                            this.onNumberConfirm(
+                                                filter.urlKey,
+                                                this.state[filter.urlKey],
+                                                filter.callback,
+                                            )
+                                        }
                                     />
                                 )}
                                 {filter.type === 'select' && (
@@ -110,13 +127,13 @@ class FiltersComponent extends React.Component {
                                         clearable={filter.isClearable}
                                         disabled={filter.isDisabled || false}
                                         keyValue={filter.urlKey}
-                                        onChange={(key, value) =>
+                                        onChange={(key, value) => {
                                             this.onChange(
                                                 filter.urlKey,
                                                 value,
                                                 filter.callback,
-                                            )
-                                        }
+                                            );
+                                        }}
                                         value={filterValue}
                                         type="select"
                                         options={filter.options}
@@ -186,6 +203,7 @@ FiltersComponent.defaultProps = {
     baseUrl: '',
     onEnterPressed: () => null,
     onFilterChanged: () => null,
+    changeOnEnterOnly: false,
 };
 
 FiltersComponent.propTypes = {
@@ -195,12 +213,12 @@ FiltersComponent.propTypes = {
     baseUrl: PropTypes.string,
     onEnterPressed: PropTypes.func,
     onFilterChanged: PropTypes.func,
+    changeOnEnterOnly: PropTypes.bool, // Introduced to fix IA-784. A better solution should be foun when addressing IA-735 and other related bugs
 };
 
 const MapStateToProps = () => ({});
 
 const MapDispatchToProps = dispatch => ({
-    dispatch,
     redirectTo: (key, params) =>
         dispatch(replace(`${key}${createUrl(params, '')}`)),
 });
